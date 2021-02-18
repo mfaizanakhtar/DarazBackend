@@ -153,16 +153,16 @@ router.get('/Skustats/:ShopId/:day',async(req,res)=>{
 router.get('/allstats/:day',async(req,res)=>{
     date = new Date();
     date.setDate(date.getDate()-req.params.day);
-    // console.log(date);
+    console.log("Start Date" +date);
     date.setHours(0,0,0,0);
     // date.setHours(date.getHours()+5)
     // console.log(date);
     enddate = new Date();
     if(req.params.day<=1){
     enddate.setDate(date.getDate()-req.params.day+1);
-    console.log(enddate);
+    // console.log(enddate);
     enddate.setHours(23,59,59,59);
-    console.log(enddate);
+    console.log("EndDate" + enddate);
     // console.log('Today & Yesterday End Date');
     // console.log(enddate);
     }
