@@ -155,7 +155,7 @@ router.get('/allstats/:day',async(req,res)=>{
     date.setDate(date.getDate()-req.params.day);
     // console.log(date);
     date.setHours(0,0,0,0);
-    date.setHours(date.getHours()+5)
+    // date.setHours(date.getHours()+5)
     // console.log(date);
     enddate = new Date();
     if(req.params.day<=1){
