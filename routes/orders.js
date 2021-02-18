@@ -174,7 +174,7 @@ router.get('/allstats/:day',async(req,res)=>{
     var TotalFbd =await Order.find({ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
     var TotalFbm =await Order.find({ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
 
-    var Total={_id:'all', FBDcount:TotalFbd,FBMcount:TotalFbm,Total:TotalFbd+TotalFbm};
+    var Total={_id:'ALL STORES', FBDcount:TotalFbd,FBMcount:TotalFbm,Total:TotalFbd+TotalFbm};
 
     var ShopFbd = await Order.aggregate([
         {$match:{ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
