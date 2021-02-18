@@ -78,21 +78,35 @@ router.get('/sort',async(req,res)=>{
     res.send('Api working');
 })
 
-router.get('/Skustats/:ShopId/:days',async(req,res)=>{
+router.get('/Skustats/:ShopId/:day',async(req,res)=>{
     var ord=[];
     date = new Date();
-    date.setDate(date.getDate()-req.params.days);
-    date.setHours(5,0,0,0);
+    date.setDate(date.getDate()-req.params.day);
+    // console.log(date);
+    date.setHours(0,0,0,0);
+    // console.log(date);
+    enddate = new Date();
+    if(req.params.day<=1){
+    enddate.setDate(date.getDate()-req.params.day+1);
+    enddate.setHours(23,59,59,59);
+    // console.log('Today & Yesterday End Date');
+    // console.log(enddate);
+    }
+    else if(req.params.day>1){
+        enddate.setDate(enddate.getDate());
+        // console.log('More than 7 days End Date');
+        // console.log(enddate);
+    }
 
     // const TotalFBD = await Order.find({ShippingType:'Own Warehouse'}).count();
     // const TotalFBM = await Order.find({ShippingType:'Dropshipping'}).count();
 
     var FBDresult = await Order.aggregate([
-        {$match: {ShopId:req.params.ShopId,ShippingType:'Own Warehouse',CreatedAt:{$gte:date}}},
+        {$match: {ShopId:req.params.ShopId,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group : { _id: '$Sku', FBDcount : {$sum : 1}}}
     ])
     var FBMresult = await Order.aggregate([
-        {$match: {ShopId:req.params.ShopId,ShippingType:'Dropshipping',CreatedAt:{$gte:date}}},
+        {$match: {ShopId:req.params.ShopId,ShippingType:'Dropshipping',CreatedAt:{$gte:date},Status:{$ne:'canceled'}}},
         {$group : { _id: '$Sku', FBMcount : {$sum : 1}}}
     ])
 
@@ -128,6 +142,9 @@ router.get('/Skustats/:ShopId/:days',async(req,res)=>{
 
         
     })
+    OutputResult = OutputResult.sort((a,b)=>{
+        return a._id - b._id;
+    })
     res.send(OutputResult);
 
     
@@ -136,24 +153,45 @@ router.get('/Skustats/:ShopId/:days',async(req,res)=>{
 router.get('/allstats/:day',async(req,res)=>{
     date = new Date();
     date.setDate(date.getDate()-req.params.day);
-    date.setHours(5,0,0,0);
+    // console.log(date);
+    date.setHours(0,0,0,0);
+    // console.log(date);
+    enddate = new Date();
+    if(req.params.day<=1){
+    enddate.setDate(date.getDate()-req.params.day+1);
+    enddate.setHours(23,59,59,59);
+    // console.log('Today & Yesterday End Date');
+    // console.log(enddate);
+    }
+    else if(req.params.day>1){
+        enddate.setDate(enddate.getDate());
+        // console.log('More than 7 days End Date');
+        // console.log(enddate);
+    }
     // var testfbd =await Order.find({ShippingType:'Own Warehouse',CreatedAt:{$gte:date}})
     // var testfbm =await Order.find({ShippingType:'Own Warehouse',CreatedAt:{$gte:date}})
 
-    var TotalFbd =await Order.find({ShippingType:'Own Warehouse',CreatedAt:{$gte:date}}).count();
-    var TotalFbm =await Order.find({ShippingType:'Dropshipping',CreatedAt:{$gte:date}}).count();
+    var TotalFbd =await Order.find({ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
+    var TotalFbm =await Order.find({ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
 
     var Total={_id:'all', FBDcount:TotalFbd,FBMcount:TotalFbm,Total:TotalFbd+TotalFbm};
 
     var ShopFbd = await Order.aggregate([
-        {$match:{ShippingType:'Own Warehouse',CreatedAt:{$gte:date}}},
+        {$match:{ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group:{_id:'$ShopId',FBDcount:{$sum:1}}}
     ])
     var ShopFbm = await Order.aggregate([
-        {$match:{ShippingType:'Dropshipping',CreatedAt:{$gte:date}}},
+        {$match:{ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group:{_id:'$ShopId',FBMcount:{$sum:1}}}
     ])
 
+
+    ShopFbd = ShopFbd.map(r=>{
+        var o = Object.assign({},r);
+        o.FBMcount = 0;
+        o.Total = o.FBDcount
+        return o;
+    })
     
     ShopFbm.forEach(fbm => {
         var filteredresult = ShopFbd.filter(f=>{
@@ -176,7 +214,9 @@ router.get('/allstats/:day',async(req,res)=>{
     });
     ShopFbd.push(Total);
     // console.log(testfbd);
-    res.send(ShopFbd)
+    res.send(ShopFbd.sort(function(a,b){
+        return a._id - b._id
+    }))
     // var TotalFbd = Order.aggregate([
     //     {$match:{ShippingType='Own Warehouse'}},
     //     {$group}
