@@ -14,7 +14,7 @@ router.get('/data/:filter',async(req,res)=>{
     else if(req.params.filter=="all"){
         order=await Order.find().sort({CreatedAt:1})
     }
-    else order = await Order.find({Status:req.params.filter});
+    else order = await Order.find({Status:req.params.filter}).sort({CreatedAt:1});
     res.send(order);
     // let orders = await Order.find().sort({CreatedAt:1})
     
