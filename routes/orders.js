@@ -14,6 +14,18 @@ router.get('/data/:filter',async(req,res)=>{
     else if(req.params.filter=="all"){
         order=await Order.find().sort({CreatedAt:1})
     }
+    else if(req.params.filter=="ready_to_ship"){
+        order=await Order.find({Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}}).sort({CreatedAt:1})
+    }
+    else if(req.params.filter=="failed"){
+        order=await Order.find({Status:"failed",WarehouseStatus:{$ne:"Received"}}).sort({CreatedAt:1})
+    }
+    else if(req.params.filter=="ready_to_ship-dispatched"){
+        order=await Order.find({Status:"ready_to_ship",WarehouseStatus:"Dispatched"}).sort({CreatedAt:1})
+    }
+    else if(req.params.filter=="failed-received"){
+        order=await Order.find({Status:"failed",WarehouseStatus:"Received"}).sort({CreatedAt:1})
+    }
     else order = await Order.find({Status:req.params.filter}).sort({CreatedAt:1});
     res.send(order);
     // let orders = await Order.find().sort({CreatedAt:1})
@@ -47,18 +59,58 @@ router.post('/',async(req,res)=>{
     res.send("Order added");
 })
 
-router.put('/tracking/:id',async(req,res)=>{
-    // var order = await Order.find({TrackingCode:req.params.id})
-    // console.log(order);
-    // if (order){
+router.put('/return/:id',async(req,res)=>{
+    var order = await Order.find({TrackingCode:req.params.id,WarehouseStatus:{$ne:"Received"}});
+    if(order.length>0){
 
-    // }
-    var order = await Order.updateMany({TrackingCode:req.params.id},{
+    order = await Order.updateMany({TrackingCode:req.params.id},{
         $set:{
-            WarehouseStatus:"Received"
+            WarehouseStatus:"Received",
+            ReturnDate:new Date()
         }
-    })   
+    })
+    res.send({Status:"Received"})
+    }
+    else{
+        order = await Order.find({TrackingCode:req.params.id})
+        if(order.length>0){
+            res.send({Status:"Already Received"})
+        }
+        else res.send({Status:"Tracking not Found"})
+        
+    }    
+    
+})
+
+router.put('/dispatch/:id',async(req,res)=>{
+    var order = await Order.find({TrackingCode:req.params.id,Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}})
+    if(order.length>0){
+    order = await Order.updateMany({TrackingCode:req.params.id},{
+        $set:{
+            WarehouseStatus:"Dispatched",
+            DispatchDate:new Date()
+        }
+    })
+    
+    res.send({Status:"Dispatched"});
+}
+else res.send({Status:"Cant Dispatch"})
+})
+
+router.get('/ordermovement/:filter',async(req,res)=>{
+    var order;
+    date = new Date();
+    date.setHours(date.getHours()+5);
+    date.setHours(0,0,0,0)
+    console.log(date);
+    if(req.params.filter == "Dispatched"){
+    order = await Order.find({WarehouseStatus:req.params.filter,DispatchDate:{$gte:date}}).sort({DispatchDate:-1})
+    }
+    else if(req.params.filter == "Received"){
+    order = await Order.find({WarehouseStatus:req.params.filter,ReturnDate:{$gte:date}}).sort({ReturnDate:-1})
+    }
     res.send(order);
+
 })
 
 router.get('/sort',async(req,res)=>{

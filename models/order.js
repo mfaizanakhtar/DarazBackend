@@ -19,7 +19,9 @@ const orderSchema = new mongoose.Schema({
     CreatedAt:Date,
     UpdatedAt:Date,
     productMainImage:String,
-    Variation:String
+    Variation:String,
+    DispatchDate:Date,
+    ReturnDate:Date,
 
 
     
