@@ -94,7 +94,21 @@ router.put('/dispatch/:id',async(req,res)=>{
     
     res.send({Status:"Dispatched"});
 }
-else res.send({Status:"Cant Dispatch"})
+else{
+  order = await Order.find({TrackingCode:req.params.id,Status:"ready_to_ship"})
+  if(order.length>0){
+    res.send({Status:"Duplicate"})
+  }
+  else{
+      order = await Order.find({TrackingCode:req.params.id})
+      if(order.length>0){
+          res.send({Status:"Order status not eligible to dispatch"})
+      }
+      else{
+          res.send({Status:"Order not Found"})
+      }
+  }
+} 
 })
 
 router.get('/ordermovement/:filter',async(req,res)=>{
