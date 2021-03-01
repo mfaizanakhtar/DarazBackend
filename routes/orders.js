@@ -231,7 +231,7 @@ router.get('/allstats/:day',async(req,res)=>{
     enddate = new Date();
     if(req.params.day<=1){
     enddate.setDate(date.getDate()-req.params.day+1);
-    // console.log(enddate);
+    console.log(enddate);
     enddate.setHours(23,59,59,59);
     // console.log("EndDate" + enddate);
     // console.log('Today & Yesterday End Date');
