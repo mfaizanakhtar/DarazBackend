@@ -245,7 +245,7 @@ router.get('/allstats/:startdate/:enddate',async(req,res)=>{
     async function timezone(){
 
     startdate = new Date(req.params.startdate);
-    // startdate.setHours(5);
+    startdate.setHours(startdate.getHours()+5);
     enddate = new Date(req.params.enddate);
     enddate.setHours(23,59,59,59);
     // enddate.setHours(enddate.getHours()+5);
