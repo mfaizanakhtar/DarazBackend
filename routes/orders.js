@@ -144,39 +144,57 @@ router.get('/sort',async(req,res)=>{
     res.send('Api working');
 })
 
-router.get('/Skustats/:ShopId/:day',async(req,res)=>{
+router.get('/Skustats/:ShopId/:startdate/:enddate',async(req,res)=>{
+
+    var startdate;
+    var enddate;
+
+    async function timezone(){
+
+    startdate = new Date(req.params.startdate);
+    startdate.setHours(5);
+    enddate = new Date(req.params.enddate);
+    enddate.setHours(23,59,59,59);
+    enddate.setHours(enddate.getHours()+5);
+
+    }
+    await timezone();
     var ord=[];
-    date = new Date();
-    date.setDate(date.getDate()-req.params.day);
-    date.setHours(date.getHours()+5)
-    date.setHours(0,0,0,0);
+    // startdate = new Date(req.params.startdate);
+    // // startdate.setHours(5);
+    // // console.log(startdate);
+    // enddate = new Date(req.params.enddate);
+    // enddate.setHours(23,59,59,59);
+    // console.log(enddate)
+    // enddate.setHours(enddate.getHours()+5);
+    // console.log(enddate)
     // console.log("Start Date" +date);
     // date.setHours(date.getHours()+5)
     // console.log(date);
-    enddate = new Date();
-    if(req.params.day<=1){
-    enddate.setDate(date.getDate()-req.params.day+1);
-    // console.log(enddate);
-    enddate.setHours(23,59,59,59);
-    // console.log("EndDate" + enddate);
-    // console.log('Today & Yesterday End Date');
-    // console.log(enddate);
-    }
-    else if(req.params.day>1){
-        enddate.setDate(enddate.getDate());
-        // console.log('More than 7 days End Date');
-        // console.log(enddate);
-    }
+    // enddate = new Date();
+    // if(req.params.day<=1){
+    // enddate.setDate(date.getDate()-req.params.day+1);
+    // // console.log(enddate);
+    // enddate.setHours(23,59,59,59);
+    // // console.log("EndDate" + enddate);
+    // // console.log('Today & Yesterday End Date');
+    // // console.log(enddate);
+    // }
+    // else if(req.params.day>1){
+    //     enddate.setDate(enddate.getDate());
+    //     // console.log('More than 7 days End Date');
+    //     // console.log(enddate);
+    // }
 
     // const TotalFBD = await Order.find({ShippingType:'Own Warehouse'}).count();
     // const TotalFBM = await Order.find({ShippingType:'Dropshipping'}).count();
 
     var FBDresult = await Order.aggregate([
-        {$match: {ShopId:req.params.ShopId,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match: {ShopId:req.params.ShopId,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group : { _id: '$Sku', FBDcount : {$sum : 1}}}
     ])
     var FBMresult = await Order.aggregate([
-        {$match: {ShopId:req.params.ShopId,ShippingType:'Dropshipping',CreatedAt:{$gte:date},Status:{$ne:'canceled'}}},
+        {$match: {ShopId:req.params.ShopId,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group : { _id: '$Sku', FBMcount : {$sum : 1}}}
     ])
 
@@ -220,42 +238,62 @@ router.get('/Skustats/:ShopId/:day',async(req,res)=>{
     
 })
 
-router.get('/allstats/:day',async(req,res)=>{
-    date = new Date();
-    date.setDate(date.getDate()-req.params.day);
-    date.setHours(date.getHours()+5)
-    date.setHours(0,0,0,0);
-    // console.log("Start Date" +date);
-    // date.setHours(date.getHours()+5)
-    // console.log(date);
-    enddate = new Date();
-    if(req.params.day<=1){
-    enddate.setDate(date.getDate()-req.params.day+1);
-    console.log(enddate);
+router.get('/allstats/:startdate/:enddate',async(req,res)=>{
+    var startdate;
+    var enddate;
+
+    async function timezone(){
+
+    startdate = new Date(req.params.startdate);
+    startdate.setHours(5);
+    enddate = new Date(req.params.enddate);
     enddate.setHours(23,59,59,59);
-    // console.log("EndDate" + enddate);
-    // console.log('Today & Yesterday End Date');
+    enddate.setHours(enddate.getHours()+5);
+
+    }
+    await timezone();
+    // console.log(startdate);
+    // console.log(enddate)
+    // console.log(enddate)
+    // date = new Date();
+    // date.setDate(date.getDate()-req.params.day);
+    // date.setHours(date.getHours()+5)
+    // date.setHours(0,0,0,0);
+    // // console.log("Start Date" +date);
+    // // date.setHours(date.getHours()+5)
+    // // console.log(date);
+
+    // enddate = new Date();
+    // if(req.params.day<=1){
+    // enddate.setDate(date.getDate()-req.params.day+1);
     // console.log(enddate);
-    }
-    else if(req.params.day>1){
-        enddate.setDate(enddate.getDate());
-        // console.log('More than 7 days End Date');
-        // console.log(enddate);
-    }
+    // enddate.setHours(23,59,59,59);
+    
+    // // console.log("EndDate" + enddate);
+    // // console.log('Today & Yesterday End Date');
+    // // console.log(enddate);
+    // }
+    // else if(req.params.day>1){
+    //     enddate.setDate(enddate.getDate());
+    //     // console.log('More than 7 days End Date');
+    //     // console.log(enddate);
+    // }
     // var testfbd =await Order.find({ShippingType:'Own Warehouse',CreatedAt:{$gte:date}})
     // var testfbm =await Order.find({ShippingType:'Own Warehouse',CreatedAt:{$gte:date}})
 
-    var TotalFbd =await Order.find({ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
-    var TotalFbm =await Order.find({ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
+    var TotalFbd =await Order.find({ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
+    var TotalFbm =await Order.find({ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
 
     var Total={_id:'ALL STORES', FBDcount:TotalFbd,FBMcount:TotalFbm,Total:TotalFbd+TotalFbm};
-
+    console.log(startdate);
+    console.log(enddate);
     var ShopFbd = await Order.aggregate([
-        {$match:{ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match:{ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group:{_id:'$ShopId',FBDcount:{$sum:1}}}
     ])
+    console.log(ShopFbd);
     var ShopFbm = await Order.aggregate([
-        {$match:{ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:date}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match:{ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group:{_id:'$ShopId',FBMcount:{$sum:1}}}
     ])
 
