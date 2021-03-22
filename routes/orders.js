@@ -9,7 +9,7 @@ router.get('/data/:filter',async(req,res)=>{
     date = new Date();
     date.setDate(date.getDate()-30);
     console.log(date);
-    order = await Order.find({CreatedAt: {$lte:date},WarehouseStatus:{$ne:"Received"},Status:{$ne:"Delivered"}});
+    order = await Order.find({CreatedAt: {$lte:date},WarehouseStatus:"Dispatched",Status:{$ne:"delivered"}});
     }
     else if(req.params.filter=="all"){
         order=await Order.find().sort({CreatedAt:1})
@@ -24,14 +24,11 @@ router.get('/data/:filter',async(req,res)=>{
         order=await Order.find({Status:"ready_to_ship",WarehouseStatus:"Dispatched"}).sort({CreatedAt:1})
     }
     else if(req.params.filter=="failed-received"){
-        order=await Order.find({Status:"failed",WarehouseStatus:"Received"}).sort({CreatedAt:1})
+        order=await Order.find({WarehouseStatus:"Received"}).sort({CreatedAt:1})
     }
     else order = await Order.find({Status:req.params.filter}).sort({CreatedAt:1});
     res.send(order);
-    // let orders = await Order.find().sort({CreatedAt:1})
-    
-    // res.send(orders)
-    
+
 })
 
 router.post('/',async(req,res)=>{
@@ -127,22 +124,6 @@ router.get('/ordermovement/:filter',async(req,res)=>{
 
 })
 
-router.get('/sort',async(req,res)=>{
-    // var order;
-    // if(req.params.filter=="claimable")
-    // {
-    // date = new Date();
-    // date.setDate(date.getDate()-30);
-    // console.log(date);
-    // order = await Order.find({CreatedAt: {$lte:date},WarehouseStatus:{$ne:"Received"},Status:{$ne:"Delivered"}});
-    // }
-    // else if(req.params.filter=="all"){
-    //     order=await Order.find()
-    // }
-    // else order = await Order.find({Status:req.params.filter});
-    // res.send(order);
-    res.send('Api working');
-})
 
 router.get('/Skustats/:ShopId/:startdate/:enddate',async(req,res)=>{
 
@@ -155,39 +136,9 @@ router.get('/Skustats/:ShopId/:startdate/:enddate',async(req,res)=>{
     startdate.setHours(startdate.getHours()+5);
     enddate = new Date(req.params.enddate);
     enddate.setHours(enddate.getHours()+28,59,59,59);
-    // enddate.setHours(enddate.getHours()+5);
 
     }
     await timezone();
-    var ord=[];
-    // startdate = new Date(req.params.startdate);
-    // // startdate.setHours(5);
-    // // console.log(startdate);
-    // enddate = new Date(req.params.enddate);
-    // enddate.setHours(23,59,59,59);
-    // console.log(enddate)
-    // enddate.setHours(enddate.getHours()+5);
-    // console.log(enddate)
-    // console.log("Start Date" +date);
-    // date.setHours(date.getHours()+5)
-    // console.log(date);
-    // enddate = new Date();
-    // if(req.params.day<=1){
-    // enddate.setDate(date.getDate()-req.params.day+1);
-    // // console.log(enddate);
-    // enddate.setHours(23,59,59,59);
-    // // console.log("EndDate" + enddate);
-    // // console.log('Today & Yesterday End Date');
-    // // console.log(enddate);
-    // }
-    // else if(req.params.day>1){
-    //     enddate.setDate(enddate.getDate());
-    //     // console.log('More than 7 days End Date');
-    //     // console.log(enddate);
-    // }
-
-    // const TotalFBD = await Order.find({ShippingType:'Own Warehouse'}).count();
-    // const TotalFBM = await Order.find({ShippingType:'Dropshipping'}).count();
 
     var FBDresult = await Order.aggregate([
         {$match: {ShopId:req.params.ShopId,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
@@ -198,7 +149,6 @@ router.get('/Skustats/:ShopId/:startdate/:enddate',async(req,res)=>{
         {$group : { _id: '$Sku', FBMcount : {$sum : 1}}}
     ])
 
-    // result.ShopId='kilobyte';
     OutputResult = FBDresult.map(r=>{
         var o = Object.assign({},r);
         o.FBMcount = 0;
@@ -248,38 +198,9 @@ router.get('/allstats/:startdate/:enddate',async(req,res)=>{
     startdate.setHours(startdate.getHours()+5);
     enddate = new Date(req.params.enddate);
     enddate.setHours(enddate.getHours()+28,59,59,59);
-    // enddate.setHours(enddate.getHours()+5);
 
     }
     await timezone();
-    // console.log(startdate);
-    // console.log(enddate)
-    // console.log(enddate)
-    // date = new Date();
-    // date.setDate(date.getDate()-req.params.day);
-    // date.setHours(date.getHours()+5)
-    // date.setHours(0,0,0,0);
-    // // console.log("Start Date" +date);
-    // // date.setHours(date.getHours()+5)
-    // // console.log(date);
-
-    // enddate = new Date();
-    // if(req.params.day<=1){
-    // enddate.setDate(date.getDate()-req.params.day+1);
-    // console.log(enddate);
-    // enddate.setHours(23,59,59,59);
-    
-    // // console.log("EndDate" + enddate);
-    // // console.log('Today & Yesterday End Date');
-    // // console.log(enddate);
-    // }
-    // else if(req.params.day>1){
-    //     enddate.setDate(enddate.getDate());
-    //     // console.log('More than 7 days End Date');
-    //     // console.log(enddate);
-    // }
-    // var testfbd =await Order.find({ShippingType:'Own Warehouse',CreatedAt:{$gte:date}})
-    // var testfbm =await Order.find({ShippingType:'Own Warehouse',CreatedAt:{$gte:date}})
 
     var TotalFbd =await Order.find({ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
     var TotalFbm =await Order.find({ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
@@ -325,14 +246,10 @@ router.get('/allstats/:startdate/:enddate',async(req,res)=>{
  
     });
     ShopFbd.push(Total);
-    // console.log(testfbd);
     res.send(ShopFbd.sort(function(a,b){
         return a._id - b._id
     }))
-    // var TotalFbd = Order.aggregate([
-    //     {$match:{ShippingType='Own Warehouse'}},
-    //     {$group}
-    // ])
+
 })
 
 module.exports = router;
