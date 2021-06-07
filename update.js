@@ -175,7 +175,71 @@ async function UpdateData(){
 }
 
 async function updateStatus(){
-    var orders = await Order.find({$or:[{ Status: 'pending'},{Status:'shipped'},{ Status:'ready_to_ship'}]})
+    var orders = await Order.find({$or:[{Status:'shipped'},{ Status:'ready_to_ship'}]})
+    for(const order of orders){
+        
+        var darazid = await Darazid.findOne({emailid:order.ShopId});
+//Updating tracking of each pending/shipped order if any changes 
+        url = await generateMultipleOrderItemsUrl(darazid.emailid,darazid.secretkey,"["+order.OrderId+"]");
+        orderitemsdata = await GetData(url);
+        try{
+        for(const order of orderitemsdata.Orders[0].OrderItems)
+        {
+            
+
+
+            var findorder = await Order.findOne({OrderItemId:order.OrderItemId});
+            //updating statuses
+            if(findorder.Status!=order.Status){
+                console.log(findorder.Status+" "+order.Status);
+                findorder.Status=order.Status;
+                const result = await findorder.save();
+            }
+            //Update Tracking if tracking available
+            if(findorder.TrackingCode==""){
+                if(order.TrackingCode!="")
+                {
+                    findorder.TrackingCode=order.TrackingCode;
+                    const result = await findorder.save();
+                    // console.log(result);
+                }
+                
+            }
+             //New Updated Tracking if changed
+            else if(findorder.TrackingCode!=order.TrackingCode)
+            {
+               
+                findorder.UpdatedTracking=order.TrackingCode;
+                const result = await findorder.save();
+                // console.log(result);
+            }
+        }
+    }
+    catch(error){
+        // console.log(error);
+    }
+        
+        
+
+       
+
+
+    }
+    console.log("Status Loop done");
+
+    try {
+        setTimeout(()=>{
+            updateStatus();
+        },10000);
+    } catch (error) {
+        console.log(error);
+    }
+    
+    
+}
+
+async function updatePending(){
+    var orders = await Order.find({Status:'pending'})
     for(const order of orders){
         
         var darazid = await Darazid.findOne({emailid:order.ShopId});
@@ -269,3 +333,4 @@ async function getOrderData(userid,secretkey,data){
 
 module.exports.UpdateData = UpdateData
 module.exports.updateStatus = updateStatus
+module.exports.updatePending = updatePending
