@@ -20,10 +20,6 @@ mongoose.connect(config.connectionstring)
         console.log("Error");
     });
 
-
-
-
-
 app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept");
@@ -40,15 +36,6 @@ app.use('/api/auth',auth);
 app.use('/api/darazid',darazid);
 app.use('/api/orders',order);
 
-// setInterval(api.test,5000);
-// api.test();
-// function test(){
-//     console.log("test");
-// }
-// console.log(api.test(userID,secretkey,0));
-// setInterval(test,100);
-// setTimeout(api.UpdateData,300000);
-// setInterval(api.updateStatus,10000);
 
 api.UpdateData();
 api.updateStatus();

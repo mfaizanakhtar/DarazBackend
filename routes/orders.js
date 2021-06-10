@@ -26,6 +26,12 @@ router.get('/data/:filter',async(req,res)=>{
     else if(req.params.filter=="failed-received"){
         order=await Order.find({WarehouseStatus:"Received"}).sort({CreatedAt:1})
     }
+    else if(req.params.filter=="Claim Filed"){
+        order=await Order.find({WarehouseStatus:"Claim Filed"}).sort({CreatedAt:1})
+    }
+    else if(req.params.filter=="Claim Received"){
+        order=await Order.find({WarehouseStatus:"Claim Received"}).sort({CreatedAt:1})
+    }
     else order = await Order.find({Status:req.params.filter}).sort({CreatedAt:1});
     res.send(order);
 
@@ -54,6 +60,18 @@ router.post('/',async(req,res)=>{
     })
     await order.save();
     res.send("Order added");
+})
+
+router.put('/Update/:Status',async(req,res)=>{
+    var orders=req.body;
+    orders.forEach(async o => {
+        o = await Order.updateMany({OrderItemId:o.OrderItemId},{
+            $set:{
+                WarehouseStatus:req.params.Status
+            }
+        })
+    });
+    res.send({Status:"Success"})
 })
 
 router.put('/return/:id',async(req,res)=>{
