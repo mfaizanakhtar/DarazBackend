@@ -7,16 +7,20 @@ const { Darazid } = require('./models/darazid');
 
 
 function generateOrdersUrl(userid,secretkey,Offset){
+    //To get multiple orders (100 latest with 0 offset)
 
+    //base URL
     const url="https://api.sellercenter.daraz.pk?";
+    //Created After as per daraz requirement and encoded
     createdAfter=encodeURIComponent(new Date('02-25-2014').toISOString().substr(0,19)+'+00:00');
+    //TimeStamp as per daraz requirement and encoded    
     Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00');
 
-
+    //UserId Encoded
     let userID=encodeURIComponent(userid);
-
+    //Action of API
     let Action='GetOrders';
-
+    //parameters created, signed and concatenated with URL and returned
     let apiparams='Action='+Action+'&CreatedAfter='+createdAfter+'&Format=json'+'&Offset='+Offset+'&SortBy=created_at'+'&SortDirection=DESC'+'&Timestamp='+Timestamp+'&UserID='+userID+'&Version=1.0'
     return url+apiparams+'&Signature='+SignParameters(secretkey,apiparams);
     
@@ -24,23 +28,27 @@ function generateOrdersUrl(userid,secretkey,Offset){
 }
 
 function generateOrderUrl(userid,secretkey,Orderid){
+    //To get Single Order Detail with Order ID argument
 
+    //base URL
     const url="https://api.sellercenter.daraz.pk?";
-    // createdAfter=encodeURIComponent(new Date('02-25-2014').toISOString().substr(0,19)+'+00:00');
+    //TimeStamp as per daraz
     Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00');
 
-
+    //encode userid(email)
     let userID=encodeURIComponent(userid);
-
+    //Action of API
     let Action='GetOrder';
-
+    //Api paramaters formation
     let apiparams='Action='+Action+'&Format=json'+'&OrderId='+Orderid+'&Timestamp='+Timestamp+'&UserID='+userID+'&Version=1.0'
+    //Sign parameters and concatenate with base URL
     return url+apiparams+'&Signature='+SignParameters(secretkey,apiparams);
     
 
 }
 
 function generateMultipleOrderItemsUrl(userid,secretkey,Orders){
+    //to get OrderItemsUrl from OrderID
 
     const url="https://api.sellercenter.daraz.pk?";
     createdAfter=encodeURIComponent(new Date('02-25-2014').toISOString().substr(0,19)+'+00:00');
@@ -56,6 +64,30 @@ function generateMultipleOrderItemsUrl(userid,secretkey,Orders){
     return url+apiparams+'&Signature='+SignParameters(secretkey,apiparams);
     
 
+}
+
+async function getOrderData(userid,secretkey,data){
+    //MultipleOrderIds Passed and OrderItemData Gathered
+
+    //Extracting orderids only from all orders
+    var orderids='['
+    data.forEach(element => {
+        orderids+=element.OrderId+',';
+        
+    });
+    orderids+=']'
+    // console.log(orderids);
+
+    //creating url to get MultipleOrderItems
+    url = await generateMultipleOrderItemsUrl(userid,secretkey,orderids);
+    // console.log(url);
+
+    //Passing url to get Data using axios
+    orderitemsdata = await GetData(url);
+    return orderitemsdata;
+    // console.log(orderitemsdata.Orders)
+   
+    
 }
 
 
@@ -88,7 +120,6 @@ function SignParameters(secretkey,param){
 
 getApiIds = async()=>{
     var darazids = await Darazid.find();
-    // console.log(darazids);
     return darazids;
 
 }
@@ -132,31 +163,6 @@ async function UpdateData(){
             // console.log(result);
         }
     }
-        
-    //     try{
-    //     let response = await axios.post('http://localhost:3000/api/orders/',{
-    //         OrderId:orderitems.OrderId,
-    //         OrderItemId:orderitems.OrderItemId,
-    //         ShopId:id.emailid,
-    //         Name:orderitems.Name,
-    //         Sku:orderitems.Sku,
-    //         ShopSku:orderitems.ShopSku,
-    //         ShippingType:orderitems.ShippingType,
-    //         ItemPrice:orderitems.ItemPrice,
-    //         ShippingAmount:orderitems.ShippingAmount,
-    //         Status:orderitems.Status,
-    //         TrackingCode:orderitems.TrackingCode,
-    //         ShippingProviderType:orderitems.ShippingProviderType,
-    //         CreatedAt:orderitems.CreatedAt,
-    //         UpdatedAt:orderitems.UpdatedAt,
-    //         productMainImage:orderitems.productMainImage,
-    //         Variation:orderitems.Variation
-    //     })
-    //     // console.log(orderitems);
-    // }
-    // catch(error){
-        
-    // }
     };
 }
     }
@@ -179,7 +185,7 @@ async function updateStatus(){
     for(const order of orders){
         
         var darazid = await Darazid.findOne({emailid:order.ShopId});
-//Updating tracking of each pending/shipped order if any changes 
+//Updating tracking of each shipped/Rts order if any changes 
         url = await generateMultipleOrderItemsUrl(darazid.emailid,darazid.secretkey,"["+order.OrderId+"]");
         orderitemsdata = await GetData(url);
         try{
@@ -243,7 +249,7 @@ async function updatePending(){
     for(const order of orders){
         
         var darazid = await Darazid.findOne({emailid:order.ShopId});
-//Updating tracking of each pending/shipped order if any changes 
+//Updating tracking of each pending order if any changes 
         url = await generateMultipleOrderItemsUrl(darazid.emailid,darazid.secretkey,"["+order.OrderId+"]");
         orderitemsdata = await GetData(url);
         try{
@@ -289,41 +295,16 @@ async function updatePending(){
 
 
     }
-    console.log("Status Loop done");
+    console.log("Pending Loop done");
 
     try {
         setTimeout(()=>{
-            updateStatus();
+            updatePending();
         },10000);
     } catch (error) {
         console.log(error);
     }
     
-    
-}
-
-
-async function getOrderData(userid,secretkey,data){
-    //MultipleOrderIds Passed and OrderItemData Gathered
-
-    //Extracting orderids only from all orders
-    var orderids='['
-    data.forEach(element => {
-        orderids+=element.OrderId+',';
-        
-    });
-    orderids+=']'
-    // console.log(orderids);
-
-    //creating url to get MultipleOrderItems
-    url = await generateMultipleOrderItemsUrl(userid,secretkey,orderids);
-    // console.log(url);
-
-    //Passing url to get Data using axios
-    orderitemsdata = await GetData(url);
-    return orderitemsdata;
-    // console.log(orderitemsdata.Orders)
-   
     
 }
 
