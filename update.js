@@ -300,7 +300,7 @@ async function updatePending(){
     try {
         setTimeout(()=>{
             updatePending();
-        },10000);
+        },100000);
     } catch (error) {
         console.log(error);
     }
