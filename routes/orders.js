@@ -27,7 +27,7 @@ router.get('/data/:filter',async(req,res)=>{
         order=await Order.find({WarehouseStatus:"Received"}).sort({CreatedAt:1})
     }
     else if(req.params.filter=="Claim Filed"){
-        order=await Order.find({WarehouseStatus:"Claim Filed"}).sort({CreatedAt:1})
+        order=await Order.find({$or:[{WarehouseStatus:"Claim Filed"},{WarehouseStatus:"Claim Approved"},{WarehouseStatus:"Claim Rejected"},{WarehouseStatus:"Claim POD Dispute"}]}).sort({CreatedAt:1})
     }
     else if(req.params.filter=="Claim Received"){
         order=await Order.find({WarehouseStatus:"Claim Received"}).sort({CreatedAt:1})
