@@ -236,7 +236,7 @@ async function updateStatus(){
     try {
         setTimeout(()=>{
             updateStatus();
-        },10000);
+        },1000000);
     } catch (error) {
         console.log(error);
     }
