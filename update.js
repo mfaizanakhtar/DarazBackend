@@ -246,12 +246,15 @@ async function updateStatus(){
 
 async function updatePending(){
     var orders = await Order.find({Status:'pending'})
+    console.log(orders)
+    if(orders.length>0){
     for(const order of orders){
         
         var darazid = await Darazid.findOne({emailid:order.ShopId});
 //Updating tracking of each pending order if any changes 
         url = await generateMultipleOrderItemsUrl(darazid.emailid,darazid.secretkey,"["+order.OrderId+"]");
         orderitemsdata = await GetData(url);
+        
         try{
         for(const order of orderitemsdata.Orders[0].OrderItems)
         {
@@ -297,6 +300,7 @@ async function updatePending(){
 
 
     
+    }
 }
     console.log("Pending Loop done");
 
