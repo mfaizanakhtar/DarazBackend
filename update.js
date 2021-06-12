@@ -246,7 +246,7 @@ async function updateStatus(){
 
 async function updatePending(){
     var orders = await Order.find({Status:'pending'})
-    console.log(orders)
+    // console.log(orders)
     if(orders.length>0){
     for(const order of orders){
         
