@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth');
 const { Darazid } = require('../models/darazid');
 
 
-router.post('/',async(req,res)=>{
+router.post('/',auth,async(req,res)=>{
     const darazid = new Darazid({
-        emailid:req.body.emailid,
-        secretkey:req.body.secretkey
+        shopid:req.body.shopid,
+        secretkey:req.body.secretkey,
+        useremail:req.user.useremail
     })
 
     await darazid.save();

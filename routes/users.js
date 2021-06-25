@@ -4,17 +4,18 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 
 router.get('/',async(req,res)=>{
-    const user =await User.find();
+    const user =await User.find({},{password:0,_id:0});
     res.send(user);
 }
 )
 
-router.post('/adduser',async(req,res)=>{
-    let user =await User.findOne({userid:req.body.userid});
+router.post('/',async(req,res)=>{
+    console.log(req.body)
+    let user =await User.findOne({useremail:req.body.useremail});
     if (user) return res.status(400).send({message:"User already exists"}); 
 
         user = new User({
-        userid:req.body.userid,
+        useremail:req.body.useremail,
         password:req.body.password,
         usertype:req.body.usertype
     })

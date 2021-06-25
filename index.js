@@ -6,11 +6,12 @@ const darazapi = require('./routes/darazapi');
 const users = require('./routes/users')
 const auth = require('./routes/auth');
 const darazid = require('./routes/darazids');
-const order = require('./routes/orders');
-const api = require('./update');
-
-
-
+const orderitems = require('./routes/orderItems');
+const orders = require('./routes/orders');
+const {updateOrdersData} = require('./scripts/updateOrders');
+const {updateItemPendingStatus,updateOrderItemStatus,updatePendingOrderStatus} = require('./scripts/updateStatus')
+const {generateSingleOrderUrl} = require('./scripts/GenerateUrl');
+const {updateTransactions} = require("./scripts/updateFinance");
 
 mongoose.connect(config.connectionstring)
     .then(()=>{
@@ -34,12 +35,18 @@ app.use('/api/darazapi',darazapi);
 app.use('/api/users',users);
 app.use('/api/auth',auth);
 app.use('/api/darazid',darazid);
-app.use('/api/orders',order);
+app.use('/api/orderitems',orderitems);
+app.use('/api/orders',orders)
 
 
-api.UpdateData();
-api.updateStatus();
-api.updatePending();
+updateOrdersData()
+updateOrderItemStatus();
+// updateItemPendingStatus();
+// updatePendingOrderStatus();
+updateTransactions();
+
+// url = generateSingleOrderUrl("techmart73@gmail.com","M7kLg0PM2dIOOc8yhBdznzq5jc4ULf6kFy5vczlXfLqQxzN3gcS9atdw",110984852507016)
+// console.log(url);
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port,()=> console.log(`Listening on port ${port}`));

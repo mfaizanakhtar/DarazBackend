@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 const darazidSchema = new mongoose.Schema({
-    emailid:String,
-    secretkey:String
+    shopid:String,
+    secretkey:String,
+    useremail:String
 })
 
 const Darazid = mongoose.model('Darazapi',darazidSchema);

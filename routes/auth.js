@@ -5,12 +5,14 @@ const bcrypt = require('bcrypt');
 
 
 router.post('/',async(req,res)=>{
-    const user = await User.findOne({ userid:req.body.userid })
+    // console.log(req.body)
+    const user = await User.findOne({ useremail:req.body.useremail })
     if(!user) return res.send({message:'User not found'});
 
     const password = await bcrypt.compare(req.body.password,user.password);
+    // console.log(password)
     if (password == true){
-        let token = user.generateAuthToken()
+        let token = user.generateAuthToken();
         res.send({"token":token});
     }
     
