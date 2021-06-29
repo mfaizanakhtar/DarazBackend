@@ -21,6 +21,6 @@ const transactionSchema = new mongoose.Schema({
     PaymentRefId:String
 })
 
-const Transaction = new mongoose.model('transaction',transactionSchema)
+const Transaction = new mongoose.model('Transaction',transactionSchema)
 
 module.exports.Transaction = Transaction;

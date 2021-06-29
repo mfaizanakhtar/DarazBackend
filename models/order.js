@@ -41,7 +41,7 @@ const orderSchema = new mongoose.Schema({
     ItemsCount:Number,
     OrderItems:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'orderitems'
+        ref:'OrderItem'
     }],
     Statuses:[String],
     Voucher:Number,

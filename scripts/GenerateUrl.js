@@ -81,6 +81,7 @@ function getTimeStamp(){
     return Timestamp;
 }
 function getOrderIdArray(data){
+
 var orderids='['
 data.forEach(element => {
     orderids+=element.OrderId+',';

@@ -10,7 +10,14 @@ async function updateOrderItemStatus(){
     //get All Shops in db
     darazid.forEach(async(shop) => {
         //get order with statuses of this shop
+        splitCount=300
+        var orderitemscount = await OrderItems.countDocuments({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
+        end = Math.ceil(orderitemscount/splitCount)
+    for(let i=0;i<end;i++){
         var orderitems = await OrderItems.find({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
+        .skip(i*splitCount)
+        .limit(splitCount)
+        
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,getOrderIdArray(orderitems));
         orderitemsdata = await GetData(url);
         orderitemsdata = orderitemsdata.Orders[0].OrderItems
@@ -48,9 +55,11 @@ async function updateOrderItemStatus(){
 
     }
     catch(error){
-        // console.log(error);
+        console.log(error);
     }
-    });
+    }
+    }
+    );
 
     console.log("Status Loop done");
 

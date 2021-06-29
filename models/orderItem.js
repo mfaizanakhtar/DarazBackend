@@ -26,7 +26,7 @@ const OrderItemsSchema = new mongoose.Schema({
     useremail:String,
     Transactions:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'transactions'
+        ref:'Transaction'
     }],
     cost:Number
 
@@ -34,6 +34,6 @@ const OrderItemsSchema = new mongoose.Schema({
     
 })
 
-const OrderItems = mongoose.model('OrderItems',OrderItemsSchema);
+const OrderItems = mongoose.model('OrderItem',OrderItemsSchema);
 
 module.exports.OrderItems = OrderItems;

@@ -13,7 +13,7 @@ router.get('/data/:filter',auth,async(req,res)=>{
     orderItem = await OrderItems.find({CreatedAt: {$lte:date},WarehouseStatus:"Dispatched",Status:{$ne:"delivered"}});
     }
     else if(req.params.filter=="all"){
-        orderItem=await OrderItems.find().sort({CreatedAt:1})
+        orderItem=await OrderItems.find().populate('Order').sort({CreatedAt:1})
     }
     else if(req.params.filter=="ready_to_ship"){
         orderItem=await OrderItems.find({Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}}).sort({CreatedAt:1})
@@ -38,31 +38,6 @@ router.get('/data/:filter',auth,async(req,res)=>{
 
 })
 
-router.post('/',async(req,res)=>{
-    const result = await OrderItems.findOne({OrderItemId: req.body.OrderItemId})
-    if (result) return res.status(404).send("Order already exists");
-    const orderItem = new OrderItems({
-        OrderId:req.body.OrderId,
-        OrderItemId:req.body.OrderItemId,
-        ShopId:req.body.ShopId,
-        Name:req.body.Name,
-        Sku:req.body.Sku,
-        ShopSku:req.body.ShopSku,
-        ShippingType:req.body.ShippingType,
-        ItemPrice:req.body.ItemPrice,
-        ShippingAmount:req.body.ShippingAmount,
-        Status:req.body.Status,
-        TrackingCode:req.body.TrackingCode,
-        ShippingProviderType:req.body.ShippingProviderType,
-        CreatedAt:req.body.CreatedAt,
-        UpdatedAt:req.body.UpdatedAt,
-        productMainImage:req.body.productMainImage,
-        Variation:req.body.Variation
-    })
-    await orderItem.save();
-    res.send("Order added");
-})
-
 router.put('/Update/:Status',async(req,res)=>{
     var orderItems=req.body;
     orderItems.forEach(async o => {
@@ -75,11 +50,12 @@ router.put('/Update/:Status',async(req,res)=>{
     res.send({Status:"Success"})
 })
 
-router.put('/return/:id',async(req,res)=>{
-    var orderItem = await OrderItems.find({TrackingCode:req.params.id,WarehouseStatus:{$ne:"Received"}});
+router.put('/return/:id',auth,async(req,res)=>{
+    
+    var orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id,WarehouseStatus:{$ne:"Received"}});
     if(orderItem.length>0){
 
-    orderItem = await OrderItems.updateMany({TrackingCode:req.params.id},{
+    orderItem = await OrderItems.updateMany({useremail:req.user.useremail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Received",
             ReturnDate:new Date()
@@ -90,7 +66,7 @@ router.put('/return/:id',async(req,res)=>{
     res.send([{Status:"Received"},updatedResult])
     }
     else{
-        orderItem = await OrderItems.find({TrackingCode:req.params.id})
+        orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id})
         if(orderItem.length>0){
             res.send({Status:"Already Received"})
         }
@@ -100,25 +76,25 @@ router.put('/return/:id',async(req,res)=>{
     
 })
 
-router.put('/dispatch/:id',async(req,res)=>{
-    var orderItem = await OrderItems.find({TrackingCode:req.params.id,Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}})
+router.put('/dispatch/:id',auth,async(req,res)=>{
+    var orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id,Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}})
     if(orderItem.length>0){
-    orderItem = await OrderItems.updateMany({TrackingCode:req.params.id},{
+    orderItem = await OrderItems.updateMany({useremail:req.user.useremail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Dispatched",
             DispatchDate:new Date()
         }
     })
-    
-    res.send({Status:"Dispatched"});
+    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1})
+    res.send([{Status:"Dispatched"},updatedResult]);
 }
 else{
-  orderItem = await OrderItems.find({TrackingCode:req.params.id,Status:"ready_to_ship"})
+  orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id,Status:"ready_to_ship"})
   if(orderItem.length>0){
     res.send({Status:"Duplicate"})
   }
   else{
-      orderItem = await OrderItems.find({TrackingCode:req.params.id})
+      orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id})
       if(orderItem.length>0){
           res.send({Status:"Order status not eligible to dispatch"})
       }
@@ -129,7 +105,7 @@ else{
 } 
 })
 
-router.get('/ordermovement/:filter',async(req,res)=>{
+router.get('/ordermovement/:filter',auth,async(req,res)=>{
     var orderItem;
     date = new Date();
     date.setHours(date.getHours()+5);
@@ -145,12 +121,12 @@ router.get('/ordermovement/:filter',async(req,res)=>{
     }
 
     orderItem = await OrderItems.aggregate([{
-        $group:{_id:'$TrackingCode',OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'}}
+        $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'}}
     },{
-        $match:{WarehouseStatus:req.params.filter}
+        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter}
     }]).sort({Date:-1})
     
-    console.log(orderItem)
+    // console.log(orderItem)
     res.send(orderItem);
 
 })
