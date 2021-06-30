@@ -4,148 +4,96 @@ const { Order } = require('../models/order');
 const auth = require('../middleware/auth')
 const router = express.Router();
 
-router.get('/orders/:status',async(req,res)=>{
-    var response
-    console.log(req.query.OrderId)
+router.get('/orders/',auth,async(req,res)=>{
 
-    if(req.params.status=='all'){
-        response = await FindQuery({},req.query.pageNumber,req.query.pageSize)
-    }
-    else if(req.params.status=='ready_to_ship'){
-        response = await aggregateQuery({"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":{$ne:"Dispatched"}},req.query.pageNumber,req.query.pageSize)
-    }
-    else if(req.params.status=='RTS-Dispatched'){
-        response = await aggregateQuery(aggregateDoc("RTSDispatched",req.query.OrderId),req.query.pageNumber,req.query.pageSize)
-    }
-    else if(req.params.status=='Delivery Failed-Received'){
-        response = await aggregateQuery(aggregateDoc("DeliveryFailedReceived"),req.query.pageNumber,req.query.pageSize)
-    }
-    else if(req.params.status=='Claimable'){
-        response = await aggregateQuery(aggregateDoc("Claimable"),req.query.pageNumber,req.query.pageSize)
-    }
-    else if(req.params.status=='Claim Filed'){
-        response = await aggregateQuery(aggregateDoc("ClaimFiled"),req.query.pageNumber,req.query.pageSize)
-    }
-    else if(req.params.status=='Claim Received'){
-        response = await aggregateQuery(aggregateDoc("ClaimReceived"),req.query.pageNumber,req.query.pageSize)
-    }
-    else{
-        response = await FindQuery({Statuses:req.params.status},req.query.pageNumber,req.query.pageSize)
-    }
-    res.send(response);
+    var response = await FindQuery(req.query,req.user)
+    var stores = await Order.aggregate([
+        {$group:{_id:"$ShopId"}}
+    ])
+
+    res.send([...response,stores]);
 })
 
-function aggregateDoc(status,OrderId){
-    date = new Date();
-    date.setDate(date.getDate()-30);
-    RTSDispatched = {"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":"Dispatched"}
-    DeliveryFailedReceived = {"OrderItems.Status":"delivery failed","OrderItems.WarehouseStatus":"Received"}
-    Claimable = {CreatedAt: {$lte:date},"OrderItems.WarehouseStatus":"Dispatched","OrderItems.Status":{$ne:"delivered"}}
-    ClaimFiled = {$or:[{"OrderItems.WarehouseStatus":"Claim Filed"},{"OrderItems.WarehouseStatus":"Claim Approved"},{"OrderItems.WarehouseStatus":"Claim Rejected"},{"OrderItems.WarehouseStatus":"Claim POD Dispute"}]}
-    ClaimReceived = {"OrderItems.WarehouseStatus":"Claim Received"}
 
-    if(status=="RTSDispatched"){
-        if(!OrderId) return RTSDispatched
-        RTSDispatched.OrderId=OrderId
-        return RTSDispatched
+async function FindQuery(query,user){
+    
+    var pageArgs={}
+    var FinalFilter={}
+    dateFilter={$and:[{CreatedAt:{$gte:new Date(query.startDate)}},{CreatedAt:{$lte:new Date(query.endDate)}}]}
+    
+    AdditionStatus={
+        RTSDispatched : {"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":"Dispatched"},
+        DeliveryFailedReceived : {"OrderItems.Status":"delivery failed","OrderItems.WarehouseStatus":"Received"},
+        Claimable : {CreatedAt: {$lte:date},"OrderItems.WarehouseStatus":"Dispatched","OrderItems.Status":{$ne:"delivered"}},
+        ClaimFiled : {$or:[{"OrderItems.WarehouseStatus":"Claim Filed"},{"OrderItems.WarehouseStatus":"Claim Approved"},{"OrderItems.WarehouseStatus":"Claim Rejected"},{"OrderItems.WarehouseStatus":"Claim POD Dispute"}]},
+        ClaimReceived : {"OrderItems.WarehouseStatus":"Claim Received"}
     }
-    else if(status=="DeliveryFailedReceived"){
-        if(!OrderId) return DeliveryFailedReceived
-        DeliveryFailedReceived.OrderId=OrderId
-        return DeliveryFailedReceived
+
+    if(AdditionStatus[query["OrderItems.Status"]]){
+        if(query["OrderItems.Status"]=="Claimable") dateFilter={}
+
+        FinalFilter={...AdditionStatus[query["OrderItems.Status"]]}
+        query["OrderItems.Status"]="null"
+    } 
+    
+    for(var propName in query){
+        if(query[propName] == "null" || propName=="startDate" || propName=="endDate") 
+        delete query[propName]
+        else if(propName=="pageSize" || propName=="pageNumber")
+        {
+            pageArgs={...pageArgs,[propName]:query[propName]}
+            delete query[propName]
+        }
     }
-    else if(status=="Claimable"){
-        if(!OrderId) return Claimable
-        Claimable.OrderId=OrderId
-        return Claimable
-    }
-    else if(status=="ClaimFiled"){
-        if(!OrderId) return ClaimFiled
-        ClaimFiled.OrderId=OrderId
-        return ClaimFiled
-    }
-    else if(status=="ClaimReceived"){
-        if(!OrderId) return ClaimReceived
-        ClaimReceived.OrderId=OrderId
-        return ClaimReceived
-    }
-}
+    
 
+    FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail}
+    console.log(FinalFilter)
 
-async function FindQuery(FilterDoc,pNumber,pSize){
-    console.log(FilterDoc)
-    const length = await Order.countDocuments(FilterDoc)
-
-    const orders = await Order.find(FilterDoc)
-    .populate('OrderItems')
-    .sort({CreatedAt:-1})
-    .skip(parseInt(pNumber*pSize))
-    .limit(parseInt(pSize))
-
-    return [orders,length]
-}
-
-async function aggregateQuery(filterDoc,pNumber,pSize){
-        console.log(filterDoc)
-        //join then find
-        const orders = await Order.aggregate([
-            {$lookup:{
-                from:'orderitems',
-                localField:"OrderItems",
-                foreignField:"_id",
-                as:"OrderItems"
-            }},
-            {$match:filterDoc}
-        ])
-        .skip(parseInt(pNumber*pSize))
-        .limit(parseInt(pSize))
-
-        const length = await Order.aggregate([
-            {$lookup:{
-                from:'orderitems',
-                localField:"OrderItems",
-                foreignField:"_id",
-                as:"OrderItems"
-            }},
-            {$match:filterDoc},
-            {$count:"count"}
-        ])
-        
-        if(length[0]) return [orders,length[0].count]
-        return [orders,0]
-}
-
-router.get('/data/:filter',async(req,res)=>{
-    //join then find
     const orders = await Order.aggregate([
+        {
+            $match:{}
+        },
         {$lookup:{
             from:'orderitems',
             localField:"OrderItems",
             foreignField:"_id",
-            as:"orderitems"
+            as:"OrderItems"
         }},
-        {$match:{
-            "orderitems.TrackingCode":'PK-DEX013223201'
-        }}
+        {$match:FinalFilter}
     ])
-    res.send(...orders)
-})
+    .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
+    .limit(parseInt(pageArgs.pageSize))
 
-router.get('/statusstats',async(req,res)=>{
-    //join then find
-    var result = await Order.aggregate([
-        {$group : { _id: '$Statuses', Count : {$sum : 1}}}
+    const length = await Order.aggregate([
+        {$lookup:{
+            from:'orderitems',
+            localField:"OrderItems",
+            foreignField:"_id",
+            as:"OrderItems"
+        }},
+        {$match:FinalFilter},
+        {$count:"count"}
     ])
-    res.send(result)
-})
+    if(length[0]) return [orders,length[0].count]
+    return [orders,0]
+}
 
-router.get('/skustats',async(req,res)=>{
-    //join then find
-    var result = await Order.aggregate([
-        {$group : { _id: '$BaseSkus', Count : {$sum : 1}}}
-    ])
-    console.log(result)
-    res.send(result)
-})
+// router.get('/statusstats',async(req,res)=>{
+//     //join then find
+//     var result = await Order.aggregate([
+//         {$group : { _id: '$Statuses', Count : {$sum : 1}}}
+//     ])
+//     res.send(result)
+// })
+
+// router.get('/skustats',async(req,res)=>{
+//     //join then find
+//     var result = await Order.aggregate([
+//         {$group : { _id: '$BaseSkus', Count : {$sum : 1}}}
+//     ])
+//     console.log(result)
+//     res.send(result)
+// })
 
 module.exports = router

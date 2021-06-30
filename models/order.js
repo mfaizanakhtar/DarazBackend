@@ -54,7 +54,11 @@ const orderSchema = new mongoose.Schema({
     ReturnDate:Date,
     WarehouseStatus:String,
     Skus:[String],
-    BaseSkus:[String]
+    BaseSkus:[String],
+    isPrinted:{
+        type:Boolean,
+        default:false
+    }
 })
 
 const Order = mongoose.model('Order',orderSchema);
