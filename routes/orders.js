@@ -4,7 +4,7 @@ const { Order } = require('../models/order');
 const auth = require('../middleware/auth')
 const router = express.Router();
 
-router.get('/:status',auth,async(req,res)=>{
+router.get('/orders/:status',async(req,res)=>{
     var response
     console.log(req.query.OrderId)
 
@@ -129,6 +129,23 @@ router.get('/data/:filter',async(req,res)=>{
         }}
     ])
     res.send(...orders)
+})
+
+router.get('/statusstats',async(req,res)=>{
+    //join then find
+    var result = await Order.aggregate([
+        {$group : { _id: '$Statuses', Count : {$sum : 1}}}
+    ])
+    res.send(result)
+})
+
+router.get('/skustats',async(req,res)=>{
+    //join then find
+    var result = await Order.aggregate([
+        {$group : { _id: '$BaseSkus', Count : {$sum : 1}}}
+    ])
+    console.log(result)
+    res.send(result)
 })
 
 module.exports = router

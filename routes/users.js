@@ -10,7 +10,6 @@ router.get('/',async(req,res)=>{
 )
 
 router.post('/',async(req,res)=>{
-    console.log(req.body)
     let user =await User.findOne({useremail:req.body.useremail});
     if (user) return res.status(400).send({message:"User already exists"}); 
 
