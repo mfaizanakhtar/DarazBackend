@@ -76,6 +76,19 @@ function generateMultipleOrderItemsUrl(userid,secretkey,Orders){
 
 }
 
+function generateLabelUrl(userid,secretkey){
+    const url="https://api.sellercenter.daraz.pk?";
+    Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00');
+    let Action = 'GetDocument';
+    let OrderItemIds=encodeURIComponent('[119437190478033]')
+
+    let userID=encodeURIComponent(userid);
+
+    let apiparams='Action='+Action+'&DocumentType=shippingLabel'+'&Format=json'+'&OrderItemIds='+OrderItemIds+'&Timestamp='+Timestamp+'&UserID='+userID+'&Version=1.0'
+    return url+apiparams+'&Signature='+SignParameters(secretkey,apiparams);
+
+}
+
 function getTimeStamp(){
     Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00')
     return Timestamp;
@@ -96,3 +109,4 @@ module.exports.generateOrdersUrl = generateOrdersUrl;
 module.exports.generateSingleOrderUrl = generateSingleOrderUrl;
 module.exports.generateMultipleOrderItemsUrl = generateMultipleOrderItemsUrl;
 module.exports.getOrderIdArray = getOrderIdArray;
+module.exports.generateLabelUrl = generateLabelUrl;

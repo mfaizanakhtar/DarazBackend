@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "atob": "^2.1.2",
     "axios": "^0.19.2",
     "bcrypt": "^5.0.1",
     "config": "^3.3.1",

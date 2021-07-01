@@ -12,6 +12,10 @@ const {updateOrdersData} = require('./scripts/updateOrders');
 const {updateItemPendingStatus,updateOrderItemStatus,updatePendingOrderStatus} = require('./scripts/updateStatus')
 const {generateSingleOrderUrl} = require('./scripts/GenerateUrl');
 const {updateTransactions} = require("./scripts/updateFinance");
+const  {generateLabelUrl} = require("./scripts/GenerateUrl");
+const {GetData} = require('./scripts/HttpReq')
+const fs = require('fs')
+const atob = require("atob");
 
 mongoose.connect(config.connectionstring)
     .then(()=>{
@@ -44,6 +48,26 @@ updateOrderItemStatus();
 // updateItemPendingStatus();
 // updatePendingOrderStatus();
 updateTransactions();
+labelFetch()
+async function labelFetch(){
+
+
+var label = generateLabelUrl('pkgadgies@gmail.com','k_sD4SRfN8-aVu7wRN6CND6LVVCD4oRpat4RN5YPcx6jeYVM0-aPpfls')
+// fs.writeFile("label.json",label.Document.File,{encoding:'base64'},(err)=>{
+//     if(err){
+//         console.log(err)
+//     }
+//     else{
+//         console.log("file created")
+//     }
+// })
+data = await GetData(label)
+var result = atob(data.Document.File)
+// console.log(result)
+// divs = document.getElementsByName('div').result
+// console.log(divs)
+}
+
 
 // url = generateSingleOrderUrl("techmart73@gmail.com","M7kLg0PM2dIOOc8yhBdznzq5jc4ULf6kFy5vczlXfLqQxzN3gcS9atdw",110984852507016)
 // console.log(url);
