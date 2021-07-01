@@ -48,7 +48,7 @@ async function FindQuery(query,user){
     
 
     FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail}
-    console.log(FinalFilter)
+    // console.log(FinalFilter)
 
     const orders = await Order.aggregate([
         {

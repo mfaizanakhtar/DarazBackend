@@ -76,11 +76,11 @@ function generateMultipleOrderItemsUrl(userid,secretkey,Orders){
 
 }
 
-function generateLabelUrl(userid,secretkey){
+function generateLabelUrl(userid,secretkey,OrderItemIds){
     const url="https://api.sellercenter.daraz.pk?";
     Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00');
     let Action = 'GetDocument';
-    let OrderItemIds=encodeURIComponent('[119437190478033]')
+    OrderItemIds=encodeURIComponent(OrderItemIds)
 
     let userID=encodeURIComponent(userid);
 

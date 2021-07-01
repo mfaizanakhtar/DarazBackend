@@ -39,15 +39,16 @@ router.get('/data/:filter',auth,async(req,res)=>{
 })
 
 router.put('/Update/:Status',async(req,res)=>{
-    var orderItems=req.body;
-    orderItems.forEach(async o => {
-        o = await OrderItems.updateMany({OrderItemId:o.OrderItemId},{
+    console.log(req.body)
+    
+        ordersUpdated = await OrderItems.updateMany({OrderId:{$in:req.body}},{
             $set:{
                 WarehouseStatus:req.params.Status
             }
         })
-    });
-    res.send({Status:"Success"})
+    
+    
+    res.send(ordersUpdated)
 })
 
 router.put('/return/:id',auth,async(req,res)=>{

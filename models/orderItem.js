@@ -28,7 +28,8 @@ const OrderItemsSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'Transaction'
     }],
-    cost:Number
+    cost:Number,
+    PortCode:String
 
 
     

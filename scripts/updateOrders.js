@@ -3,7 +3,9 @@ const {OrderItems} = require('../models/orderItem');
 const { Darazid } = require('../models/darazid');
 const {Order} = require('../models/order');
 const {Sku} = require('../models/sku');
-const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl} = require('./GenerateUrl');
+const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl,generateLabelUrl} = require('./GenerateUrl');
+const cheerio = require('cheerio')
+const atob = require("atob");
 
 
 async function getOrderItemsData(userid,secretkey,data){
@@ -87,6 +89,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
         }
     }
     };
+
 }
 
 function OrderItemObj(item,shopid,useremail,cost){

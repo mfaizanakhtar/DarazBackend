@@ -16,6 +16,7 @@ const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
 const fs = require('fs')
 const atob = require("atob");
+const cheerio = require('cheerio')
 
 mongoose.connect(config.connectionstring)
     .then(()=>{
@@ -48,29 +49,35 @@ updateOrderItemStatus();
 // updateItemPendingStatus();
 // updatePendingOrderStatus();
 updateTransactions();
-labelFetch()
-async function labelFetch(){
+// labelFetch()
+// async function labelFetch(){
 
 
-var label = generateLabelUrl('pkgadgies@gmail.com','k_sD4SRfN8-aVu7wRN6CND6LVVCD4oRpat4RN5YPcx6jeYVM0-aPpfls')
-// fs.writeFile("label.json",label.Document.File,{encoding:'base64'},(err)=>{
-//     if(err){
-//         console.log(err)
-//     }
-//     else{
-//         console.log("file created")
-//     }
-// })
-data = await GetData(label)
-var result = atob(data.Document.File)
-// console.log(result)
-// divs = document.getElementsByName('div').result
-// console.log(divs)
-}
+// var label = generateLabelUrl('pkgadgies@gmail.com','k_sD4SRfN8-aVu7wRN6CND6LVVCD4oRpat4RN5YPcx6jeYVM0-aPpfls','[129603020813712,119335182660597]')
+// var portCodes=[]
+// var trackings=[]
 
+// console.log(label)
+// data = await GetData(label)
+// var result = atob(data.Document.File)
+// const $=cheerio.load(result)
 
-// url = generateSingleOrderUrl("techmart73@gmail.com","M7kLg0PM2dIOOc8yhBdznzq5jc4ULf6kFy5vczlXfLqQxzN3gcS9atdw",110984852507016)
-// console.log(url);
+// $("div").find('div:nth-child(5)').each(function(index,element){
+//         PortCode=$(element).text().substr(14)
+//         PortCode=PortCode.substr(0,PortCode.length-1)
+//         portCodes.push(PortCode)
+// });
+// $("div").find('div:nth-child(4)').each(function(index,element){
+
+//     Tracking=$(element).text().substr(20)
+//     Tracking = Tracking.substr(0,Tracking.length-1)
+//     trackings.push(Tracking)
+// });
+// console.log(portCodes)
+// console.log(trackings)
+
+// }
+
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port,()=> console.log(`Listening on port ${port}`));
