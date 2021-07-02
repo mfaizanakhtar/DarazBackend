@@ -146,6 +146,16 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         }
 
     });
+    $('div[class=barcode]').find('img').each(function(index,element){
+
+        if((index % 3==0)){
+            trackingbarcodes.push($(element).attr('src'))
+        }
+        if(((index-2) % 3==0)){
+            orderidbarcodes.push($(element).attr('src'))
+        }
+
+    });
     // $('div[class=barcode]').find('img').each(function(index,element){
         
     //     if((index == i)){
@@ -176,7 +186,7 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         //         portcodeBarcode:portcodebarcodes[i],orderIdBarcode:orderidbarcodes[i]}
         // })
         updateResult = await OrderItems.updateMany({TrackingCode:trackings[i]},{
-            $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i]}
+            $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],orderIdBarcode:orderidbarcodes[i]}
         })
         console.log(updateResult)
     }
