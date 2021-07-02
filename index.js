@@ -73,8 +73,34 @@ updateTransactions();
 //     Tracking = Tracking.substr(0,Tracking.length-1)
 //     trackings.push(Tracking)
 // });
-// console.log(portCodes)
-// console.log(trackings)
+// $('div[class=barcode]').find('img').each(function(index,element){
+
+//     if((index % 3==0)){
+//         // console.log($(element).attr('src'))
+//         // console.log(index)
+//     }
+    
+// });
+// $('div[class="box left qrcode"]').find('img').each(function(index,element){
+
+
+//         // console.log($(element).attr('src'))
+//         // console.log(index)
+    
+    
+// });
+// $('div[class=barcode]').find('img').each(function(index,element){
+
+
+
+//         console.log($(element).attr('src'))
+//         console.log(index)
+
+
+
+// });
+// // console.log(portCodes)
+// // console.log(trackings)
 
 // }
 

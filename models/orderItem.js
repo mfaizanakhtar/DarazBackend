@@ -29,7 +29,11 @@ const OrderItemsSchema = new mongoose.Schema({
         ref:'Transaction'
     }],
     cost:Number,
-    PortCode:String
+    PortCode:String,
+    trackingBarcode:String,
+    portcodeBarcode:String,
+    orderIdBarcode:String,
+    qrCode:String
 
 
     

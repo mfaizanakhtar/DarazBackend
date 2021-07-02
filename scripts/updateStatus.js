@@ -47,7 +47,7 @@ async function updateOrderItemStatus(){
 
             
             //Update Tracking if tracking available
-            console.log('existing tracking',finditem.TrackingCode,'daraz tracking',item.TrackingCode)
+            // console.log('existing tracking',finditem.TrackingCode,'daraz tracking',item.TrackingCode)
             if(finditem.TrackingCode==""){
                 if(item.TrackingCode!="")
                 {
@@ -68,8 +68,8 @@ async function updateOrderItemStatus(){
                 // console.log(result);
             }
             result = await finditem.save();
-            console.log(rtsOrderItemIds.length)
-            if (rtsOrderItemIds.length>0) updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
+            // console.log(rtsOrderItemIds.length)
+            if (rtsOrderItemIds.length>0) await updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
         }
         });
         })
@@ -99,6 +99,11 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     console.log("Entry Checkpoint")
     var portCodes=[]
     var trackings=[]
+    trackingbarcodes=[]
+    portcodebarcodes=[]
+    orderidbarcodes=[]
+    qrcodes=[]
+
     splitCount=20
     lastCount=1
 
@@ -116,7 +121,9 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     OrderItemStringArray=OrderItemStringArray+']'
     console.log(OrderItemStringArray)   
     // data = await (generateLabelUrl(shopid,secretkey,OrderItemStringArray))
-    var data = await GetData(generateLabelUrl(shopid,secretkey,OrderItemStringArray))
+    try{
+    url = generateLabelUrl(shopid,secretkey,OrderItemStringArray)
+    var data = await GetData(url)
     console.log("1st Checkpoint")
     var result = atob(data.Document.File)
     const $=cheerio.load(result)
@@ -132,14 +139,50 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         Tracking = Tracking.substr(0,Tracking.length-1)
         trackings.push(Tracking)
     });
+    $('div[class=barcode]').find('img').each(function(index,element){
+
+        if((index % 3==0)){
+            trackingbarcodes.push($(element).attr('src'))
+        }
+
+    });
+    // $('div[class=barcode]').find('img').each(function(index,element){
+        
+    //     if((index == i)){
+    //         trackingbarcodes.push($(element).attr('src'))
+    //         console.log($(element).attr('src'))
+    //     }
+    //     else if((index == i+1)){
+    //         portcodebarcodes.push($(element).attr('src'))
+    //         console.log($(element).attr('src'))
+    //     }
+    //     else if((index == i+2)){
+    //         orderidbarcodes.push($(element).attr('src'))
+    //     }
+    //     i=i+3
+
+
+    // });
+    $('div[class="box left qrcode"]').find('img').each(function(index,element){
+
+            qrcodes.push($(element).attr('src'))
+
+    });
     console.log("2nd Checkpoint")
     for(let i=0;i<trackings.length;i++){
         console.log("3rd Checkpoint")
+        // updateResult = await OrderItems.updateMany({TrackingCode:trackings[i]},{
+        //     $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],
+        //         portcodeBarcode:portcodebarcodes[i],orderIdBarcode:orderidbarcodes[i]}
+        // })
         updateResult = await OrderItems.updateMany({TrackingCode:trackings[i]},{
-            $set:{PortCode:portCodes[i]}
+            $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i]}
         })
         console.log(updateResult)
     }
+}catch(error){
+    console.log(error)
+}
 }
     
     
