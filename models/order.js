@@ -49,6 +49,12 @@ const orderSchema = new mongoose.Schema({
     VoucherSeller:Number,
     ShippingFee:Number,
     ShopId:String,
+    ShopName:String,
+    ShopAddress:String,
+    ShopState:String,
+    ShopArea:String,
+    ShopLocation:String,
+    ShopPhone:String,
     useremail:String,
     DispatchDate:Date,
     ReturnDate:Date,
@@ -58,7 +64,8 @@ const orderSchema = new mongoose.Schema({
     isPrinted:{
         type:Boolean,
         default:false
-    }
+    },
+
 })
 
 const Order = mongoose.model('Order',orderSchema);

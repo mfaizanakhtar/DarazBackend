@@ -62,43 +62,50 @@ updateTransactions();
 // var result = atob(data.Document.File)
 // const $=cheerio.load(result)
 
-// $("div").find('div:nth-child(5)').each(function(index,element){
-//         PortCode=$(element).text().substr(14)
-//         PortCode=PortCode.substr(0,PortCode.length-1)
-//         portCodes.push(PortCode)
+// $("div").find('div:nth-child(11)').each(function(index,element){
+//         // PortCode=$(element).text().substr(14)
+//         // PortCode=PortCode.substr(0,PortCode.length-1)
+//         // portCodes.push(PortCode)
+//         // console.log($(element).text())
 // });
-// $("div").find('div:nth-child(4)').each(function(index,element){
-
-//     Tracking=$(element).text().substr(20)
-//     Tracking = Tracking.substr(0,Tracking.length-1)
-//     trackings.push(Tracking)
+// $("div").find('div:nth-child(8)').each(function(index,element){
+//     // PortCode=$(element).text().substr(14)
+//     // PortCode=PortCode.substr(0,PortCode.length-1)
+//     // portCodes.push(PortCode)
+//     console.log($(element).text())
 // });
-// $('div[class=barcode]').find('img').each(function(index,element){
+// // $("div").find('div:nth-child(4)').each(function(index,element){
 
-//     if((index % 3==0)){
-//         // console.log($(element).attr('src'))
-//         // console.log(index)
-//     }
+// //     Tracking=$(element).text().substr(20)
+// //     Tracking = Tracking.substr(0,Tracking.length-1)
+// //     trackings.push(Tracking)
+// // });
+// // $('div[class=barcode]').find('img').each(function(index,element){
+
+// //     if((index % 3==0)){
+// //         // console.log($(element).attr('src'))
+// //         // console.log(index)
+// //     }
     
-// });
-// $('div[class="box left qrcode"]').find('img').each(function(index,element){
+// // });
+// // $('div[class="box left qrcode"]').find('img').each(function(index,element){
 
 
-//         // console.log($(element).attr('src'))
-//         // console.log(index)
+// //         // console.log($(element).attr('src'))
+// //         // console.log(index)
     
     
-// });
-// $('div[class=barcode]').find('img').each(function(index,element){
+// // });
+// // $('div[class=barcode]').find('img').each(function(index,element){
 
 
 
-//         console.log($(element).attr('src'))
-//         console.log(index)
+// //         console.log($(element).attr('src'))
+// //         console.log(index)
 
 
 
-// });
+// // });
 // // console.log(portCodes)
 // // console.log(trackings)
 

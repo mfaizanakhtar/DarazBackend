@@ -11,6 +11,7 @@ async function updateOrderItemStatus(){
     var result=null
     var darazid = await Darazid.find();
     //get All Shops in db
+    
     darazid.forEach(async(shop) => {
         var rtsOrderItemIds=[]
         //get order with statuses of this shop
@@ -69,11 +70,12 @@ async function updateOrderItemStatus(){
             }
             result = await finditem.save();
             // console.log(rtsOrderItemIds.length)
-            if (rtsOrderItemIds.length>0) await updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
+            // if (rtsOrderItemIds.length>0) await updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
         }
         });
         })
-
+        console.log(rtsOrderItemIds.length)
+        if (rtsOrderItemIds.length>0) await updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
     }
     catch(error){
         console.log(error);
@@ -82,6 +84,7 @@ async function updateOrderItemStatus(){
     
     }
     );
+    
 
     console.log("Status Loop done");
 
@@ -101,8 +104,10 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     var trackings=[]
     trackingbarcodes=[]
     portcodebarcodes=[]
-    orderidbarcodes=[]
+    // orderidbarcodes=[]
     qrcodes=[]
+    deliveryPoints=[]
+    labelPrices=[]
 
     splitCount=20
     lastCount=1
@@ -127,18 +132,30 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     console.log("1st Checkpoint")
     var result = atob(data.Document.File)
     const $=cheerio.load(result)
-
+        //scrape portcodes
     $("div").find('div:nth-child(5)').each(function(index,element){
         PortCode=$(element).text().substr(14)
         PortCode=PortCode.substr(0,PortCode.length-1)
         portCodes.push(PortCode)
     });
+    //scrape Tracking to search
     $("div").find('div:nth-child(4)').each(function(index,element){
 
         Tracking=$(element).text().substr(20)
         Tracking = Tracking.substr(0,Tracking.length-1)
         trackings.push(Tracking)
     });
+    //scrape Label Price
+    $("div").find('div:nth-child(11)').each(function(index,element){
+        labelPrices.push($(element).text())
+    });
+    //scrape deliveryPoint
+    $("div").find('div:nth-child(8)').each(function(index,element){
+
+        deliveryPoints.push($(element).text())
+
+    });
+    //scrape trackingbarcodes images
     $('div[class=barcode]').find('img').each(function(index,element){
 
         if((index % 3==0)){
@@ -146,16 +163,16 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         }
 
     });
-    $('div[class=barcode]').find('img').each(function(index,element){
+    // $('div[class=barcode]').find('img').each(function(index,element){
 
-        if((index % 3==0)){
-            trackingbarcodes.push($(element).attr('src'))
-        }
-        if(((index-2) % 3==0)){
-            orderidbarcodes.push($(element).attr('src'))
-        }
+    //     if((index % 3==0)){
+    //         trackingbarcodes.push($(element).attr('src'))
+    //     }
+    //     if(((index-2) % 3==0)){
+    //         orderidbarcodes.push($(element).attr('src'))
+    //     }
 
-    });
+    // });
     // $('div[class=barcode]').find('img').each(function(index,element){
         
     //     if((index == i)){
@@ -173,6 +190,7 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
 
 
     // });
+    //scrape qrcodes images
     $('div[class="box left qrcode"]').find('img').each(function(index,element){
 
             qrcodes.push($(element).attr('src'))
@@ -186,7 +204,7 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         //         portcodeBarcode:portcodebarcodes[i],orderIdBarcode:orderidbarcodes[i]}
         // })
         updateResult = await OrderItems.updateMany({TrackingCode:trackings[i]},{
-            $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],orderIdBarcode:orderidbarcodes[i]}
+            $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],labelPrice:labelPrices[i],deliveryPoint:deliveryPoints[i]}
         })
         console.log(updateResult)
     }

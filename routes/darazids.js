@@ -8,7 +8,13 @@ router.post('/',auth,async(req,res)=>{
     const darazid = new Darazid({
         shopid:req.body.shopid,
         secretkey:req.body.secretkey,
-        useremail:req.user.useremail
+        useremail:req.user.useremail,
+        shopName:req.body.shopName,
+        shopAddress:req.body.shopAddress,
+        shopState:req.body.shopState,
+        shopArea:req.body.shopArea,
+        shopLocation:req.body.shopLocation,
+        shopPhone:req.body.shopPhone
     })
 
     await darazid.save();
@@ -25,6 +31,12 @@ router.put('/update',auth,async(req,res)=>{
         $set:{
             shopid:req.body.shopid,
             secretkey:req.body.secretkey,
+            shopName:req.body.shopName,
+            shopAddress:req.body.shopAddress,
+            shopState:req.body.shopState,
+            shopArea:req.body.shopArea,
+            shopLocation:req.body.shopLocation,
+            shopPhone:req.body.shopPhone
         }
     })
 

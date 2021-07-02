@@ -33,7 +33,9 @@ const OrderItemsSchema = new mongoose.Schema({
     trackingBarcode:String,
     portcodeBarcode:String,
     orderIdBarcode:String,
-    qrCode:String
+    qrCode:String,
+    labelPrice:String,
+    deliveryPoint:String
 
 
     

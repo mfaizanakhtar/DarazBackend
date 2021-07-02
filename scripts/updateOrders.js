@@ -32,13 +32,13 @@ function baseSku(Sku){
     return Sku.substr(0,seperator)
 }
 
-async function updateOrders(shopid,useremail,OrdersData){
+async function updateOrders(id,OrdersData){
     for (const order of OrdersData){
     var result = await Order.findOne({OrderId:order.OrderId})
     // console.log(result)
 
     if(!result){
-        var orderobj = OrderObj(order,shopid,useremail)
+        var orderobj = OrderObj(order,id)
         var res = await orderobj.save()
         // console.log(res);
     }
@@ -118,7 +118,7 @@ function OrderItemObj(item,shopid,useremail,cost){
     return orderItem;
 }
 
-function OrderObj(order,shopid,useremail){
+function OrderObj(order,id){
     
     var orderobj = new Order({
         OrderId:order.OrderId,
@@ -164,8 +164,14 @@ function OrderObj(order,shopid,useremail){
         VoucherPlatform:order.VoucherPlatform,
         VoucherSeller:order.VoucherPlatform,
         ShippingFee:parseInt(order.ShippingFee),
-        ShopId:shopid,
-        useremail:useremail
+        ShopId:id.shopid,
+        ShopName:id.shopName,
+        ShopAddress:id.shopAddress,
+        ShopState:id.shopState,
+        ShopArea:id.shopArea,
+        ShopLocation:id.shopLocation,
+        ShopPhone:id.shopPhone,
+        useremail:id.useremail
     })
     // console.log(orderobj)
     return orderobj
@@ -181,7 +187,7 @@ async function updateOrdersData(){
     let url = generateOrdersUrl(id.shopid,id.secretkey,0);
     // console.log(url)
     var data = await GetData(url);
-    await updateOrders(id.shopid,id.useremail,data.Orders)
+    await updateOrders(id,data.Orders)
     await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
     // console.log(data);
 }
