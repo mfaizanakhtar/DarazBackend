@@ -7,6 +7,7 @@ const users = require('./routes/users')
 const auth = require('./routes/auth');
 const darazid = require('./routes/darazids');
 const orderitems = require('./routes/orderItems');
+const { OrderItems } = require('./models/orderItem');
 const orders = require('./routes/orders');
 const {updateOrdersData} = require('./scripts/updateOrders');
 const {updateItemPendingStatus,updateOrderItemStatus,updatePendingOrderStatus} = require('./scripts/updateStatus')
@@ -110,6 +111,15 @@ updateTransactions();
 // // console.log(trackings)
 
 // }
+getShipmentProviders()
+async function getShipmentProviders(){
+    var providers = await OrderItems.aggregate([
+        {
+            $group:{_id:"$ShipmentProvider"}
+        }
+    ])
+    console.log(providers)
+}
 
 
 const port = process.env.PORT || 3000;

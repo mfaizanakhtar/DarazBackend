@@ -8,22 +8,22 @@ const cheerio = require('cheerio')
 const atob = require("atob");
 
 async function updateOrderItemStatus(){
-    var result=null
     var darazid = await Darazid.find();
     //get All Shops in db
     
-    darazid.forEach(async(shop) => {
+    for(var shop of darazid){
         var rtsOrderItemIds=[]
         //get order with statuses of this shop
-        splitCount=300
+        splitCount=200
         var orderitemscount = await OrderItems.countDocuments({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
+        // console.log(end)
     for(let i=0;i<end;i++){
         var orderitems = await OrderItems.find({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
         .skip(i*splitCount)
         .limit(splitCount)
-        // console.log(getOrderIdArray(orderitems))
+        // console.log(shop.shopid+' '+orderitems.length)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,getOrderIdArray(orderitems));
         orderitemsdata = await GetData(url);
         // console.log(orderitemsdata.Orders)
@@ -32,8 +32,8 @@ async function updateOrderItemStatus(){
         // console.log(orderitemsdata)
         //iterate all orders fetched from api
         try{
-        orderitemsdata.forEach(async(orders)=>{
-            orders.OrderItems.forEach(async(item) => {
+        for(var orders of orderitemsdata){
+            for(item of orders.OrderItems){
                 // console.log(item)
             
             
@@ -56,6 +56,7 @@ async function updateOrderItemStatus(){
                     if(finditem.ShippingType=="Dropshipping") rtsOrderItemIds.push(finditem.OrderItemId)
                     //updating tracking
                     finditem.TrackingCode=item.TrackingCode;
+                    finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
                     // const result = await finditem.save();
                     // console.log(result);
                 }
@@ -72,18 +73,17 @@ async function updateOrderItemStatus(){
             // console.log(rtsOrderItemIds.length)
             // if (rtsOrderItemIds.length>0) await updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
         }
-        });
-        })
-        console.log(rtsOrderItemIds.length)
-        if (rtsOrderItemIds.length>0) await updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
+        }
+        }
+        // console.log(rtsOrderItemIds.length)
+        
     }
     catch(error){
         console.log(error);
     }
     }
-    
+    if (rtsOrderItemIds.length>0) await updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
     }
-    );
     
 
     console.log("Status Loop done");

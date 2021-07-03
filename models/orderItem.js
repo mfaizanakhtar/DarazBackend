@@ -17,6 +17,7 @@ const OrderItemsSchema = new mongoose.Schema({
     TrackingCode:String,
     UpdatedTracking:String,
     ShippingProviderType:String,
+    ShipmentProvider:String,
     CreatedAt:Date,
     UpdatedAt:Date,
     productMainImage:String,

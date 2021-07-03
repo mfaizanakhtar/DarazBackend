@@ -54,6 +54,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
     //iterate orderitems fetched data
     for(const items of OrderItemsData.Orders){
         for(var item of items.OrderItems){
+            // console.log(item)
         var result = await OrderItems.findOne({OrderItemId: item.OrderItemId})
         // if orderitem does not exist, add to db
         
@@ -107,6 +108,7 @@ function OrderItemObj(item,shopid,useremail,cost){
         Status:item.Status,
         TrackingCode:item.TrackingCode,
         ShippingProviderType:item.ShippingProviderType,
+        ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2),
         CreatedAt:item.CreatedAt,
         UpdatedAt:item.UpdatedAt,
         productMainImage:item.productMainImage,
@@ -114,7 +116,7 @@ function OrderItemObj(item,shopid,useremail,cost){
         useremail:useremail,
         cost:cost
     })
-    // console.log(orderItem)
+    // console.log(orderItem.ShipmentProvider)
     return orderItem;
 }
 
