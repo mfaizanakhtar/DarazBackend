@@ -7,12 +7,23 @@ const {getOrderIdArray} = require('../scripts/GenerateUrl')
 const cheerio = require('cheerio')
 const atob = require("atob");
 
-async function updateOrderItemStatus(){
-    var darazid = await Darazid.find();
-    //get All Shops in db
+async function updateOrderItemUserWise(user,RtsOrdersResponse){
+    console.log("status ",user)
+    if(RtsOrdersResponse>0){
+    // var darazid = await Darazid.find({useremail:user});
+    // console.log(darazid)
+    // //get All Shops in db
+    // console.log("updating status")
+    await updateOrderItemStatusAndUserWise(user,'pending')
+    console.log("user status done")
+}
     
+}
+
+async function updateOrderItemStatus(darazid){
+    var darazid = await Darazid.find();
+
     for(var shop of darazid){
-        var rtsOrderItemIds=[]
         //get order with statuses of this shop
         splitCount=200
         var orderitemscount = await OrderItems.countDocuments({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
@@ -29,64 +40,56 @@ async function updateOrderItemStatus(){
         // console.log(orderitemsdata.Orders)
 
         orderitemsdata = orderitemsdata.Orders
-        // console.log(orderitemsdata)
         //iterate all orders fetched from api
         try{
         for(var orders of orderitemsdata){
             for(item of orders.OrderItems){
                 // console.log(item)
-            
-            
+  
             //find fetched order
             var finditem = await OrderItems.findOne({OrderItemId:item.OrderItemId});
-            // if(finditem.Status=='pending') console.log(finditem.OrderId+' '+item.Status)
+            
             //updating statuses
+            // console.log(finditem.Status+" "+item.Status);
             if(finditem.Status!=item.Status){
-                // console.log(findorder.Status+" "+order.Status);
+                // console.log(finditem.Status+" "+item.Status);
                 finditem.Status=item.Status;
-                //for PortCode OrderItemIds
 
             
             //Update Tracking if tracking available
             // console.log('existing tracking',finditem.TrackingCode,'daraz tracking',item.TrackingCode)
             if(finditem.TrackingCode==""){
+                // console.log("Tracking first")
                 if(item.TrackingCode!="")
                 {
-                    //saving rtsOrderItemIds for portcodes later
-                    if(finditem.ShippingType=="Dropshipping") rtsOrderItemIds.push(finditem.OrderItemId)
-                    //updating tracking
+ 
                     finditem.TrackingCode=item.TrackingCode;
                     finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
-                    // const result = await finditem.save();
-                    // console.log(result);
+ 
                 }
                 
             }
              //New Updated Tracking if changed
             else if(finditem.TrackingCode!=item.TrackingCode)
             {
-               
-                finditem.UpdatedTracking=item.TrackingCode;
+                finditem.PreviousTracking=finditem.TrackingCode
+                finditem.TrackingCode=item.TrackingCode;
                 // console.log(result);
             }
             result = await finditem.save();
-            // console.log(rtsOrderItemIds.length)
-            // if (rtsOrderItemIds.length>0) await updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
+
         }
         }
         }
-        // console.log(rtsOrderItemIds.length)
+ 
         
     }
     catch(error){
         console.log(error);
     }
     }
-    if (rtsOrderItemIds.length>0) await updateOrderItemPortCodes(shop.shopid,shop.secretkey,rtsOrderItemIds)
-    }
-    
 
-    console.log("Status Loop done");
+    }
 
     try {
         setTimeout(()=>{
@@ -96,9 +99,100 @@ async function updateOrderItemStatus(){
         console.log(error);
     }
     
+
+    console.log("Status Loop done");
+}
+
+async function updateOrderItemStatusAndUserWise(user,status){
+    var darazid = await Darazid.find({useremail:user});
+
+    for(var shop of darazid){
+        //get order with statuses of this shop
+        splitCount=200
+        var orderitemscount = await OrderItems.countDocuments({Status:status,ShopId:shop.shopid})
+        // console.log(orderitemscount)
+        end = Math.ceil(orderitemscount/splitCount)
+        // console.log(end)
+    for(let i=0;i<end;i++){
+        var orderitems = await OrderItems.find({Status:status,ShopId:shop.shopid})
+        .skip(i*splitCount)
+        .limit(splitCount)
+        // console.log(shop.shopid+' '+orderitems.length)
+        url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,getOrderIdArray(orderitems));
+        orderitemsdata = await GetData(url);
+        // console.log(orderitemsdata.Orders)
+
+        orderitemsdata = orderitemsdata.Orders
+        //iterate all orders fetched from api
+        try{
+        for(var orders of orderitemsdata){
+            for(item of orders.OrderItems){
+                // console.log(item)
+  
+            //find fetched order
+            var finditem = await OrderItems.findOne({OrderItemId:item.OrderItemId});
+            
+            //updating statuses
+            // console.log(finditem.Status+" "+item.Status);
+            if(finditem.Status!=item.Status){
+                // console.log(finditem.Status+" "+item.Status);
+                finditem.Status=item.Status;
+
+            
+            //Update Tracking if tracking available
+            if(finditem.TrackingCode==""){
+                // console.log("Tracking first")
+                if(item.TrackingCode!="")
+                {
+ 
+                    finditem.TrackingCode=item.TrackingCode;
+                    finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
+ 
+                }
+                
+            }
+             //New Updated Tracking if changed
+            else if(finditem.TrackingCode!=item.TrackingCode)
+            {
+                finditem.PreviousTracking=finditem.TrackingCode
+                finditem.TrackingCode=item.TrackingCode;
+                // console.log(result);
+            }
+            result = await finditem.save();
+
+        }
+        }
+        }
+ 
+        
+    }
+    catch(error){
+        console.log(error);
+    }
+    }
+
+    }
+    
+
+    console.log("Status Loop done");
+}
+
+async function fetchLabelsAndUpdate(useremail){
+    console.log("labels ",useremail)
+    darazid = await Darazid.find({useremail:useremail})
+    for(shop of darazid){
+        var orderitemsIds=[]
+        items= await OrderItems.find({ShopId:shop.shopid,Status:'ready_to_ship',PortCode:'',ShippingType:'Dropshipping'})
+        // console.log(items)
+        for(item of items){
+            orderitemsIds.push(item.OrderItemId)
+        }
+        await updateOrderItemPortCodes(shop.shopid,shop.secretkey,orderitemsIds)
+    }
 }
 
 async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
+    console.log(orderItemIds,orderItemIds.length)
     console.log("Entry Checkpoint")
     var portCodes=[]
     var trackings=[]
@@ -109,23 +203,31 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     deliveryPoints=[]
     labelPrices=[]
 
-    splitCount=20
-    lastCount=1
-
+    splitCount=35
+    lastCount=0
+    
     for(let j=0;j<Math.ceil(orderItemIds.length/splitCount);j++){
+        var portCodes=[]
+        var trackings=[]
+        trackingbarcodes=[]
+        portcodebarcodes=[]
+        // orderidbarcodes=[]
+        qrcodes=[]
+        deliveryPoints=[]
+        labelPrices=[]
         console.log("First Loop")
     
-    OrderItemStringArray='['+orderItemIds[0]
+    OrderItemStringArray='['
+    end=lastCount+splitCount
 
-    if(orderItemIds.length<splitCount) splitCount=orderItemIds.length
-    for(let i=lastCount;i<splitCount;i++){
-        console.log("Second Loop")
-        OrderItemStringArray=OrderItemStringArray+','+orderItemIds[i]
+    if(orderItemIds.length<=end) {end=orderItemIds.length}
+    for(let i=lastCount;i<end;i++){
+        OrderItemStringArray=OrderItemStringArray+orderItemIds[i]+','
+        lastCount++
     }
-    splitCount=splitCount+lastCount
     OrderItemStringArray=OrderItemStringArray+']'
-    console.log(OrderItemStringArray)   
-    // data = await (generateLabelUrl(shopid,secretkey,OrderItemStringArray))
+    console.log(OrderItemStringArray) 
+
     try{
     url = generateLabelUrl(shopid,secretkey,OrderItemStringArray)
     var data = await GetData(url)
@@ -135,14 +237,13 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         //scrape portcodes
     $("div").find('div:nth-child(5)').each(function(index,element){
         PortCode=$(element).text().substr(14)
-        PortCode=PortCode.substr(0,PortCode.length-1)
+        PortCode=PortCode.trim()
         portCodes.push(PortCode)
     });
     //scrape Tracking to search
     $("div").find('div:nth-child(4)').each(function(index,element){
-
         Tracking=$(element).text().substr(20)
-        Tracking = Tracking.substr(0,Tracking.length-1)
+        Tracking = Tracking.trim()
         trackings.push(Tracking)
     });
     //scrape Label Price
@@ -163,47 +264,21 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         }
 
     });
-    // $('div[class=barcode]').find('img').each(function(index,element){
 
-    //     if((index % 3==0)){
-    //         trackingbarcodes.push($(element).attr('src'))
-    //     }
-    //     if(((index-2) % 3==0)){
-    //         orderidbarcodes.push($(element).attr('src'))
-    //     }
-
-    // });
-    // $('div[class=barcode]').find('img').each(function(index,element){
-        
-    //     if((index == i)){
-    //         trackingbarcodes.push($(element).attr('src'))
-    //         console.log($(element).attr('src'))
-    //     }
-    //     else if((index == i+1)){
-    //         portcodebarcodes.push($(element).attr('src'))
-    //         console.log($(element).attr('src'))
-    //     }
-    //     else if((index == i+2)){
-    //         orderidbarcodes.push($(element).attr('src'))
-    //     }
-    //     i=i+3
-
-
-    // });
-    //scrape qrcodes images
     $('div[class="box left qrcode"]').find('img').each(function(index,element){
 
             qrcodes.push($(element).attr('src'))
 
     });
     console.log("2nd Checkpoint")
+    console.log(trackings.length)
+
+
     for(let i=0;i<trackings.length;i++){
         console.log("3rd Checkpoint")
-        // updateResult = await OrderItems.updateMany({TrackingCode:trackings[i]},{
-        //     $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],
-        //         portcodeBarcode:portcodebarcodes[i],orderIdBarcode:orderidbarcodes[i]}
-        // })
-        updateResult = await OrderItems.updateMany({TrackingCode:trackings[i]},{
+
+
+        updateResult = await OrderItems.updateMany({TrackingCode:trackings[i].toString()},{
             $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],labelPrice:labelPrices[i],deliveryPoint:deliveryPoints[i]}
         })
         console.log(updateResult)
@@ -217,3 +292,6 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
 }
 
 module.exports.updateOrderItemStatus = updateOrderItemStatus
+module.exports.updateOrderItemUserWise = updateOrderItemUserWise
+module.exports.fetchLabelsAndUpdate = fetchLabelsAndUpdate
+module.exports.updateOrderItemStatusAndUserWise=updateOrderItemStatusAndUserWise

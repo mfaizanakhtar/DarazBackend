@@ -3,6 +3,10 @@ const express = require('express');
 const { Order } = require('../models/order');
 const auth = require('../middleware/auth')
 const router = express.Router();
+const {Darazid} = require('../models/darazid')
+const {RtsURL} = require('../scripts/GenerateUrl')
+const {GetData} = require('../scripts/HttpReq')
+const {updateOrderItemUserWise,fetchLabelsAndUpdate,updateOrderItemStatusAndUserWise} = require('../scripts/updateStatus')
 
 router.get('/orders/',auth,async(req,res)=>{
 
@@ -78,6 +82,58 @@ async function FindQuery(query,user){
     if(length[0]) return [orders,length[0].count]
     return [orders,0]
 }
+
+router.post('/setStatusToRTS',auth,async(req,res)=>{
+    // console.log(req.body.Orders.length)
+    RtsOrdersResponse=[]
+    Orders = req.body.Orders
+    var shop
+    try{
+    for(var order of Orders){
+        // console.log(order)
+        var OrderItems='['
+        var shop = await Darazid.findOne({shopid:order.ShopId})
+        // console.log(shop)
+        for(var orderitem of order.OrderItems){
+            if(orderitem.ShippingType=='Dropshipping') {
+                OrderItems=OrderItems+orderitem.OrderItemId+','
+            }
+        }
+        OrderItems=OrderItems+']'
+        Url = RtsURL(shop.shopid,shop.secretkey,OrderItems)
+        var result = await GetData(Url)
+        RtsOrdersResponse.push(result)
+    }
+    // console.log(RtsOrdersResponse.length)
+    await updateOrderItemUserWise(req.user.useremail,RtsOrdersResponse.length)
+    res.send({count:RtsOrdersResponse.length})
+
+}
+catch(error){
+    console.log(error)
+    res.send({count:0})
+}
+
+    // DarazIds = Darazid.findOne({shopid:req.user.useremail})
+})
+
+router.post('/getLabelsData',auth,async(req,res)=>{
+    // var LabelOrders
+    await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
+    await fetchLabelsAndUpdate(req.user.useremail)
+
+        Order.find({OrderId:{$in:req.body.Orders}}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
+        .then((response)=>{
+            res.send(response)
+        })
+        .catch((error)=>{
+            console.log(error)
+        })
+
+    
+    // console.log(LabelOrders)
+    
+})
 
 // router.get('/statusstats',async(req,res)=>{
 //     //join then find

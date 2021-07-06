@@ -15,7 +15,7 @@ const OrderItemsSchema = new mongoose.Schema({
     Status:String,
     WarehouseStatus:String,
     TrackingCode:String,
-    UpdatedTracking:String,
+    PreviousTracking:String,
     ShippingProviderType:String,
     ShipmentProvider:String,
     CreatedAt:Date,
@@ -30,7 +30,7 @@ const OrderItemsSchema = new mongoose.Schema({
         ref:'Transaction'
     }],
     cost:Number,
-    PortCode:String,
+    PortCode:{type:String,default:''},
     trackingBarcode:String,
     portcodeBarcode:String,
     orderIdBarcode:String,

@@ -34,7 +34,7 @@ function baseSku(Sku){
 
 async function updateOrders(id,OrdersData){
     for (const order of OrdersData){
-    var result = await Order.findOne({OrderId:order.OrderId})
+    var result = await Order.findOne({OrderId:order.OrderId,ShopId:id.shopid})
     // console.log(result)
 
     if(!result){
@@ -55,7 +55,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
     for(const items of OrderItemsData.Orders){
         for(var item of items.OrderItems){
             // console.log(item)
-        var result = await OrderItems.findOne({OrderItemId: item.OrderItemId})
+        var result = await OrderItems.findOne({OrderItemId: item.OrderItemId,ShopId:shopid})
         // if orderitem does not exist, add to db
         
         if(!result){
@@ -80,9 +80,10 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             // creating orderitem object
             
             var result = await orderItem.save();
+            // console.log(result)
             //pushing orderItemId._id in Order Record for reference
             await Order.update({
-                OrderId:result.OrderId
+                OrderId:result.OrderId,ShopId:shopid
             },
             {$push:{OrderItems:result._id,Skus:result.Sku,BaseSkus:result.BaseSku}})
 
@@ -94,6 +95,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
 }
 
 function OrderItemObj(item,shopid,useremail,cost){
+    // console.log(item)
     var orderItem = new OrderItems({
         OrderId:item.OrderId,
         OrderItemId:item.OrderItemId,

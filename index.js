@@ -11,7 +11,7 @@ const { OrderItems } = require('./models/orderItem');
 const orders = require('./routes/orders');
 const {updateOrdersData} = require('./scripts/updateOrders');
 const {updateItemPendingStatus,updateOrderItemStatus,updatePendingOrderStatus} = require('./scripts/updateStatus')
-const {generateSingleOrderUrl} = require('./scripts/GenerateUrl');
+const {generateSingleOrderUrl,RtsURL} = require('./scripts/GenerateUrl');
 const {updateTransactions} = require("./scripts/updateFinance");
 const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
@@ -111,15 +111,18 @@ updateTransactions();
 // // console.log(trackings)
 
 // }
-getShipmentProviders()
-async function getShipmentProviders(){
-    var providers = await OrderItems.aggregate([
-        {
-            $group:{_id:"$ShipmentProvider"}
-        }
-    ])
-    console.log(providers)
-}
+
+// getShipmentProviders()
+// async function getShipmentProviders(){
+//     var providers = await OrderItems.aggregate([
+//         {
+//             $group:{_id:"$ShipmentProvider"}
+//         }
+//     ])
+//     console.log(providers)
+// }
+
+// console.log(RtsURL('accesology@gmail.com','j6hn60ggpQaDUW1nR2kXZ6vN1JUjIAxPJrQZdWmiMFsqvc3DZCjxTZYs','[130295377502752,129666658371249]'))
 
 
 const port = process.env.PORT || 3000;
