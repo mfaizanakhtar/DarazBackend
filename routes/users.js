@@ -2,6 +2,7 @@ const { User } = require('../models/user');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const auth = require('../middleware/auth')
 
 router.get('/',async(req,res)=>{
     const user =await User.find({},{password:0,_id:0});
@@ -25,6 +26,21 @@ router.post('/',async(req,res)=>{
     res.send({message:'User Registered'});
 
 
+})
+
+router.put('/updatePassword',auth,async(req,res)=>{
+    // console.log(req.body)
+    let user = await User.findOne({useremail:req.user.useremail})
+    const password = await bcrypt.compare(req.body.oldPassword,user.password)
+    // console.log(password)
+    if(password==true){
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(req.body.newPassword,salt)
+
+        await user.save()
+        res.send({message:'Password Updated'})
+    }
+    else res.send({message:'Incorrect Old Password'})
 })
 
 module.exports = router;

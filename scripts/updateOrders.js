@@ -3,7 +3,7 @@ const {OrderItems} = require('../models/orderItem');
 const { Darazid } = require('../models/darazid');
 const {Order} = require('../models/order');
 const {Sku} = require('../models/sku');
-const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl,generateLabelUrl} = require('./GenerateUrl');
+const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl,generateLabelUrl, generateSingleOrderUrl} = require('./GenerateUrl');
 const cheerio = require('cheerio')
 const atob = require("atob");
 
@@ -210,4 +210,26 @@ async function updateOrdersData(){
     }
 }
 
+async function updateSingleOrder(shopid,orderid){
+
+    try{
+    var id = await Darazid.findOne({shopid:shopid})
+    
+
+        // console.log(id);
+    let url = generateSingleOrderUrl(id.shopid,id.secretkey,orderid);
+    // console.log(url)
+    var data = await GetData(url);
+    // console.log(data)
+    await updateOrders(id,data.Orders)
+    await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
+    // console.log(data);
+
+    }
+    catch(ex){
+        console.log(ex.message);
+    }
+}
+
 module.exports.updateOrdersData = updateOrdersData
+module.exports.updateSingleOrder = updateSingleOrder

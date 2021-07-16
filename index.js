@@ -9,15 +9,12 @@ const darazid = require('./routes/darazids');
 const orderitems = require('./routes/orderItems');
 const { OrderItems } = require('./models/orderItem');
 const orders = require('./routes/orders');
-const {updateOrdersData} = require('./scripts/updateOrders');
+const {updateOrdersData,updateSingleOrder} = require('./scripts/updateOrders');
 const {updateItemPendingStatus,updateOrderItemStatus,updatePendingOrderStatus} = require('./scripts/updateStatus')
 const {generateSingleOrderUrl,RtsURL} = require('./scripts/GenerateUrl');
 const {updateTransactions} = require("./scripts/updateFinance");
 const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
-const fs = require('fs')
-const atob = require("atob");
-const cheerio = require('cheerio')
 
 mongoose.connect(config.connectionstring)
     .then(()=>{
@@ -45,7 +42,14 @@ app.use('/api/orderitems',orderitems);
 app.use('/api/orders',orders)
 
 
-updateOrdersData()
+function updateId(){
+    OrderItems.updateMany({},{
+        $set:{useremail:'accesology@gmail.com'}
+    })
+}
+updateId()
+// updateSingleOrder('techatronixs@gmail.com','130272728232033')
+updateOrdersData();
 updateOrderItemStatus();
 // updateItemPendingStatus();
 // updatePendingOrderStatus();

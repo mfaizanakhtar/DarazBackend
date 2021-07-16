@@ -121,6 +121,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     // var LabelOrders
     await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
     await fetchLabelsAndUpdate(req.user.useremail)
+    await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
 
         Order.find({OrderId:{$in:req.body.Orders}}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
         .then((response)=>{
