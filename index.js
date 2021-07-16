@@ -51,8 +51,8 @@ async function updateId(){
 }
 updateId()
 // updateSingleOrder('techatronixs@gmail.com','130272728232033')
-updateOrdersData();
-updateOrderItemStatus();
+// updateOrdersData();
+// updateOrderItemStatus();
 // updateItemPendingStatus();
 // updatePendingOrderStatus();
 updateTransactions();
