@@ -42,7 +42,7 @@ app.use('/api/orderitems',orderitems);
 app.use('/api/orders',orders)
 
 
-function updateId(){
+async function updateId(){
     const result = await OrderItems.updateMany({},{
         $set:{useremail:'accesology@gmail.com'}
     })
