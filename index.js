@@ -43,9 +43,11 @@ app.use('/api/orders',orders)
 
 
 function updateId(){
-    await OrderItems.updateMany({},{
+    const result = await OrderItems.updateMany({},{
         $set:{useremail:'accesology@gmail.com'}
     })
+    console.log("email update query")
+    console.log(result)
 }
 updateId()
 // updateSingleOrder('techatronixs@gmail.com','130272728232033')
