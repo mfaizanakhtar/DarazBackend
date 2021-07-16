@@ -43,7 +43,7 @@ app.use('/api/orders',orders)
 
 
 function updateId(){
-    OrderItems.updateMany({},{
+    await OrderItems.updateMany({},{
         $set:{useremail:'accesology@gmail.com'}
     })
 }
