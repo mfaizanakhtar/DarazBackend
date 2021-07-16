@@ -42,17 +42,17 @@ app.use('/api/orderitems',orderitems);
 app.use('/api/orders',orders)
 
 
-// async function updateId(){
-//     const result = await OrderItems.updateMany({},{
-//         $set:{useremail:'accesology@gmail.com'}
-//     })
-//     console.log("email update query")
-//     console.log(result)
-// }
+async function updateId(){
+    const result = await OrderItems.updateMany({},{
+        $set:{useremail:'accesology@gmail.com'}
+    })
+    console.log("email update query")
+    console.log(result)
+}
 // updateId()
 // updateSingleOrder('techatronixs@gmail.com','130272728232033')
-updateOrdersData();
-updateOrderItemStatus();
+// updateOrdersData();
+// updateOrderItemStatus();
 // updateItemPendingStatus();
 // updatePendingOrderStatus();
 updateTransactions();
