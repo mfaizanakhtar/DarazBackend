@@ -49,7 +49,7 @@ async function updateId(){
     console.log("email update query")
     console.log(result)
 }
-// updateId()
+updateId()
 // updateSingleOrder('techatronixs@gmail.com','130272728232033')
 // updateOrdersData();
 // updateOrderItemStatus();
