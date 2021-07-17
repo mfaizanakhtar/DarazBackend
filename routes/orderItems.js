@@ -149,11 +149,11 @@ router.get('/Skustats',async(req,res)=>{
     await timezone();
     //aggregate result for FBD and FBM
     var FBDresult = await OrderItems.aggregate([
-        {$match: {ShopId:req.query.ShopId,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match: {useremail:req.user.useremail,ShopId:req.query.ShopId,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group : { _id: '$Sku', FBDcount : {$sum : 1}}}
     ])
     var FBMresult = await OrderItems.aggregate([
-        {$match: {ShopId:req.query.ShopId,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match: {useremail:req.user.useremail,ShopId:req.query.ShopId,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group : { _id: '$Sku', FBMcount : {$sum : 1}}}
     ])
     //modifying FBD aggregate result by setting default FBM as 0 and shopId supplied in args
@@ -200,7 +200,7 @@ router.get('/Skustats',async(req,res)=>{
     
 })
 
-router.get('/allstats',async(req,res)=>{
+router.get('/allstats',auth,async(req,res)=>{
     var startdate;
     var enddate;
     //setting timezone startdate and enddate
@@ -215,21 +215,21 @@ router.get('/allstats',async(req,res)=>{
     await timezone();
     //finding total count for ALLSTORES FBD AND FBM
 
-    var TotalFbd =await OrderItems.find({ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
-    var TotalFbm =await OrderItems.find({ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
+    var TotalFbd =await OrderItems.find({useremail:req.user.useremail,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
+    var TotalFbm =await OrderItems.find({useremail:req.user.useremail,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
     //creating Total object to total both FBD and FBM
     var Total={_id:'ALL STORES', FBDcount:TotalFbd,FBMcount:TotalFbm,Total:TotalFbd+TotalFbm};
     console.log(startdate);
     console.log(enddate);
     //aggregate FBD on basis on Shops IDs
     var ShopFbd = await OrderItems.aggregate([
-        {$match:{ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match:{useremail:req.user.useremail,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group:{_id:'$ShopId',FBDcount:{$sum:1}}}
     ])
     //aggregate FBM on basis of Shops IDS
     console.log(ShopFbd);
     var ShopFbm = await OrderItems.aggregate([
-        {$match:{ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match:{useremail:req.user.useremail,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group:{_id:'$ShopId',FBMcount:{$sum:1}}}
     ])
 
