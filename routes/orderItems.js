@@ -133,7 +133,7 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
 })
 
 
-router.get('/Skustats',async(req,res)=>{
+router.get('/Skustats',auth,async(req,res)=>{
 
     var startdate;
     var enddate;
