@@ -20,10 +20,23 @@ router.get('/orders/',auth,async(req,res)=>{
 
 
 async function FindQuery(query,user){
+
+    var startdate;
+    var enddate;
+    //setting timezone startdate and enddate
+    async function timezone(){
+
+    startdate = new Date(query.startDate);
+    startdate.setHours(startdate.getHours()+5);
+    enddate = new Date(query.endDate);
+    enddate.setHours(enddate.getHours()+28,59,59,59);
+
+    }
+    await timezone();
     
     var pageArgs={}
     var FinalFilter={}
-    dateFilter={$and:[{CreatedAt:{$gte:new Date(query.startDate)}},{CreatedAt:{$lte:new Date(query.endDate)}}]}
+    dateFilter={$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     
     AdditionStatus={
         RTSDispatched : {"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":"Dispatched"},
