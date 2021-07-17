@@ -33,6 +33,8 @@ async function FindQuery(query,user){
 
     }
     await timezone();
+    console.log(startdate)
+    console.log(enddate)
     
     var pageArgs={}
     var FinalFilter={}
