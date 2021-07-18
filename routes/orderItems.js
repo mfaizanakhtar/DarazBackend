@@ -108,10 +108,19 @@ else{
 
 router.get('/ordermovement/:filter',auth,async(req,res)=>{
     var orderItem;
-    date = new Date();
-    date.setHours(date.getHours()+5);
-    date.setHours(0,0,0,0)
-    console.log(date);
+
+    var startdate;
+    var enddate;
+    async function timezone(){
+
+        startdate = new Date();
+        startdate.setHours(startdate.getHours()+5);
+        enddate = new Date();
+        enddate.setHours(enddate.getHours()+28,59,59,59);
+        console.log('stardate: ',startdate)
+        console.log('enddate: ',enddate)
+    }
+    await timezone();
 
     var sortBy
     if(req.params.filter == "Dispatched"){
@@ -124,7 +133,7 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     orderItem = await OrderItems.aggregate([{
         $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'}}
     },{
-        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter}
+        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     }]).sort({Date:-1})
     
     // console.log(orderItem)
