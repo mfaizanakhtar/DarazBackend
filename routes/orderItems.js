@@ -42,11 +42,11 @@ router.put('/Update/:Status',async(req,res)=>{
     console.log(req.body)
     var dateArgs
         if(req.params.Status=='Dispatched'){
-            dateArgs={DispatchDate:new Date()}
+            dateArgs={DispatchDate:new Date(req.body.date)}
         }else if(req.params.Status=='Received'){
-            dateArgs={ReturnDate:new Date()}
+            dateArgs={ReturnDate:new Date(req.body.date)}
         }
-        ordersUpdated = await OrderItems.updateMany({OrderId:{$in:req.body}},{
+        ordersUpdated = await OrderItems.updateMany({OrderId:{$in:req.body.orders}},{
             $set:{
                 WarehouseStatus:req.params.Status,
                 ...dateArgs
@@ -65,7 +65,7 @@ router.put('/return/:id',auth,async(req,res)=>{
     orderItem = await OrderItems.updateMany({useremail:req.user.useremail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Received",
-            ReturnDate:new Date()
+            ReturnDate:new Date(req.body.date)
         }
     })
 
@@ -84,12 +84,13 @@ router.put('/return/:id',auth,async(req,res)=>{
 })
 
 router.put('/dispatch/:id',auth,async(req,res)=>{
+    console.log('Dispatch Date: ',req.body.date)
     var orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id,Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}})
     if(orderItem.length>0){
     orderItem = await OrderItems.updateMany({useremail:req.user.useremail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Dispatched",
-            DispatchDate:new Date()
+            DispatchDate:new Date(req.body.date)
         }
     })
     updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1})
@@ -119,10 +120,10 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     var enddate;
     async function timezone(){
 
-        startdate = new Date();
+        startdate = new Date(req.query.date);
         // startdate.setHours(startdate.getHours()+5);
         startdate.setHours(5,0,0,0);
-        enddate = new Date();
+        enddate = new Date(req.query.date);
         enddate.setHours(28,59,59,59);
         console.log('stardate: ',startdate)
         console.log('enddate: ',enddate)
