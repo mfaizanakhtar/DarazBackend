@@ -115,9 +115,9 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
 
         startdate = new Date();
         // startdate.setHours(startdate.getHours()+5);
-        startdate.setHours(0,0,0,0);
+        startdate.setHours(5,0,0,0);
         enddate = new Date();
-        enddate.setHours(23,59,59,59);
+        enddate.setHours(28,59,59,59);
         console.log('stardate: ',startdate)
         console.log('enddate: ',enddate)
     }
