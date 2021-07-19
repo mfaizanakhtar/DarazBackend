@@ -41,6 +41,7 @@ async function FindQuery(query,user){
     dateFilter={$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     
     AdditionStatus={
+        ready_to_ship:{"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":{$ne:"Dispatched"}},
         RTSDispatched : {"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":"Dispatched"},
         DeliveryFailedReceived : {"OrderItems.Status":"delivery failed","OrderItems.WarehouseStatus":"Received"},
         Claimable : {CreatedAt: {$lte:date},"OrderItems.WarehouseStatus":"Dispatched","OrderItems.Status":{$ne:"delivered"}},
@@ -71,7 +72,7 @@ async function FindQuery(query,user){
 
     const orders = await Order.aggregate([
         {
-            $match:{}
+            $match:{useremail:user.useremail,...dateFilter}
         },
         {$lookup:{
             from:'orderitems',
@@ -85,6 +86,9 @@ async function FindQuery(query,user){
     .limit(parseInt(pageArgs.pageSize))
 
     const length = await Order.aggregate([
+        {
+            $match:{useremail:user.useremail,...dateFilter}
+        },
         {$lookup:{
             from:'orderitems',
             localField:"OrderItems",
