@@ -127,7 +127,7 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     var sortBy
     if(req.params.filter == "Dispatched"){
     sortBy='$DispatchDate'
-    dateFilter=[{DispatchDate:{$gte:startdate}}]
+    dateFilter={DispatchDate:{$gte:startdate}}
     }
     else if(req.params.filter == "Received"){
     sortBy='$ReturnDate'
@@ -138,7 +138,7 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     orderItem = await OrderItems.aggregate([{
         $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'}}
     },{
-        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter,$and:dateFilter}
+        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter,...dateFilter}
     }]).sort({Date:-1})
     
     // console.log(orderItem)
