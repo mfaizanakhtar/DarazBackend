@@ -138,7 +138,7 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     orderItem = await OrderItems.aggregate([{
         $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'}}
     },{
-        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter,...dateFilter}
+        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter,DispatchDate:{$gte:startdate}}
     }]).sort({Date:-1})
     
     // console.log(orderItem)
