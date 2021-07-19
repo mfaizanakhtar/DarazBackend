@@ -111,6 +111,7 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
 
     var startdate;
     var enddate;
+    var dateFilter
     async function timezone(){
 
         startdate = new Date();
@@ -126,15 +127,18 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     var sortBy
     if(req.params.filter == "Dispatched"){
     sortBy='$DispatchDate'
+    dateFilter=[{DispatchDate:{$gte:startdate}},{DispatchDate:{$lte:enddate}}]
     }
     else if(req.params.filter == "Received"){
     sortBy='$ReturnDate'
+    dateFilter=[{ReturnDate:{$gte:startdate}},{ReturnDate:{$lte:enddate}}]
     }
+    console.log(dateFilter)
 
     orderItem = await OrderItems.aggregate([{
         $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'}}
     },{
-        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter,$and:[{DispatchDate:{$gte:startdate}},{DispatchDate:{$lte:enddate}}]}
+        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter,$and:dateFilter}
     }]).sort({Date:-1})
     
     // console.log(orderItem)
