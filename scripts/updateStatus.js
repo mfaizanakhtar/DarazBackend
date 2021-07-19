@@ -34,7 +34,7 @@ async function updateOrderItemStatus(darazid){
         var orderitems = await OrderItems.find({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
         .skip(i*splitCount)
         .limit(splitCount)
-        // console.log(shop.shopid+' '+orderitems.length)
+        console.log(shop.shopid+' '+orderitems.length)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,getOrderIdArray(orderitems));
         orderitemsdata = await GetData(url);
         // console.log(orderitemsdata.Orders)
