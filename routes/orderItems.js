@@ -127,7 +127,7 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     var sortBy
     if(req.params.filter == "Dispatched"){
     sortBy='$DispatchDate'
-    dateFilter=[{DispatchDate:{$gte:startdate}},{DispatchDate:{$lte:enddate}}]
+    dateFilter=[{DispatchDate:{$gte:startdate}}]
     }
     else if(req.params.filter == "Received"){
     sortBy='$ReturnDate'
