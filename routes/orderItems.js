@@ -40,10 +40,16 @@ router.get('/data/:filter',auth,async(req,res)=>{
 
 router.put('/Update/:Status',async(req,res)=>{
     console.log(req.body)
-    
+    var dateArgs
+        if(req.params.Status=='Dispatched'){
+            dateArgs={DispatchDate:new Date()}
+        }else if(req.params.Status=='Received'){
+            dateArgs={ReturnDate:new Date()}
+        }
         ordersUpdated = await OrderItems.updateMany({OrderId:{$in:req.body}},{
             $set:{
-                WarehouseStatus:req.params.Status
+                WarehouseStatus:req.params.Status,
+                ...dateArgs
             }
         })
     
