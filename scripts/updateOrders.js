@@ -71,7 +71,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             }
             if(skuresult!=null){
                 //reducing stock
-                await Sku.update({name:baseSku(item.Sku)},{
+                await Sku.updateMany({name:baseSku(item.Sku)},{
                     $inc:{stock:-1}
                 })
                 orderItem = OrderItemObj(item,shopid,useremail,skuresult.cost)
@@ -82,7 +82,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             var result = await orderItem.save();
             // console.log(result)
             //pushing orderItemId._id in Order Record for reference
-            await Order.update({
+            await Order.updateMany({
                 OrderId:result.OrderId,ShopId:shopid
             },
             {$push:{OrderItems:result._id,Skus:result.Sku,BaseSkus:result.BaseSku}})
