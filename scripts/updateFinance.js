@@ -5,18 +5,18 @@ const {Transaction} = require('../models/transaction')
 const {OrderItems} = require('../models/orderItem')
 
 async function updateTransactions(){
+    try{
     var shopids = await Darazid.find()
     //get start and enddate for query
     date = getDates()
-
-    shopids.forEach(async(shopid) => {
+    for(shopid of shopids){
         //get Url for transaction
         url= generateTransactionsUrl(shopid.shopid,shopid.secretkey,date.start,date.end,300)
         //get transactions data
         var transactions = await GetData(url);
         transactions = transactions.TransactionDOs.transactionDOs
         // console.log(shopid.shopid+" "+transactions.length);
-        transactions.forEach(async(t) => {
+        for(var t of transactions){
             //check if transactions is in db
             var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"]})
             if(transaction.length==0){
@@ -29,9 +29,21 @@ async function updateTransactions(){
             })
         }
             
-        });
-    });
-    
+        };
+    };
+    console.log("Transaction Loop Done")
+}
+catch(ex){
+    console.log(ex)
+}
+try{
+    setTimeout(()=>{
+        updateTransactions();
+    },300000);
+}
+catch(ex){
+    console.log(ex)
+}
 }
 
 function getTransactionObj(t){
