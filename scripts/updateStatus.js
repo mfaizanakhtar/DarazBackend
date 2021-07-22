@@ -90,6 +90,7 @@ async function updateOrderItemStatus(darazid){
     }
 
     }
+    console.log("Status Loop done");
 
     try {
         setTimeout(()=>{
@@ -100,7 +101,7 @@ async function updateOrderItemStatus(darazid){
     }
     
 
-    console.log("Status Loop done");
+    
 }
 
 async function updateOrderItemStatusAndUserWise(user,status){
