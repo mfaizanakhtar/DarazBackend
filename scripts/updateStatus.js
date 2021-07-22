@@ -25,7 +25,7 @@ async function updateOrderItemStatus(darazid){
 
     for(var shop of darazid){
         //get order with statuses of this shop
-        splitCount=200
+        splitCount=150
         var orderitemscount = await OrderItems.countDocuments({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
@@ -36,6 +36,7 @@ async function updateOrderItemStatus(darazid){
         .limit(splitCount)
         // console.log(shop.shopid+' '+orderitems.length)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,getOrderIdArray(orderitems));
+        // console.log(url)
         orderitemsdata = await GetData(url);
         // console.log(orderitemsdata.Orders)
 
