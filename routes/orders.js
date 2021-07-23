@@ -103,7 +103,7 @@ async function FindQuery(query,user){
 }
 
 router.post('/setStatusToRTS',auth,async(req,res)=>{
-    console.log(req.body.Orders.length)
+    console.log(req.body.Orders)
     RtsOrdersResponse=[]
     Orders = req.body.Orders
     var shop
