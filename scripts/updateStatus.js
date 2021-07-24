@@ -36,6 +36,7 @@ async function updateOrderItemStatus(darazid){
         .limit(splitCount)
         // console.log(shop.shopid+' '+orderitems.length)
         var orderitemsarray = getOrderIdArray(orderitems)
+        console.log(orderitemsarray)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
         // console.log(url)
         orderitemsdata = await GetData(url);
@@ -122,6 +123,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
         .limit(splitCount)
         // console.log(shop.shopid+' '+orderitems.length)
         var orderitemsarray = getOrderIdArray(orderitems)
+        // console.log(orderitemsarray)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
         orderitemsdata = await GetData(url);
         // console.log(orderitemsdata.Orders)
