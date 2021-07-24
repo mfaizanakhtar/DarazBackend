@@ -93,7 +93,7 @@ router.put('/dispatch/:id',auth,async(req,res)=>{
             DispatchDate:new Date(req.body.date)
         }
     })
-    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1})
+    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{DispatchDate:1,OrderId:1,TrackingCode:1,ShopId:1})
     res.send([{Status:"Dispatched"},updatedResult]);
 }
 else{
