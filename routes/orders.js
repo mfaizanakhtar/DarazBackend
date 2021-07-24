@@ -25,7 +25,7 @@ async function FindQuery(query,user){
     var enddate;
     //setting timezone startdate and enddate
     async function timezone(){
-
+    
     startdate = new Date(query.startDate);
     startdate.setHours(startdate.getHours());
     enddate = new Date(query.endDate);
@@ -35,7 +35,7 @@ async function FindQuery(query,user){
     await timezone();
     console.log(startdate)
     console.log(enddate)
-    
+    //initializing filters object variables
     var pageArgs={}
     var FinalFilter={}
     dateFilter={$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
@@ -48,17 +48,17 @@ async function FindQuery(query,user){
         ClaimFiled : {$or:[{"OrderItems.WarehouseStatus":"Claim Filed"},{"OrderItems.WarehouseStatus":"Claim Approved"},{"OrderItems.WarehouseStatus":"Claim Rejected"},{"OrderItems.WarehouseStatus":"Claim POD Dispute"}]},
         ClaimReceived : {"OrderItems.WarehouseStatus":"Claim Received"}
     }
-
+    //removing datefilter if status = claimaible
     if(AdditionStatus[query["OrderItems.Status"]]){
         if(query["OrderItems.Status"]=="Claimable") dateFilter={}
-
+        //if status found from additionstatus, delete orderitems.status
         FinalFilter={...AdditionStatus[query["OrderItems.Status"]]}
         query["OrderItems.Status"]="null"
     } 
-    
-    for(var propName in query){
+    //iterate the query object
+    for(var propName in query){//if value is null,startdate or enddate, delete the object key value
         if(query[propName] == "null" || propName=="startDate" || propName=="endDate") 
-        delete query[propName]
+        delete query[propName]//if pagesize or page number, move to pageArgs object and delete that from query
         else if(propName=="pageSize" || propName=="pageNumber")
         {
             pageArgs={...pageArgs,[propName]:query[propName]}
@@ -66,10 +66,10 @@ async function FindQuery(query,user){
         }
     }
     
-
+    //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail}
     // console.log(FinalFilter)
-
+    //query generated
     const orders = await Order.aggregate([
         {
             $match:{useremail:user.useremail,...dateFilter}
@@ -80,11 +80,12 @@ async function FindQuery(query,user){
             foreignField:"_id",
             as:"OrderItems"
         }},
-        {$match:FinalFilter}
+        {$match:FinalFilter},
+        {$sort:{"OrderItems.Sku":1}}
     ])
     .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
     .limit(parseInt(pageArgs.pageSize))
-
+    //use for counting the documents
     const length = await Order.aggregate([
         {
             $match:{useremail:user.useremail,...dateFilter}
