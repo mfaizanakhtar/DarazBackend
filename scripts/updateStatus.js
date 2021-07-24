@@ -36,9 +36,9 @@ async function updateOrderItemStatus(darazid){
         .limit(splitCount)
         // console.log(shop.shopid+' '+orderitems.length)
         var orderitemsarray = getOrderIdArray(orderitems)
-        console.log(orderitemsarray)
+        // console.log(orderitemsarray)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
-        // console.log(url)
+        console.log(url)
         orderitemsdata = await GetData(url);
         // console.log(orderitemsdata.Orders)
 
