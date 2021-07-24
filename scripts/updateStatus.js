@@ -110,7 +110,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
 
     for(var shop of darazid){
         //get order with statuses of this shop
-        splitCount=150
+        splitCount=100
         var orderitemscount = await OrderItems.countDocuments({Status:status,ShopId:shop.shopid})
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
@@ -120,7 +120,8 @@ async function updateOrderItemStatusAndUserWise(user,status){
         .skip(i*splitCount)
         .limit(splitCount)
         // console.log(shop.shopid+' '+orderitems.length)
-        url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,getOrderIdArray(orderitems));
+        orderitemsarray = await getOrderIdArray(orderitems)
+        url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
         orderitemsdata = await GetData(url);
         // console.log(orderitemsdata.Orders)
 
