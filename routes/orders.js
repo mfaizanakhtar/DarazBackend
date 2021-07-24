@@ -143,7 +143,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     await fetchLabelsAndUpdate(req.user.useremail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
 
-        Order.find({OrderId:{$in:req.body.Orders}}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
+        Order.find({OrderId:{$in:req.body.Orders}}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}}).sort({"OrderItems.Sku":1})
         .then((response)=>{
             res.send(response)
         })
