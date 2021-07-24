@@ -75,9 +75,9 @@ router.put('/return/:id',auth,async(req,res)=>{
     else{
         orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id})
         if(orderItem.length>0){
-            res.send({Status:"Already Received"})
+            res.send([{Status:"Already Received"}])
         }
-        else res.send({Status:"Tracking not Found"})
+        else res.send([{Status:"Tracking not Found"}])
         
     }    
     
@@ -99,15 +99,15 @@ router.put('/dispatch/:id',auth,async(req,res)=>{
 else{
   orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id,Status:"ready_to_ship"})
   if(orderItem.length>0){
-    res.send({Status:"Duplicate"})
+    res.send([{Status:"Duplicate"}])
   }
   else{
       orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id})
       if(orderItem.length>0){
-          res.send({Status:"Order status not eligible to dispatch"})
+          res.send([{Status:"Order status not eligible to dispatch"}])
       }
       else{
-          res.send({Status:"Order not Found"})
+          res.send([{Status:"Order not Found"}])
       }
   }
 } 
