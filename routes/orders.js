@@ -81,7 +81,7 @@ async function FindQuery(query,user){
             as:"OrderItems"
         }},
         {$match:FinalFilter},
-        {$sort:{"OrderItems.Sku":1}}
+        {$sort:{}}
     ])
     .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
     .limit(parseInt(pageArgs.pageSize))
@@ -143,7 +143,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     await fetchLabelsAndUpdate(req.user.useremail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
 
-        Order.find({OrderId:{$in:req.body.Orders}}).sort({"Skus":1}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
+        Order.find({OrderId:{$in:req.body.Orders}}).sort({}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
         .then((response)=>{
             res.send(response)
         })

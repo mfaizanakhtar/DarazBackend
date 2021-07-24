@@ -110,7 +110,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
 
     for(var shop of darazid){
         //get order with statuses of this shop
-        splitCount=200
+        splitCount=150
         var orderitemscount = await OrderItems.countDocuments({Status:status,ShopId:shop.shopid})
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
