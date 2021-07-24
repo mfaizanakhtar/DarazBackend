@@ -23,6 +23,7 @@ async function FindQuery(query,user){
 
     var startdate;
     var enddate;
+    var skuSort=[]
     //setting timezone startdate and enddate
     async function timezone(){
     
@@ -39,6 +40,10 @@ async function FindQuery(query,user){
     var pageArgs={}
     var FinalFilter={}
     dateFilter={$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+    //check if sort is true, set Skus sort to 1 to enable sorting by sku
+    if(query.skuSort=="true") skuSort=[{$sort:{"Skus":1}}] 
+        
+    
     
     AdditionStatus={
         ready_to_ship:{"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":{$ne:"Dispatched"}},
@@ -57,7 +62,7 @@ async function FindQuery(query,user){
     } 
     //iterate the query object
     for(var propName in query){//if value is null,startdate or enddate, delete the object key value
-        if(query[propName] == "null" || propName=="startDate" || propName=="endDate") 
+        if(query[propName] == "null" || propName=="startDate" || propName=="endDate" || propName=="skuSort") 
         delete query[propName]//if pagesize or page number, move to pageArgs object and delete that from query
         else if(propName=="pageSize" || propName=="pageNumber")
         {
@@ -68,7 +73,7 @@ async function FindQuery(query,user){
     
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail}
-    // console.log(FinalFilter)
+    console.log(FinalFilter)
     //query generated
     const orders = await Order.aggregate([
         {
@@ -81,7 +86,7 @@ async function FindQuery(query,user){
             as:"OrderItems"
         }},
         {$match:FinalFilter},
-        
+        ...skuSort
     ])
     .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
     .limit(parseInt(pageArgs.pageSize))
@@ -139,11 +144,17 @@ catch(error){
 
 router.post('/getLabelsData',auth,async(req,res)=>{
     // var LabelOrders
+    var sort={}
+    // console.log(req.body.skuSort)
+    if(req.body.skuSort==true) {
+        sort={"Skus":1}
+    }
+    // console.log(sort)
     await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
     await fetchLabelsAndUpdate(req.user.useremail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
 
-        Order.find({OrderId:{$in:req.body.Orders}}).sort({}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
+        Order.find({OrderId:{$in:req.body.Orders}}).sort({...sort}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
         .then((response)=>{
             res.send(response)
         })
