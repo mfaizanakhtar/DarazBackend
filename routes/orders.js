@@ -46,8 +46,8 @@ async function FindQuery(query,user){
     if(query.skuSort=="true") skuSort={$sort:{"Skus":1}}
     if(query.shopSort="true") shopSort={$sort:{"ShopId":1}}
 
-    Sort.push(shopSort)
-    Sort.push(skuSort)
+    if(shopSort!=null) Sort.push(shopSort)
+    if(skuSort!=null) Sort.push(skuSort)
     console.log("SortLog")
     console.log(Sort) 
         
