@@ -24,6 +24,7 @@ async function FindQuery(query,user){
     var startdate;
     var enddate;
     var skuSort=[]
+    var shopSort=[]
     //setting timezone startdate and enddate
     async function timezone(){
     
@@ -42,7 +43,7 @@ async function FindQuery(query,user){
     dateFilter={$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     //check if sort is true, set Skus sort to 1 to enable sorting by sku
     if(query.skuSort=="true") skuSort=[{$sort:{"Skus":1}}]
-    if(query.shopSort=="true") skuSort=[{$sort:{"ShopId":1}}]
+    if(query.shopSort=="true") shopSort=[{$sort:{"ShopId":1}}]
         
     
     
