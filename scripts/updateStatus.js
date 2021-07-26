@@ -39,8 +39,9 @@ async function updateOrderItemStatus(darazid){
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
         // console.log(url)
         orderitemsdata = await GetData(url);
-        console.log(orderitemsdata.Orders.length)
         if(orderitemsdata!=null){
+        console.log(orderitemsdata.Orders.length)
+        
         orderitemsdata = orderitemsdata.Orders
         //iterate all orders fetched from api
         // try{
