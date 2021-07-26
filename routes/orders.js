@@ -43,10 +43,9 @@ async function FindQuery(query,user){
     var FinalFilter={}
     dateFilter={$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     //check if sort is true, set Skus sort to 1 to enable sorting by sku
-    console.log("skusort",query.skuSort)
-    console.log("shopsort",query.shopSort)
+
     if(query.skuSort=="true") skuSort={$sort:{"Skus":1}}
-    if(query.shopSort="true") shopSort={$sort:{"ShopId":1}}
+    if(query.shopSort=="true") shopSort={$sort:{"ShopId":1}}
 
     if(shopSort!=null) Sort.push(shopSort)
     if(skuSort!=null) Sort.push(skuSort)
