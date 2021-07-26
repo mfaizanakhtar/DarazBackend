@@ -160,6 +160,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
         })
         .catch((error)=>{
             console.log(error)
+            res.send([])
         })
 
     
