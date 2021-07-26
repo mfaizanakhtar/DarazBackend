@@ -149,11 +149,11 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     // var LabelOrders
     var sort={}
     // console.log(req.body.skuSort)
-    if(req.body.shopSort==true) {
-        sort={...sort,"ShopId":1}
-    }
     if(req.body.skuSort==true) {
         sort={...sort,"Skus":1}
+    }
+    if(req.body.shopSort==true) {
+        sort={...sort,"ShopId":1}
     }
     // console.log(sort)
     await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
