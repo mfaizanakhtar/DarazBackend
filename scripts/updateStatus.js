@@ -247,6 +247,7 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     });
     //scrape Tracking to search
     $("div").find('div:nth-child(4)').each(function(index,element){
+        console.log(element)
         Tracking=$(element).text().substr(20)
         Tracking = Tracking.trim()
         trackings.push(Tracking)
