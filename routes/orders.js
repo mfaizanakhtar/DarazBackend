@@ -29,9 +29,9 @@ async function FindQuery(query,user){
     async function timezone(){
     
     startdate = new Date(query.startDate);
-    startdate.setHours(startdate.getHours());
+    startdate.setHours(startdate.getHours()+5);
     enddate = new Date(query.endDate);
-    enddate.setHours(enddate.getHours()+23,59,59,59);
+    enddate.setHours(enddate.getHours()+28,59,59,59);
 
     }
     await timezone();
@@ -88,8 +88,8 @@ async function FindQuery(query,user){
             as:"OrderItems"
         }},
         {$match:FinalFilter},
-        // ...skuSort,
-        // ...shopSort,
+        ...skuSort,
+        ...shopSort,
     ])
     .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
     .limit(parseInt(pageArgs.pageSize))
