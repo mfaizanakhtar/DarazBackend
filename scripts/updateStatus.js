@@ -25,7 +25,7 @@ async function updateOrderItemStatus(darazid){
 
     for(var shop of darazid){
         //get order with statuses of this shop
-        splitCount=80
+        splitCount=100
         var orderitemscount = await OrderItems.countDocuments({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
@@ -40,10 +40,10 @@ async function updateOrderItemStatus(darazid){
         // console.log(url)
         orderitemsdata = await GetData(url);
         console.log(orderitemsdata.Orders.length)
-
+        if(orderitems!=null){
         orderitemsdata = orderitemsdata.Orders
         //iterate all orders fetched from api
-        try{
+        // try{
         for(var orders of orderitemsdata){
             for(item of orders.OrderItems){
                 // console.log(item)
@@ -83,12 +83,14 @@ async function updateOrderItemStatus(darazid){
         }
         }
         }
+        
  
         
-    }
-    catch(error){
-        console.log(error);
-    }
+    // }
+    // catch(error){
+    //     console.log(error);
+    // }
+}
     }
 
     }
@@ -111,7 +113,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
 
     for(var shop of darazid){
         //get order with statuses of this shop
-        splitCount=80
+        splitCount=100
         var orderitemscount = await OrderItems.countDocuments({Status:status,ShopId:shop.shopid})
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
@@ -124,6 +126,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
         var orderitemsrray = getOrderIdArray(orderitems)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsrray);
         orderitemsdata = await GetData(url);
+        if(orderitems!=null){
         console.log(orderitemsdata.Orders.length)
 
         orderitemsdata = orderitemsdata.Orders
@@ -167,6 +170,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
         }
         }
         }
+    }
  
         
 

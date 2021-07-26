@@ -13,6 +13,7 @@ async function GetData(url){
     }
     catch(error){
         console.log(error);
+        return null
     }
 }
 
