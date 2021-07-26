@@ -149,7 +149,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     // var LabelOrders
     var skuSort={}
     var shopSort={}
-    // console.log(req.body.skuSort)
+    console.log(req.body.shopSort)
     if(req.body.skuSort==true) {
         skuSort={"Skus":1}
     }
