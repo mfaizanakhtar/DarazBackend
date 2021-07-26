@@ -23,7 +23,9 @@ async function FindQuery(query,user){
 
     var startdate;
     var enddate;
-    var skuSort=[]
+    var Sort=[]
+    var skuSort=null
+    var shopSort=null
     //setting timezone startdate and enddate
     async function timezone(){
     
@@ -41,7 +43,13 @@ async function FindQuery(query,user){
     var FinalFilter={}
     dateFilter={$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     //check if sort is true, set Skus sort to 1 to enable sorting by sku
-    if(query.skuSort=="true") skuSort=[{$sort:{"Skus":1}}] 
+    if(query.skuSort=="true") skuSort={$sort:{"Skus":1}}
+    if(query.shopSort="true") shopSort={$sort:{"ShopId":1}}
+
+    Sort.push(shopSort)
+    Sort.push(skuSort)
+    console.log("SortLog")
+    console.log(Sort) 
         
     
     
@@ -86,7 +94,7 @@ async function FindQuery(query,user){
             as:"OrderItems"
         }},
         {$match:FinalFilter},
-        ...skuSort
+        ...Sort
     ])
     .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
     .limit(parseInt(pageArgs.pageSize))
@@ -146,11 +154,11 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     // var LabelOrders
     var sort={}
     // console.log(req.body.skuSort)
-    if(req.body.skuSort==true) {
-        sort={"Skus":1}
-    }
     if(req.body.shopSort==true) {
         sort={...sort,"ShopId":1}
+    }
+    if(req.body.skuSort==true) {
+        sort={...sort,"Skus":1}
     }
     // console.log(sort)
     await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
