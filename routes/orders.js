@@ -23,9 +23,7 @@ async function FindQuery(query,user){
 
     var startdate;
     var enddate;
-    var Sort=[]
-    var skuSort=null
-    var shopSort=null
+    var skuSort=[]
     //setting timezone startdate and enddate
     async function timezone(){
     
@@ -43,14 +41,8 @@ async function FindQuery(query,user){
     var FinalFilter={}
     dateFilter={$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     //check if sort is true, set Skus sort to 1 to enable sorting by sku
-
-    if(query.skuSort=="true") skuSort={$sort:{"Skus":1}}
-    if(query.shopSort=="true") shopSort={$sort:{"ShopId":1}}
-
-    if(shopSort!=null) Sort.push(shopSort)
-    if(skuSort!=null) Sort.push(skuSort)
-    console.log("SortLog")
-    console.log(Sort) 
+    if(query.skuSort=="true") skuSort=[{$sort:{"Skus":1}}]
+    if(query.shopSort=="true") skuSort=[{$sort:{"ShopId":1}}]
         
     
     
@@ -95,7 +87,8 @@ async function FindQuery(query,user){
             as:"OrderItems"
         }},
         {$match:FinalFilter},
-        ...Sort
+        ...shopSort,
+        ...skuSort
     ])
     .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
     .limit(parseInt(pageArgs.pageSize))
