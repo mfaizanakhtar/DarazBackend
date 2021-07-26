@@ -64,7 +64,7 @@ async function FindQuery(query,user){
     } 
     //iterate the query object
     for(var propName in query){//if value is null,startdate or enddate, delete the object key value
-        if(query[propName] == "null" || propName=="startDate" || propName=="endDate" || propName=="skuSort") 
+        if(query[propName] == "null" || propName=="startDate" || propName=="endDate" || propName=="skuSort" || propName=="shopSort") 
         delete query[propName]//if pagesize or page number, move to pageArgs object and delete that from query
         else if(propName=="pageSize" || propName=="pageNumber")
         {
