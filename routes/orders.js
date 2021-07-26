@@ -147,20 +147,21 @@ catch(error){
 
 router.post('/getLabelsData',auth,async(req,res)=>{
     // var LabelOrders
-    var sort={}
+    var skuSort={}
+    var shopSort={}
     // console.log(req.body.skuSort)
     if(req.body.skuSort==true) {
-        sort={...sort,"Skus":1}
+        skuSort={"Skus":1}
     }
     if(req.body.shopSort==true) {
-        sort={...sort,"ShopId":1}
+        shopSort={"ShopId":1}
     }
     // console.log(sort)
     await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
     await fetchLabelsAndUpdate(req.user.useremail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
 
-        Order.find({OrderId:{$in:req.body.Orders}}).sort({...sort}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
+        Order.find({OrderId:{$in:req.body.Orders}}).sort({...skuSort}).sort({...shopSort}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
         .then((response)=>{
             res.send(response)
         })

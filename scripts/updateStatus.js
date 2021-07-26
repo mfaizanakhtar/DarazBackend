@@ -128,7 +128,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
 
         orderitemsdata = orderitemsdata.Orders
         //iterate all orders fetched from api
-        try{
+
         for(var orders of orderitemsdata){
             for(item of orders.OrderItems){
                 // console.log(item)
@@ -169,10 +169,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
         }
  
         
-    }
-    catch(error){
-        console.log(error);
-    }
+
     }
 
     }
