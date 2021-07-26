@@ -156,6 +156,8 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     if(req.body.shopSort==true) {
         shopSort={"ShopId":1}
     }
+    console.log("skuSort",skuSort)
+    console.log("shopSort",shopSort)
     // console.log(sort)
     await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
     await fetchLabelsAndUpdate(req.user.useremail)
