@@ -105,7 +105,7 @@ function getTimeStamp(){
     Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00')
     return Timestamp;
 }
-function getOrderIdArray(data){
+async function getOrderIdArray(data){
 
 var orderids='['
 for(var element of data){
