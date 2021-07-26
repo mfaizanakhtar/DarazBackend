@@ -88,8 +88,8 @@ async function FindQuery(query,user){
             as:"OrderItems"
         }},
         {$match:FinalFilter},
-        ...skuSort,
-        ...shopSort,
+        // ...skuSort,
+        // ...shopSort,
     ])
     .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
     .limit(parseInt(pageArgs.pageSize))
