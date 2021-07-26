@@ -247,7 +247,8 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     });
     //scrape Tracking to search
     $("div").find('div:nth-child(4)').each(function(index,element){
-        console.log($(element))
+        trackingbarcodes.push($(element).find('div').find('img').attr('src'))
+        // console.log($(element).find('div').find('img').attr('src'))
         Tracking=$(element).text().substr(20)
         Tracking = Tracking.trim()
         trackings.push(Tracking)
@@ -263,13 +264,13 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
 
     });
     //scrape trackingbarcodes images
-    $('div[class=barcode]').find('img').each(function(index,element){
+    // $('div[class=barcode]').find('img').each(function(index,element){
 
-        if((index % 3==0)){
-            trackingbarcodes.push($(element).attr('src'))
-        }
+    //     if((index % 3==0)){
+    //         trackingbarcodes.push($(element).attr('src'))
+    //     }
 
-    });
+    // });
 
     $('div[class="box left qrcode"]').find('img').each(function(index,element){
 
