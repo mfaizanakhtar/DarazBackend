@@ -34,12 +34,12 @@ async function updateOrderItemStatus(darazid){
         var orderitems = await OrderItems.find({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
         .skip(i*splitCount)
         .limit(splitCount)
-        // console.log(shop.shopid+' '+orderitems.length)
+        console.log(shop.shopid+' '+orderitems.length)
         var orderitemsarray = getOrderIdArray(orderitems)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
         // console.log(url)
         orderitemsdata = await GetData(url);
-        // console.log(orderitemsdata.Orders)
+        console.log(orderitemsdata.Orders.length)
 
         orderitemsdata = orderitemsdata.Orders
         //iterate all orders fetched from api
@@ -120,11 +120,11 @@ async function updateOrderItemStatusAndUserWise(user,status){
         var orderitems = await OrderItems.find({Status:status,ShopId:shop.shopid})
         .skip(i*splitCount)
         .limit(splitCount)
-        // console.log(shop.shopid+' '+orderitems.length)
+        console.log(shop.shopid+' '+orderitems.length)
         var orderitemsrray = getOrderIdArray(orderitems)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsrray);
         orderitemsdata = await GetData(url);
-        // console.log(orderitemsdata.Orders)
+        console.log(orderitemsdata.Orders.length)
 
         orderitemsdata = orderitemsdata.Orders
         //iterate all orders fetched from api
