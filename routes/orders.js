@@ -25,6 +25,7 @@ async function FindQuery(query,user){
     var enddate;
     var skuSort=[]
     var shopSort=[]
+    var isPrinted={}
     //setting timezone startdate and enddate
     async function timezone(){
     
@@ -44,6 +45,9 @@ async function FindQuery(query,user){
     //check if sort is true, set Skus sort to 1 to enable sorting by sku
     if(query.skuSort=="true") skuSort=[{$sort:{"Skus":1}}]
     if(query.shopSort=="true") shopSort=[{$sort:{"ShopId":1}}]
+
+    if(query.Printed=="true") isPrinted={isPrinted:true}
+    if(query.unPrinted=="true") isPrinted={isPrinted:false}
         
     
     
@@ -64,7 +68,7 @@ async function FindQuery(query,user){
     } 
     //iterate the query object
     for(var propName in query){//if value is null,startdate or enddate, delete the object key value
-        if(query[propName] == "null" || propName=="startDate" || propName=="endDate" || propName=="skuSort" || propName=="shopSort") 
+        if(query[propName] == "null" || propName=="startDate" || propName=="endDate" || propName=="skuSort" || propName=="shopSort" || propName=="Printed" || propName=="unPrinted") 
         delete query[propName]//if pagesize or page number, move to pageArgs object and delete that from query
         else if(propName=="pageSize" || propName=="pageNumber")
         {
@@ -74,7 +78,7 @@ async function FindQuery(query,user){
     }
     
     //spread the finalfilter,query,date and assign it to final filter
-    FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail}
+    FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail,...isPrinted}
     console.log(FinalFilter)
     //query generated
     const orders = await Order.aggregate([
