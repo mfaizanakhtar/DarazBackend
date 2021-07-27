@@ -232,8 +232,8 @@ router.get('/allstats',auth,async(req,res)=>{
     await timezone();
     //finding total count for ALLSTORES FBD AND FBM
 
-    var TotalFbd =await OrderItems.find({useremail:req.user.useremail,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
-    var TotalFbm =await OrderItems.find({useremail:req.user.useremail,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).count();
+    var TotalFbd =await OrderItems.find({useremail:req.user.useremail,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).countDocuments();
+    var TotalFbm =await OrderItems.find({useremail:req.user.useremail,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).countDocuments();
     //creating Total object to total both FBD and FBM
     var Total={_id:'ALL STORES', FBDcount:TotalFbd,FBMcount:TotalFbm,Total:TotalFbd+TotalFbm};
     console.log(startdate);
