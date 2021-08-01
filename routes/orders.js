@@ -92,6 +92,7 @@ async function FindQuery(query,user){
             as:"OrderItems"
         }},
         {$match:FinalFilter},
+        {$sort:{"CreatedAt":1}},
         ...skuSort,
         ...shopSort,
     ])
@@ -149,6 +150,29 @@ catch(error){
     // DarazIds = Darazid.findOne({shopid:req.user.useremail})
 })
 
+router.post('/setItemStatusToRTS',auth,async(req,res)=>{
+    // console.log(req.body.OrderItem)
+    RtsOrdersResponse=[]
+    OrderItem = req.body.OrderItem
+    var shop = await Darazid.findOne({shopid:OrderItem.ShopId})
+    try{
+
+    Url = RtsURL(shop.shopid,shop.secretkey,"["+OrderItem.OrderItemId+"]")
+    var result = await GetData(Url)
+    RtsOrdersResponse.push(result)
+    // console.log(RtsOrdersResponse.length)
+    await updateOrderItemUserWise(req.user.useremail,RtsOrdersResponse.length)
+    res.send({count:RtsOrdersResponse.length})
+
+}
+catch(error){
+    console.log(error)
+    res.send({count:0})
+}
+
+    // DarazIds = Darazid.findOne({shopid:req.user.useremail})
+})
+
 router.post('/getLabelsData',auth,async(req,res)=>{
     // var LabelOrders
     var skuSort={}
@@ -167,7 +191,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     await fetchLabelsAndUpdate(req.user.useremail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
 
-        Order.find({OrderId:{$in:req.body.Orders}}).sort({...skuSort}).sort({...shopSort}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
+        Order.find({OrderId:{$in:req.body.Orders}}).sort({CreatedAt:1}).sort({...skuSort}).sort({...shopSort}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
         .then((response)=>{
             res.send(response)
         })
