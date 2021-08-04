@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const { Order } = require('../models/order');
+const {OrderItems} = require('../models/orderItem')
 const auth = require('../middleware/auth')
 const router = express.Router();
 const {Darazid} = require('../models/darazid')
@@ -203,6 +204,23 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     
     // console.log(LabelOrders)
     
+})
+
+router.post('/getStockChecklist',auth,async(req,res)=>{
+    if(req.body.orders>0){
+    var matchFilter = {$match:{OrderId:{$in:req.body.orders}}}
+    }
+    else{
+    var matchFilter = {$match:{Status:"ready_to_ship",ShippingType:"Dropshipping"}}
+    }
+    var result = await OrderItems.aggregate([
+        matchFilter,
+        {$group:{
+            _id:"$BaseSku",
+            count:{$sum:1}
+        }}
+    ])
+    res.send(result)
 })
 
 // router.get('/statusstats',async(req,res)=>{
