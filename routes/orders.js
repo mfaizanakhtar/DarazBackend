@@ -217,8 +217,10 @@ router.post('/getStockChecklist',auth,async(req,res)=>{
         matchFilter,
         {$group:{
             _id:"$BaseSku",
-            count:{$sum:1}
-        }}
+            count:{$sum:1},
+            img:{$first:"$productMainImage"}
+        }},
+        {$sort:{"_id":1}}
     ])
     res.send(result)
 })
