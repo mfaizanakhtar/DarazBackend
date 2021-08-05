@@ -80,7 +80,7 @@ async function FindQuery(query,user){
     
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail,...isPrinted}
-    console.log(FinalFilter)
+    // console.log(FinalFilter)
     //query generated
     const orders = await Order.aggregate([
         {
@@ -161,7 +161,7 @@ router.post('/setItemStatusToRTS',auth,async(req,res)=>{
     Url = RtsURL(shop.shopid,shop.secretkey,"["+OrderItem.OrderItemId+"]")
     var result = await GetData(Url)
     RtsOrdersResponse.push(result)
-    // console.log(RtsOrdersResponse.length)
+    console.log(RtsOrdersResponse.length)
     await updateOrderItemUserWise(req.user.useremail,RtsOrdersResponse.length)
     res.send({count:RtsOrdersResponse.length})
 
@@ -207,7 +207,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
 })
 
 router.post('/getStockChecklist',auth,async(req,res)=>{
-    if(req.body.orders>0){
+    if(req.body.orders.length>0){
     var matchFilter = {$match:{OrderId:{$in:req.body.orders}}}
     }
     else{

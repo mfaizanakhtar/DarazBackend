@@ -8,15 +8,20 @@ const cheerio = require('cheerio')
 const atob = require("atob");
 
 async function updateOrderItemUserWise(user,RtsOrdersResponse){
-    console.log("status ",user)
-    if(RtsOrdersResponse>0){
-    // var darazid = await Darazid.find({useremail:user});
-    // console.log(darazid)
-    // //get All Shops in db
-    // console.log("updating status")
-    await updateOrderItemStatusAndUserWise(user,'pending')
-    console.log("user status done")
-}
+    setTimeout(async()=>{
+
+        console.log("status ",user)
+        if(RtsOrdersResponse>0){
+        // var darazid = await Darazid.find({useremail:user});
+        // console.log(darazid)
+        // //get All Shops in db
+        // console.log("updating status")
+        await updateOrderItemStatusAndUserWise(user,'pending')
+        console.log("user status done")
+    }
+
+    },1000)
+
     
 }
 
