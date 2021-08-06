@@ -10,7 +10,7 @@ router.get('/',async(req,res)=>{
 }
 )
 
-router.post('/',async(req,res)=>{
+router.post('/',auth,async(req,res)=>{
     let user =await User.findOne({useremail:req.body.useremail});
     if (user) return res.status(400).send({message:"User already exists"}); 
 
@@ -26,6 +26,20 @@ router.post('/',async(req,res)=>{
     res.send({message:'User Registered'});
 
 
+})
+
+router.put('/updateUser',auth,async(req,res)=>{
+    var update = await User.updateOne({useremail:req.params.useremail},{
+        useremail:req.body.useremail,
+        password:req.body.password,
+        usertype:req.body.usertype
+    });
+    res.send(update)
+})
+
+router.post('/deleteUser',auth,async(req,res)=>{
+    var del = await User.deleteMany({useremail:req.body.useremail})
+    res.send(del)
 })
 
 router.put('/updatePassword',auth,async(req,res)=>{
