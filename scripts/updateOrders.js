@@ -60,18 +60,19 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
         
         if(!result){
         var orderItem
-        var skuresult = await Sku.findOne({name:baseSku(item.Sku)})
+        var skuresult = await Sku.findOne({name:baseSku(item.Sku),useremail:useremail})
             if(skuresult==null){
                 //creating new sku
                 var sku = new Sku({
-                    name:baseSku(item.Sku)
+                    name:baseSku(item.Sku),
+                    useremail:useremail
                 })
                 await sku.save();
                 orderItem = OrderItemObj(item,shopid,useremail,0);
             }
             if(skuresult!=null){
                 //reducing stock
-                await Sku.updateMany({name:baseSku(item.Sku)},{
+                await Sku.updateMany({name:baseSku(item.Sku),useremail:useremail},{
                     $inc:{stock:-1}
                 })
                 orderItem = OrderItemObj(item,shopid,useremail,skuresult.cost)

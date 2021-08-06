@@ -9,7 +9,8 @@ const skuSchema = new mongoose.Schema({
     stock:{
         type:Number,
         default:-1
-    }
+    },
+    useremail:String
 })
 
 const Sku = mongoose.model('sku',skuSchema);

@@ -18,7 +18,8 @@ const transactionSchema = new mongoose.Schema({
     ShippingSpeed:String,
     ShipmentType:String,
     Reference:String,
-    PaymentRefId:String
+    PaymentRefId:String,
+    useremail:String
 })
 
 const Transaction = new mongoose.model('Transaction',transactionSchema)

@@ -21,7 +21,7 @@ async function updateTransactions(){
             var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"]})
             if(transaction.length==0){
                 //if not found, save into db
-                var transaction = getTransactionObj(t)
+                var transaction = getTransactionObj(t,shopid.useremail)
             transactResult = await transaction.save()
             //find corresponding order and push transaction into order obj
             OrderItems.update({OrderItemId:t["Order Item No."]},{
@@ -46,7 +46,7 @@ catch(ex){
 }
 }
 
-function getTransactionObj(t){
+function getTransactionObj(t,useremail){
     var transaction = new Transaction({
         TransactionDate:t["Transaction Date"],
         TransactionType:t["Transaction Type"],
@@ -65,7 +65,8 @@ function getTransactionObj(t){
         ShippingSpeed:t["Shipping Speed"],
         ShipmentType:t["Shipment Type"],
         Reference:t["Reference"],
-        PaymentRefId:t["Payment Ref Id"]
+        PaymentRefId:t["Payment Ref Id"],
+        useremail:useremail
     })
 
     return transaction
