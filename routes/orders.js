@@ -208,7 +208,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
 
 router.post('/getStockChecklist',auth,async(req,res)=>{
     if(req.body.orders.length>0){
-    var matchFilter = {$match:{OrderId:{$in:req.body.orders}}}
+    var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"DropShipping"}}
     }
     else{
     var matchFilter = {$match:{Status:"ready_to_ship",ShippingType:"Dropshipping"}}
