@@ -92,6 +92,21 @@ async function FindQuery(query,user){
             foreignField:"_id",
             as:"OrderItems"
         }},
+        // {
+        //     $lookup:{
+        //         from:'orderitems',
+        //         let:{order_items:"$OrderItems"},
+        //         pipeline:[
+        //             {
+                        
+        //                 $match:{
+        //                     $expr:{$eq:["$$order_items","$_id"]}
+        //                 }
+        //             }
+        //         ],
+        //         as:"OrderItems"
+        //     }
+        // },
         {$match:FinalFilter},
         {$sort:{"CreatedAt":1}},
         ...skuSort,
@@ -100,6 +115,7 @@ async function FindQuery(query,user){
     .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
     .limit(parseInt(pageArgs.pageSize))
     //use for counting the documents
+    // console.log("here",orders)
     const length = await Order.aggregate([
         {
             $match:{useremail:user.useremail,...dateFilter}

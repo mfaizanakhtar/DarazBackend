@@ -3,40 +3,40 @@ const router = express.Router();
 const { OrderItems } = require('../models/orderItem');
 const auth = require('../middleware/auth')
 
-router.get('/data/:filter',auth,async(req,res)=>{
-    var orderItem;
-    if(req.params.filter=="claimable")
-    {
-    date = new Date();
-    date.setDate(date.getDate()-30);
-    console.log(date);
-    orderItem = await OrderItems.find({CreatedAt: {$lte:date},WarehouseStatus:"Dispatched",Status:{$ne:"delivered"}});
-    }
-    else if(req.params.filter=="all"){
-        orderItem=await OrderItems.find().populate('Order').sort({CreatedAt:1})
-    }
-    else if(req.params.filter=="ready_to_ship"){
-        orderItem=await OrderItems.find({Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}}).sort({CreatedAt:1})
-    }
-    else if(req.params.filter=="failed"){
-        orderItem=await OrderItems.find({Status:"failed",WarehouseStatus:{$ne:"Received"}}).sort({CreatedAt:1})
-    }
-    else if(req.params.filter=="ready_to_ship-dispatched"){
-        orderItem=await OrderItems.find({Status:"ready_to_ship",WarehouseStatus:"Dispatched"}).sort({CreatedAt:1})
-    }
-    else if(req.params.filter=="failed-received"){
-        orderItem=await OrderItems.find({WarehouseStatus:"Received"}).sort({CreatedAt:1})
-    }
-    else if(req.params.filter=="Claim Filed"){
-        orderItem=await OrderItems.find({$or:[{WarehouseStatus:"Claim Filed"},{WarehouseStatus:"Claim Approved"},{WarehouseStatus:"Claim Rejected"},{WarehouseStatus:"Claim POD Dispute"}]}).sort({CreatedAt:1})
-    }
-    else if(req.params.filter=="Claim Received"){
-        orderItem=await OrderItems.find({WarehouseStatus:"Claim Received"}).sort({CreatedAt:1})
-    }
-    else orderItem = await OrderItems.find({Status:req.params.filter}).sort({CreatedAt:1});
-    res.send(orderItem);
+// router.get('/data/:filter',auth,async(req,res)=>{
+//     var orderItem;
+//     if(req.params.filter=="claimable")
+//     {
+//     date = new Date();
+//     date.setDate(date.getDate()-30);
+//     console.log(date);
+//     orderItem = await OrderItems.find({CreatedAt: {$lte:date},WarehouseStatus:"Dispatched",Status:{$ne:"delivered"}});
+//     }
+//     else if(req.params.filter=="all"){
+//         orderItem=await OrderItems.find().populate('Order').sort({CreatedAt:1})
+//     }
+//     else if(req.params.filter=="ready_to_ship"){
+//         orderItem=await OrderItems.find({Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}}).sort({CreatedAt:1})
+//     }
+//     else if(req.params.filter=="failed"){
+//         orderItem=await OrderItems.find({Status:"failed",WarehouseStatus:{$ne:"Received"}}).sort({CreatedAt:1})
+//     }
+//     else if(req.params.filter=="ready_to_ship-dispatched"){
+//         orderItem=await OrderItems.find({Status:"ready_to_ship",WarehouseStatus:"Dispatched"}).sort({CreatedAt:1})
+//     }
+//     else if(req.params.filter=="failed-received"){
+//         orderItem=await OrderItems.find({WarehouseStatus:"Received"}).sort({CreatedAt:1})
+//     }
+//     else if(req.params.filter=="Claim Filed"){
+//         orderItem=await OrderItems.find({$or:[{WarehouseStatus:"Claim Filed"},{WarehouseStatus:"Claim Approved"},{WarehouseStatus:"Claim Rejected"},{WarehouseStatus:"Claim POD Dispute"}]}).sort({CreatedAt:1})
+//     }
+//     else if(req.params.filter=="Claim Received"){
+//         orderItem=await OrderItems.find({WarehouseStatus:"Claim Received"}).sort({CreatedAt:1})
+//     }
+//     else orderItem = await OrderItems.find({Status:req.params.filter}).sort({CreatedAt:1});
+//     res.send(orderItem);
 
-})
+// })
 
 router.put('/Update/:Status',async(req,res)=>{
     console.log(req.body)
