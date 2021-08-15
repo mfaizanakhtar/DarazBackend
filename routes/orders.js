@@ -224,10 +224,10 @@ router.post('/getLabelsData',auth,async(req,res)=>{
 
 router.post('/getStockChecklist',auth,async(req,res)=>{
     if(req.body.orders.length>0){
-    var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping"}}
+    var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping",useremail:req.user.useremail}}
     }
     else{
-    var matchFilter = {$match:{Status:"ready_to_ship",ShippingType:"Dropshipping"}}
+    var matchFilter = {$match:{Status:"ready_to_ship",ShippingType:"Dropshipping",useremail:req.user.useremail}}
     }
     var result = await OrderItems.aggregate([
         matchFilter,
