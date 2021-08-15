@@ -12,7 +12,7 @@ const {updateOrderItemUserWise,fetchLabelsAndUpdate,updateOrderItemStatusAndUser
 router.get('/orders/',auth,async(req,res)=>{
 
     var response = await FindQuery(req.query,req.user)
-    var stores = await Order.aggregate([
+    var stores = await Order.aggregate([{$match:{useremail:req.user.useremail}},
         {$group:{_id:"$ShopId"}}
     ])
 
@@ -208,7 +208,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
 
 router.post('/getStockChecklist',auth,async(req,res)=>{
     if(req.body.orders.length>0){
-    var matchFilter = {$match:{OrderId:{$in:req.body.orders}}}
+    var matchFilter = {$match:{OrderId:{$in:req.body.orders},useremail:req.user.useremail}}
     }
     else{
     var matchFilter = {$match:{Status:"ready_to_ship",ShippingType:"Dropshipping"}}
