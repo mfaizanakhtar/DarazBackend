@@ -92,6 +92,21 @@ async function FindQuery(query,user){
             foreignField:"_id",
             as:"OrderItems"
         }},
+        // {
+        //     $lookup:{
+        //         from:'orderitems',
+        //         let:{order_items:"$OrderItems"},
+        //         pipeline:[
+        //             {
+                        
+        //                 $match:{
+        //                     $expr:{$eq:["$$order_items","$_id"]}
+        //                 }
+        //             }
+        //         ],
+        //         as:"OrderItems"
+        //     }
+        // },
         {$match:FinalFilter},
         {$sort:{"CreatedAt":1}},
         ...skuSort,
@@ -100,6 +115,7 @@ async function FindQuery(query,user){
     .skip(parseInt(pageArgs.pageNumber*pageArgs.pageSize))
     .limit(parseInt(pageArgs.pageSize))
     //use for counting the documents
+    // console.log("here",orders)
     const length = await Order.aggregate([
         {
             $match:{useremail:user.useremail,...dateFilter}
@@ -208,7 +224,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
 
 router.post('/getStockChecklist',auth,async(req,res)=>{
     if(req.body.orders.length>0){
-    var matchFilter = {$match:{OrderId:{$in:req.body.orders},useremail:req.user.useremail}}
+    var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping"}}
     }
     else{
     var matchFilter = {$match:{Status:"ready_to_ship",ShippingType:"Dropshipping"}}

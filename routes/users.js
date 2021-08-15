@@ -29,6 +29,7 @@ router.post('/',auth,async(req,res)=>{
 })
 
 router.put('/updateUser/:useremail',auth,async(req,res)=>{
+    // console.log(req.params.useremail)
     var update = await User.updateOne({useremail:req.params.useremail},{
         useremail:req.body.useremail,
         password:req.body.password,
