@@ -207,8 +207,8 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     console.log("skuSort",skuSort)
     console.log("shopSort",shopSort)
     // console.log(sort)
-    await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
-    await fetchLabelsAndUpdate(req.user.useremail)
+    var updateResult = await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
+    if(updateResult==true) await fetchLabelsAndUpdate(req.user.useremail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
 
         Order.find({OrderId:{$in:req.body.Orders}}).sort({CreatedAt:1}).sort({...skuSort}).sort({...shopSort}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
