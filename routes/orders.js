@@ -50,13 +50,14 @@ async function FindQuery(query,user){
     if(query.Printed=="true") isPrinted={isPrinted:true}
     if(query.unPrinted=="true") isPrinted={isPrinted:false}
         
-    
+    claimDate = new Date();
+    claimDate.setDate(claimDate.getDate()-30);
     
     AdditionStatus={
         ready_to_ship:{"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":{$ne:"Dispatched"}},
         RTSDispatched : {"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":"Dispatched"},
-        DeliveryFailedReceived : {"OrderItems.Status":"delivery failed","OrderItems.WarehouseStatus":"Received"},
-        Claimable : {CreatedAt: {$lte:date},"OrderItems.WarehouseStatus":"Dispatched","OrderItems.Status":{$ne:"delivered"}},
+        DeliveryFailedReceived : {"OrderItems.Status":"failed","OrderItems.WarehouseStatus":"Received"},
+        Claimable : {CreatedAt: {$lte:claimDate},"OrderItems.WarehouseStatus":"Dispatched","OrderItems.Status":{$ne:"delivered"}},
         ClaimFiled : {$or:[{"OrderItems.WarehouseStatus":"Claim Filed"},{"OrderItems.WarehouseStatus":"Claim Approved"},{"OrderItems.WarehouseStatus":"Claim Rejected"},{"OrderItems.WarehouseStatus":"Claim POD Dispute"}]},
         ClaimReceived : {"OrderItems.WarehouseStatus":"Claim Received"}
     }
