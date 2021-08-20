@@ -50,7 +50,7 @@ app.use('/api/orders',orders)
 //     console.log(result)
 // }
 // updateId()
-// updateSingleOrder('techatronixs@gmail.com','130272728232033')
+// updateSingleOrder('accesology@gmail.com','131164633411564')
 updateOrdersData();
 updateOrderItemStatus();
 // updateItemPendingStatus();

@@ -8,7 +8,7 @@ const cheerio = require('cheerio')
 const atob = require("atob");
 
 async function updateOrderItemUserWise(user,RtsOrdersResponse){
-    setTimeout(async()=>{
+    // setTimeout(async()=>{
 
         console.log("status ",user)
         if(RtsOrdersResponse>0){
@@ -16,11 +16,12 @@ async function updateOrderItemUserWise(user,RtsOrdersResponse){
         // console.log(darazid)
         // //get All Shops in db
         // console.log("updating status")
-        await updateOrderItemStatusAndUserWise(user,'pending')
+        var updateResult = await updateOrderItemStatusAndUserWise(user,'pending')
         console.log("user status done")
+        return updateResult
     }
 
-    },1000)
+    // },1000)
 
     
 }
@@ -82,6 +83,8 @@ async function updateOrderItemStatus(darazid){
             {
                 finditem.PreviousTracking=finditem.TrackingCode
                 finditem.TrackingCode=item.TrackingCode;
+                finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
+                finditem.trackingChangeCount=finditem.trackingChangeCount+1
                 // console.log(result);
             }
             result = await finditem.save();
@@ -169,6 +172,8 @@ async function updateOrderItemStatusAndUserWise(user,status){
             {
                 finditem.PreviousTracking=finditem.TrackingCode
                 finditem.TrackingCode=item.TrackingCode;
+                finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
+                finditem.trackingChangeCount=finditem.trackingChangeCount+1
                 // console.log(result);
             }
             result = await finditem.save();
@@ -186,6 +191,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
     
 
     console.log("Status Loop done");
+    return true
 }
 
 async function fetchLabelsAndUpdate(useremail){

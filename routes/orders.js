@@ -155,8 +155,11 @@ router.post('/setStatusToRTS',auth,async(req,res)=>{
         RtsOrdersResponse.push(result)
     }
     // console.log(RtsOrdersResponse.length)
-    await updateOrderItemUserWise(req.user.useremail,RtsOrdersResponse.length)
-    res.send({count:RtsOrdersResponse.length})
+    var updateResult = ""
+    if(Orders.length==RtsOrdersResponse.length){
+    updateResult = await updateOrderItemUserWise(req.user.useremail,RtsOrdersResponse.length)
+    }
+    res.send({count:RtsOrdersResponse.length,updateResult:updateResult})
 
 }
 catch(error){
@@ -178,8 +181,8 @@ router.post('/setItemStatusToRTS',auth,async(req,res)=>{
     var result = await GetData(Url)
     RtsOrdersResponse.push(result)
     console.log(RtsOrdersResponse.length)
-    await updateOrderItemUserWise(req.user.useremail,RtsOrdersResponse.length)
-    res.send({count:RtsOrdersResponse.length})
+    updateResult = await updateOrderItemUserWise(req.user.useremail,RtsOrdersResponse.length)
+    res.send({count:RtsOrdersResponse.length,updateResult:updateResult})
 
 }
 catch(error){
