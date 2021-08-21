@@ -60,12 +60,22 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
         
         if(!result){
         var orderItem
+
+        if(item.ShippingType=="Dropshipping"){
+            var stockType={FBMstock:-1}
+        }
+        else if(item.ShippingType=="Own Warehouse"){
+            var stockType={FBMstock:0}
+        }
+        // console.log(stockType)
+
         var skuresult = await Sku.findOne({name:baseSku(item.Sku),useremail:useremail})
             if(skuresult==null){
                 //creating new sku
                 var sku = new Sku({
                     name:baseSku(item.Sku),
-                    useremail:useremail
+                    useremail:useremail,
+                    ...stockType
                 })
                 await sku.save();
                 orderItem = OrderItemObj(item,shopid,useremail,0);
@@ -73,7 +83,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             if(skuresult!=null){
                 //reducing stock
                 await Sku.updateMany({name:baseSku(item.Sku),useremail:useremail},{
-                    $inc:{stock:-1}
+                    $inc:stockType
                 })
                 orderItem = OrderItemObj(item,shopid,useremail,skuresult.cost)
             }

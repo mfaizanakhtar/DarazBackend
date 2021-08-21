@@ -6,9 +6,9 @@ const skuSchema = new mongoose.Schema({
         type:Number,
         default:0
     },
-    stock:{
+    FBMstock:{
         type:Number,
-        default:-1
+        default:0
     },
     useremail:String
 })

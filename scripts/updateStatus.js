@@ -3,6 +3,7 @@ const {Darazid} = require('../models/darazid');
 const {generateMultipleOrderItemsUrl,generateLabelUrl} = require('../scripts/GenerateUrl');
 const {GetData} = require('./HttpReq');
 const {Order} = require('../models/order')
+const {Sku} = require('../models/sku')
 const {getOrderIdArray} = require('../scripts/GenerateUrl')
 const cheerio = require('cheerio')
 const atob = require("atob");
@@ -63,6 +64,11 @@ async function updateOrderItemStatus(darazid){
             if(finditem.Status!=item.Status){
                 // console.log(finditem.Status+" "+item.Status);
                 finditem.Status=item.Status;
+                //Update Stock for failed orders
+                if(item.Status=="failed" && item.ShippingType=="dropshipping"){
+                    await Sku.updateMany({useremail:item.useremail,name:item.BaseSku},{$inc:{FBMstock:-1}})
+                }
+                              
 
             
             //Update Tracking if tracking available
