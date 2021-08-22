@@ -8,7 +8,7 @@ const {getOrderIdArray} = require('../scripts/GenerateUrl')
 const cheerio = require('cheerio')
 const atob = require("atob");
 
-async function updateOrderItemUserWise(user,RtsOrdersResponse){
+async function updateOrderItemsForRts(user,RtsOrdersResponse){
     // setTimeout(async()=>{
 
         console.log("status ",user)
@@ -317,6 +317,6 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
 }
 
 module.exports.updateOrderItemStatus = updateOrderItemStatus
-module.exports.updateOrderItemUserWise = updateOrderItemUserWise
+module.exports.updateOrderItemsForRts = updateOrderItemsForRts
 module.exports.fetchLabelsAndUpdate = fetchLabelsAndUpdate
 module.exports.updateOrderItemStatusAndUserWise=updateOrderItemStatusAndUserWise
