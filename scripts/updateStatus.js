@@ -62,7 +62,8 @@ async function updateOrderItemStatus(darazid){
             //updating statuses
             // console.log(finditem.Status+" "+item.Status);
             if(finditem.Status!=item.Status){
-                // console.log(finditem.Status+" "+item.Status);
+                if(finditem.Status=='ready_to_ship')
+                console.log(finditem.Status+" "+item.Status);
                 finditem.Status=item.Status;
                 //Update Stock for failed orders
                 // if(item.Status=="failed" && item.ShippingType=="dropshipping"){
@@ -154,7 +155,8 @@ async function updateOrderItemStatusAndUserWise(user,status){
             //updating statuses
             // console.log(finditem.Status+" "+item.Status);
             if(finditem.Status!=item.Status){
-                // console.log(finditem.Status+" "+item.Status);
+                if(finditem.Status=='ready_to_ship')
+                console.log(finditem.Status+" "+item.Status);
                 finditem.Status=item.Status;
                 //Update Stock for failed orders
                 // if(item.Status=="failed" && item.ShippingType=="dropshipping"){
