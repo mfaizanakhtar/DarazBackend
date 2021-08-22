@@ -7,7 +7,7 @@ const router = express.Router();
 const {Darazid} = require('../models/darazid')
 const {RtsURL} = require('../scripts/GenerateUrl')
 const {GetData} = require('../scripts/HttpReq')
-const {updateOrderItemUserWise,fetchLabelsAndUpdate,updateOrderItemStatusAndUserWise} = require('../scripts/updateStatus')
+const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatusAndUserWise} = require('../scripts/updateStatus')
 
 router.get('/orders/',auth,async(req,res)=>{
 
