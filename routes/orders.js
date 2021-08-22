@@ -213,14 +213,15 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     var updateResult = await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
     if(updateResult==true) await fetchLabelsAndUpdate(req.user.useremail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
+    trackingCount = await OrderItems.aggregate([{$match:{OrderId:{$in:req.body.Orders},ShippingType:'Dropshipping'}},{$group:{_id:'$TrackingCode'},Count:{$sum:1}}])
 
         Order.find({OrderId:{$in:req.body.Orders}}).sort({CreatedAt:1}).sort({...skuSort}).sort({...shopSort}).populate({path:'OrderItems',match:{ShippingType:'Dropshipping'}})
         .then((response)=>{
-            res.send(response)
+            res.send({labelsData:response,labelsCount:trackingCount})
         })
         .catch((error)=>{
             console.log(error)
-            res.send([])
+            res.send({labelsData:[]})
         })
 
     
