@@ -205,7 +205,7 @@ async function fetchLabelsAndUpdate(useremail){
     darazid = await Darazid.find({useremail:useremail})
     for(shop of darazid){
         var orderitemsIds=[]
-        items= await OrderItems.find({ShopId:shop.shopid,Status:'ready_to_ship',PortCode:'',ShippingType:'Dropshipping'})
+        items= await OrderItems.find({ShopId:shop.shopid,Status:'ready_to_ship',labelTracking:'',ShippingType:'Dropshipping'})
         // console.log(items)
         for(item of items){
             orderitemsIds.push(item.OrderItemId)

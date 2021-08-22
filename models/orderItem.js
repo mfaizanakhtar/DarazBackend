@@ -16,7 +16,7 @@ const OrderItemsSchema = new mongoose.Schema({
     WarehouseStatus:String,
     TrackingCode:String,
     PreviousTracking:String,
-    labelTracking:String,
+    labelTracking:{type:String,default:''},
     ShippingProviderType:String,
     ShipmentProvider:String,
     CreatedAt:Date,
