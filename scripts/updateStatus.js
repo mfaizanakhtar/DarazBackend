@@ -87,10 +87,10 @@ async function updateOrderItemStatus(darazid){
              //New Updated Tracking if changed
             else if(finditem.TrackingCode!=item.TrackingCode)
             {
-                finditem.PreviousTracking=finditem.TrackingCode
-                finditem.TrackingCode=item.TrackingCode;
-                finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
-                finditem.trackingChangeCount=finditem.trackingChangeCount+1
+                if(item.TrackingCode!=finditem.UpdatedTracking){
+                    finditem.UpdatedTracking = item.TrackingCode
+                    finditem.trackingChangeCount=finditem.trackingChangeCount+1
+                }
                 // console.log(result);
             }
             result = await finditem.save();
@@ -176,10 +176,10 @@ async function updateOrderItemStatusAndUserWise(user,status){
              //New Updated Tracking if changed
             else if(finditem.TrackingCode!=item.TrackingCode)
             {
-                finditem.PreviousTracking=finditem.TrackingCode
-                finditem.TrackingCode=item.TrackingCode;
-                finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
-                finditem.trackingChangeCount=finditem.trackingChangeCount+1
+                if(item.TrackingCode!=finditem.UpdatedTracking){
+                    finditem.UpdatedTracking = item.TrackingCode
+                    finditem.trackingChangeCount=finditem.trackingChangeCount+1
+                }
                 // console.log(result);
             }
             result = await finditem.save();
