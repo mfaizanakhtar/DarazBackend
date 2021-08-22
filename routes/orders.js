@@ -183,6 +183,7 @@ router.post('/setItemStatusToRTS',auth,async(req,res)=>{
     RtsOrdersResponse.push(result)
     console.log(RtsOrdersResponse.length)
     updateResult = await updateOrderItemsForRts(req.user.useremail,RtsOrdersResponse.length)
+    await OrderItems.updateMany({OrderItemId:OrderItem.OrderItemId},{SeperateRts:true})
     res.send({count:RtsOrdersResponse.length,updateResult:updateResult})
 
 }
