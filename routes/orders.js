@@ -209,8 +209,8 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     console.log("skuSort",skuSort)
     console.log("shopSort",shopSort)
     // console.log(sort)
-    var updateResult=true
-    // var updateResult = await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
+    // var updateResult=true
+    var updateResult = await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
     if(updateResult==true) await fetchLabelsAndUpdate(req.user.useremail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
 
