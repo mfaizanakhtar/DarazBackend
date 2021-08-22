@@ -52,8 +52,8 @@ app.use('/api/skus',skus)
 //     console.log(result)
 // }
 // updateId()
-updateSingleOrder('pkgadgies@gmail.com','131329258345032')
-// updateOrdersData();
+// updateSingleOrder('pkgadgies@gmail.com','131329258345032')
+updateOrdersData();
 updateOrderItemStatus();
 // updateItemPendingStatus();
 // updatePendingOrderStatus();

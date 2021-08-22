@@ -65,27 +65,26 @@ async function updateOrderItemStatus(darazid){
                 // console.log(finditem.Status+" "+item.Status);
                 finditem.Status=item.Status;
                 //Update Stock for failed orders
-                if(item.Status=="failed" && item.ShippingType=="dropshipping"){
-                    await Sku.updateMany({useremail:item.useremail,name:item.BaseSku},{$inc:{FBMstock:-1}})
-                }
-                              
+                // if(item.Status=="failed" && item.ShippingType=="dropshipping"){
+                //     await Sku.updateMany({useremail:item.useremail,name:item.BaseSku},{$inc:{FBMstock:-1}})
+                // }
 
-            
+        }
             //Update Tracking if tracking available
             // console.log('existing tracking',finditem.TrackingCode,'daraz tracking',item.TrackingCode)
-            if(finditem.TrackingCode==""){
-                // console.log("Tracking first")
-                if(item.TrackingCode!="")
-                {
+            // if(finditem.TrackingCode==""){
+            //     // console.log("Tracking first")
+            //     if(item.TrackingCode!="")
+            //     {
  
-                    finditem.TrackingCode=item.TrackingCode;
-                    finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
+            //         finditem.TrackingCode=item.TrackingCode;
+            //         finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
  
-                }
+            //     }
                 
-            }
+            // }
              //New Updated Tracking if changed
-            else if(finditem.TrackingCode!=item.TrackingCode)
+            if(finditem.TrackingCode!=item.TrackingCode)
             {
                 finditem.PreviousTracking=finditem.TrackingCode
                 finditem.TrackingCode=item.TrackingCode;
@@ -94,8 +93,6 @@ async function updateOrderItemStatus(darazid){
                 // console.log(result);
             }
             result = await finditem.save();
-
-        }
         }
         }
         
@@ -159,22 +156,27 @@ async function updateOrderItemStatusAndUserWise(user,status){
             if(finditem.Status!=item.Status){
                 // console.log(finditem.Status+" "+item.Status);
                 finditem.Status=item.Status;
+                //Update Stock for failed orders
+                // if(item.Status=="failed" && item.ShippingType=="dropshipping"){
+                //     await Sku.updateMany({useremail:item.useremail,name:item.BaseSku},{$inc:{FBMstock:-1}})
+                // }
 
-            
+        }
             //Update Tracking if tracking available
-            if(finditem.TrackingCode==""){
-                // console.log("Tracking first")
-                if(item.TrackingCode!="")
-                {
+            // console.log('existing tracking',finditem.TrackingCode,'daraz tracking',item.TrackingCode)
+            // if(finditem.TrackingCode==""){
+            //     // console.log("Tracking first")
+            //     if(item.TrackingCode!="")
+            //     {
  
-                    finditem.TrackingCode=item.TrackingCode;
-                    finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
+            //         finditem.TrackingCode=item.TrackingCode;
+            //         finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
  
-                }
+            //     }
                 
-            }
+            // }
              //New Updated Tracking if changed
-            else if(finditem.TrackingCode!=item.TrackingCode)
+            if(finditem.TrackingCode!=item.TrackingCode)
             {
                 finditem.PreviousTracking=finditem.TrackingCode
                 finditem.TrackingCode=item.TrackingCode;
@@ -183,8 +185,6 @@ async function updateOrderItemStatusAndUserWise(user,status){
                 // console.log(result);
             }
             result = await finditem.save();
-
-        }
         }
         }
     }

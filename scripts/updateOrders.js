@@ -20,7 +20,7 @@ async function getOrderItemsData(userid,secretkey,data){
     // console.log(url);
     //Passing url to get Data using axios
     orderitemsdata = await GetData(url);
-    console.log(orderitemsdata.Orders)
+    // console.log(orderitemsdata.Orders)
     return orderitemsdata;
    
     
