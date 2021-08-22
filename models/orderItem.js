@@ -17,6 +17,7 @@ const OrderItemsSchema = new mongoose.Schema({
     TrackingCode:String,
     PreviousTracking:String,
     labelTracking:{type:String,default:''},
+    SeperateRts:{type:Boolean,default:false},
     ShippingProviderType:String,
     ShipmentProvider:String,
     CreatedAt:Date,
