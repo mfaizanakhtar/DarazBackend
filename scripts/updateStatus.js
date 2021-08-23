@@ -124,31 +124,37 @@ async function updateOrderItemStatus(user,status,repeatTime){
         for(var orders of orderitemsdata){
             for(item of orders.OrderItems){
                 // console.log(item)
+                await OrderItems.updateOne(
+                {OrderId:item.OrderId,Name:item.Name,Sku:item.Sku,ShopSku:item.ShopSku,
+                ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,
+                ShippingAmount:item.ShippingAmount
+                ,Variation:item.Variation},
+                {Status:item.Status,TrackingCode:item.TrackingCode})
   
-            //find fetched order
-            var finditem = await OrderItems.findOne({OrderId:item.OrderId,Name:item.Name,Sku:item.Sku,ShopSku:item.ShopSku,
-                ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,ShippingAmount:item.ShippingAmount
-            ,Variation:item.Variation});
+        //     //find fetched order
+        //     var finditem = await OrderItems.findOne({OrderId:item.OrderId,Name:item.Name,Sku:item.Sku,ShopSku:item.ShopSku,
+        //         ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,ShippingAmount:item.ShippingAmount
+        //     ,Variation:item.Variation});
             
-            //updating statuses
-            // console.log(finditem.Status+" "+item.Status);
-            if(finditem.Status!=item.Status){
-                if(finditem.Status=='ready_to_ship' && finditem.ShippingType=='Dropshipping')
-                console.log("Status",finditem.Status+" "+item.Status);
-                console.log("Order",finditem.OrderItemId+" "+item.OrderItemId)
-                finditem.Status=item.Status;
+        //     //updating statuses
+        //     // console.log(finditem.Status+" "+item.Status);
+        //     if(finditem.Status!=item.Status){
+        //         if(finditem.Status=='ready_to_ship' && finditem.ShippingType=='Dropshipping')
+        //         console.log("Status",finditem.Status+" "+item.Status);
+        //         console.log("Order",finditem.OrderItemId+" "+item.OrderItemId)
+        //         finditem.Status=item.Status;
 
-        }
-             //New Updated Tracking if changed
-            if(finditem.TrackingCode!=item.TrackingCode)
-            {
-                finditem.PreviousTracking=finditem.TrackingCode
-                finditem.TrackingCode=item.TrackingCode;
-                finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
-                finditem.trackingChangeCount=finditem.trackingChangeCount+1
-                // console.log(result);
-            }
-            result = await finditem.save();
+        // }
+        //      //New Updated Tracking if changed
+        //     if(finditem.TrackingCode!=item.TrackingCode)
+        //     {
+        //         finditem.PreviousTracking=finditem.TrackingCode
+        //         finditem.TrackingCode=item.TrackingCode;
+        //         finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
+        //         finditem.trackingChangeCount=finditem.trackingChangeCount+1
+        //         // console.log(result);
+        //     }
+        //     result = await finditem.save();
         }
         }
     }
