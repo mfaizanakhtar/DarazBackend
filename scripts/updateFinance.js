@@ -23,6 +23,7 @@ async function updateTransactions(){
                 //if not found, save into db
                 var transaction = getTransactionObj(t,shopid.useremail)
             transactResult = await transaction.save()
+            console.log(transactResult)
             //find corresponding order and push transaction into order obj
             OrderItems.update({OrderItemId:t["Order Item No."]},{
                 $push:{Transactions:transactResult._id}
