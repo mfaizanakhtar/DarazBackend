@@ -32,7 +32,7 @@ async function updateOrderItemStatus(darazid){
 
     for(var shop of darazid){
         //get order with statuses of this shop
-        splitCount=10
+        splitCount=150
         var orderitemscount = await OrderItems.countDocuments({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
@@ -44,7 +44,7 @@ async function updateOrderItemStatus(darazid){
         console.log(shop.shopid+' '+orderitems.length)
         var orderitemsarray = getOrderIdArray(orderitems)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
-        console.log(url)
+        // console.log(url)
         orderitemsdata = await GetData(url);
         if(orderitemsdata!=null){
         console.log(orderitemsdata.Orders.length)
@@ -126,7 +126,7 @@ async function updateOrderItemStatusAndUserWise(user,status){
 
     for(var shop of darazid){
         //get order with statuses of this shop
-        splitCount=10
+        splitCount=150
         var orderitemscount = await OrderItems.countDocuments({Status:status,ShopId:shop.shopid})
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
