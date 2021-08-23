@@ -59,28 +59,12 @@ updateOrdersData();
 // updatePendingOrderStatus();
 updateTransactions();
 
+updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
+ShippingType:'Own Warehouse'},18000000);
 
-try {
-    setTimeout(()=>{
+updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
+ShippingType:'Dropshipping'},180000);
 
-        updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
-        ShippingType:'Dropshipping'});
-
-    },180000);
-} catch (error) {
-    console.log(error);
-}
-
-try {
-    setTimeout(()=>{
-
-        updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
-        ShippingType:'Own Warehouse'});
-
-    },18000000);
-} catch (error) {
-    console.log(error);
-}
 // labelFetch()
 // async function labelFetch(){
 

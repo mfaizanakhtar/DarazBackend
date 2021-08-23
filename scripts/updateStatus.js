@@ -16,15 +16,9 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
 
         // //get All Shops in db
         // console.log("updating status")
-        var result = setTimeout(async()=>{
-
         var updateResult = await updateOrderItemStatus({useremail:user},{Status:'pending',ShippingType:'Dropshipping'})
-        return updateResult
-
-        },3000)
-        
         console.log("user status done")
-        return result
+        return updateResult
     }
 
     // },3000)
@@ -103,7 +97,7 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
     
 // }
 
-async function updateOrderItemStatus(user,status){
+async function updateOrderItemStatus(user,status,repeatTime){
     var darazid = await Darazid.find({...user});
     for(var shop of darazid){
         //get order with statuses of this shop
@@ -160,7 +154,15 @@ async function updateOrderItemStatus(user,status){
     }
 
     }
-    
+    if(repeatTime!=''){
+        try {
+        setTimeout(()=>{
+            updateOrderItemStatus();
+        },repeatTime);
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     console.log("Status Loop done");
     return true
