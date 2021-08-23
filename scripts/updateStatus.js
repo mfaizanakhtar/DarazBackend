@@ -9,7 +9,7 @@ const cheerio = require('cheerio')
 const atob = require("atob");
 
 async function updateOrderItemsForRts(user,RtsOrdersResponse){
-    setTimeout(async()=>{
+    // setTimeout(async()=>{
 
         console.log("status ",user)
         if(RtsOrdersResponse>0){
@@ -21,7 +21,7 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
         return updateResult
     }
 
-    },3000)
+    // },3000)
 
     
 }
