@@ -65,8 +65,11 @@ updateTransactions();
 updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
 ShippingType:'Own Warehouse'},18000000);
 
-updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
-ShippingType:'Dropshipping'},300000);
+updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'delivered'}],
+ShippingType:'Dropshipping'},3000000);
+
+updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
+ShippingType:'Dropshipping'},180000);
 
 // updateOrderItemStatus({},{Status:'delivered',
 // ShippingType:'Dropshipping'})
