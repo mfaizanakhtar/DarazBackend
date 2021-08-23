@@ -280,4 +280,3 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
 module.exports.updateOrderItemStatus = updateOrderItemStatus
 module.exports.updateOrderItemsForRts = updateOrderItemsForRts
 module.exports.fetchLabelsAndUpdate = fetchLabelsAndUpdate
-module.exports.updateOrderItemStatusAndUserWise=updateOrderItemStatusAndUserWise
