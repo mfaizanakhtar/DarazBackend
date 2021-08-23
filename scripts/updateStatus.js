@@ -297,7 +297,7 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         }
         else{
             console.log("PortCode Length: ",portCodes.length)
-            console.log("trackingbarcodes Length: ",trackingBarcode.length)
+            console.log("trackingbarcodes Length: ",trackingbarcodes.length)
             console.log("qrcodes Length: ",qrcodes.length)
             console.log("labelPrices Length: ",labelPrices.length)
             console.log("deliveryPoints Length: ",deliveryPoints.length)
