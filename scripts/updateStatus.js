@@ -194,6 +194,7 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     qrcodes=[]
     deliveryPoints=[]
     labelPrices=[]
+    labelOrderNumbers=[]
 
     splitCount=35
     lastCount=0
@@ -250,6 +251,14 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         deliveryPoints.push($(element).text())
 
     });
+    //scrape ordernumber from label
+    $("div:nth-child(2)").find('div:nth-child(1)').each(function(index,element){
+        // PortCode=$(element).text().substr(14)
+        // PortCode=PortCode.substr(0,PortCode.length-1)
+        // portCodes.push(PortCode)
+        labelOrderNumbers.push($(element).text().substr(13))
+        // console.log($(element).text().substr(13))
+    });
     //scrape trackingbarcodes images
     // $('div[class=barcode]').find('img').each(function(index,element){
 
@@ -272,7 +281,7 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         console.log("3rd Checkpoint")
 
 
-        updateResult = await OrderItems.updateMany({TrackingCode:trackings[i].toString()},{
+        updateResult = await OrderItems.updateMany({TrackingCode:trackings[i].toString(),OrderId:labelOrderNumbers[i].toString()},{
             $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],labelPrice:labelPrices[i],deliveryPoint:deliveryPoints[i],labelTracking:trackings[i]}
         })
         console.log(updateResult)

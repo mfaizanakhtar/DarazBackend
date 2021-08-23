@@ -16,6 +16,9 @@ const {generateSingleOrderUrl,RtsURL} = require('./scripts/GenerateUrl');
 const {updateTransactions} = require("./scripts/updateFinance");
 const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
+const cheerio = require('cheerio')
+const atob = require("atob");
+ 
 
 mongoose.connect(config.connectionstring)
     .then(()=>{
@@ -84,11 +87,11 @@ ShippingType:'Dropshipping'},300000);
 //         // portCodes.push(PortCode)
 //         // console.log($(element).text())
 // });
-// $("div").find('div:nth-child(8)').each(function(index,element){
+// $("div:nth-child(2)").find('div:nth-child(1)').each(function(index,element){
 //     // PortCode=$(element).text().substr(14)
 //     // PortCode=PortCode.substr(0,PortCode.length-1)
 //     // portCodes.push(PortCode)
-//     console.log($(element).text())
+//     console.log($(element).text().substr(13))
 // });
 // // $("div").find('div:nth-child(4)').each(function(index,element){
 
