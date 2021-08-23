@@ -62,14 +62,14 @@ updateOrdersData();
 // updatePendingOrderStatus();
 updateTransactions();
 
-updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
-ShippingType:'Own Warehouse'},18000000);
+// updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
+// ShippingType:'Own Warehouse'},18000000);
 
-updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
-ShippingType:'Dropshipping'},300000);
+// updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
+// ShippingType:'Dropshipping'},300000);
 
 updateOrderItemStatus({},{Status:'delivered',
-ShippingType:'Own Warehouse'})
+ShippingType:'Dropshipping'})
 
 // labelFetch()
 // async function labelFetch(){
