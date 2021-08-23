@@ -289,7 +289,7 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     for(let i=0;i<trackings.length;i++){
         console.log("3rd Checkpoint")
 
-        if(portCodes.length==trackingbarcodes.length==qrcodes.length==labelPrices.length==deliveryPoints.length==trackings.length==labelOrderNumbers.length){
+        if(portCodes.length==trackingbarcodes.length){
         updateResult = await OrderItems.updateMany({TrackingCode:trackings[i].toString(),OrderId:labelOrderNumbers[i].toString()},{
             $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],labelPrice:labelPrices[i],deliveryPoint:deliveryPoints[i],labelTracking:trackings[i]}
         })
