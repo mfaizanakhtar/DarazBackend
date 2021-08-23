@@ -9,12 +9,11 @@ const cheerio = require('cheerio')
 const atob = require("atob");
 
 async function updateOrderItemsForRts(user,RtsOrdersResponse){
-    // setTimeout(async()=>{
+    setTimeout(async()=>{
 
         console.log("status ",user)
         if(RtsOrdersResponse>0){
-        // var darazid = await Darazid.find({useremail:user});
-        // console.log(darazid)
+
         // //get All Shops in db
         // console.log("updating status")
         var updateResult = await updateOrderItemStatus({useremail:user},{Status:'pending',ShippingType:'Dropshipping'})
@@ -22,7 +21,7 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
         return updateResult
     }
 
-    // },1000)
+    },3000)
 
     
 }
