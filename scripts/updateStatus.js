@@ -99,6 +99,9 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
 
 async function updateOrderItemStatus(user,status,repeatTime){
     console.log("repeatTime",repeatTime)
+    if(repeatTime!=undefined){
+        console.log("undefined check")
+    }
     var darazid = await Darazid.find({...user});
     for(var shop of darazid){
         //get order with statuses of this shop
@@ -155,7 +158,7 @@ async function updateOrderItemStatus(user,status,repeatTime){
     }
 
     }
-    if(repeatTime!=''){
+    if(repeatTime!=undefined){
         try {
         setTimeout(()=>{
             updateOrderItemStatus();
