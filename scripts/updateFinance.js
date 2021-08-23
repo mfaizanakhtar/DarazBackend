@@ -25,7 +25,7 @@ async function updateTransactions(){
             transactResult = await transaction.save()
             // console.log(transactResult)
             //find corresponding order and push transaction into order obj
-            OrderItems.update({OrderItemId:transactResult.OrderItemNo},{
+            await OrderItems.updateOne({OrderItemId:transactResult.OrderItemNo},{
                 $push:{Transactions:transactResult._id}
             })
         }
