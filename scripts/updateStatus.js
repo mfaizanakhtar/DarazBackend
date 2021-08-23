@@ -126,13 +126,16 @@ async function updateOrderItemStatus(user,status,repeatTime){
                 // console.log(item)
   
             //find fetched order
-            var finditem = await OrderItems.findOne({OrderItemId:item.OrderItemId});
+            var finditem = await OrderItems.findOne({OrderId:item.OrderId,Name:item.Name,Sku:item.Sku,ShopSku:item.ShopSku,
+                ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,ShippingAmount:item.ShippingAmount
+            ,Variation:item.Variation});
             
             //updating statuses
             // console.log(finditem.Status+" "+item.Status);
             if(finditem.Status!=item.Status){
-                if(finditem.Status=='ready_to_ship')
-                console.log(finditem.Status+" "+item.Status);
+                if(finditem.Status=='ready_to_ship' && finditem.ShippingType=='Dropshipping')
+                console.log("Status",finditem.Status+" "+item.Status);
+                console.log("Order",finditem.OrderItemId+" "+item.OrderItemId)
                 finditem.Status=item.Status;
 
         }
