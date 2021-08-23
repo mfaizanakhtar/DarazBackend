@@ -156,7 +156,7 @@ router.post('/setStatusToRTS',auth,async(req,res)=>{
         RtsOrdersResponse.push(result)
     }
     // console.log(RtsOrdersResponse.length)
-    var updateResult = ""
+    var updateResult = false
     if(Orders.length==RtsOrdersResponse.length){
     updateResult = await updateOrderItemsForRts(req.user.useremail,RtsOrdersResponse.length)
     }
