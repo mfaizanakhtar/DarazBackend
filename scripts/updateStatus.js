@@ -129,7 +129,8 @@ async function updateOrderItemStatus(user,status,repeatTime){
                 ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,
                 ShippingAmount:item.ShippingAmount
                 ,Variation:item.Variation},
-                {Status:item.Status,TrackingCode:item.TrackingCode})
+                {Status:item.Status,TrackingCode:item.TrackingCode,
+                    ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2)})
   
         //     //find fetched order
         //     var finditem = await OrderItems.findOne({OrderId:item.OrderId,Name:item.Name,Sku:item.Sku,ShopSku:item.ShopSku,
