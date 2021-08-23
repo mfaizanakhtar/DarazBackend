@@ -17,7 +17,7 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
         // console.log(darazid)
         // //get All Shops in db
         // console.log("updating status")
-        var updateResult = await updateOrderItemStatusAndUserWise(user,'pending')
+        var updateResult = await updateOrderItemStatus({useremail:user},{Status:'pending',ShippingType:'Dropshipping'})
         console.log("user status done")
         return updateResult
     }
@@ -27,112 +27,88 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
     
 }
 
-async function updateOrderItemStatus(darazid){
-    var darazid = await Darazid.find();
+// async function updateOrderItemStatus(darazid){
+//     var darazid = await Darazid.find();
 
-    for(var shop of darazid){
-        //get order with statuses of this shop
-        splitCount=150
-        var orderitemscount = await OrderItems.countDocuments({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
-        // console.log(orderitemscount)
-        end = Math.ceil(orderitemscount/splitCount)
-        // console.log(end)
-    for(let i=0;i<end;i++){
-        var orderitems = await OrderItems.find({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
-        .skip(i*splitCount)
-        .limit(splitCount)
-        console.log(shop.shopid+' '+orderitems.length)
-        var orderitemsarray = getOrderIdArray(orderitems)
-        url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
-        // console.log(url)
-        orderitemsdata = await GetData(url);
-        if(orderitemsdata!=null){
-        console.log(orderitemsdata.Orders.length)
+//     for(var shop of darazid){
+//         //get order with statuses of this shop
+//         splitCount=150
+//         var orderitemscount = await OrderItems.countDocuments({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
+//         // console.log(orderitemscount)
+//         end = Math.ceil(orderitemscount/splitCount)
+//         // console.log(end)
+//     for(let i=0;i<end;i++){
+//         var orderitems = await OrderItems.find({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
+//         .skip(i*splitCount)
+//         .limit(splitCount)
+//         console.log(shop.shopid+' '+orderitems.length)
+//         var orderitemsarray = getOrderIdArray(orderitems)
+//         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
+//         // console.log(url)
+//         orderitemsdata = await GetData(url);
+//         if(orderitemsdata!=null){
+//         console.log(orderitemsdata.Orders.length)
         
-        orderitemsdata = orderitemsdata.Orders
-        //iterate all orders fetched from api
-        // try{
-        for(var orders of orderitemsdata){
-            for(item of orders.OrderItems){
-                // console.log(item)
+//         orderitemsdata = orderitemsdata.Orders
+//         //iterate all orders fetched from api
+//         // try{
+//         for(var orders of orderitemsdata){
+//             for(item of orders.OrderItems){
+//                 // console.log(item)
   
-            //find fetched order
-            var finditem = await OrderItems.findOne({OrderItemId:item.OrderItemId});
+//             //find fetched order
+//             var finditem = await OrderItems.findOne({OrderItemId:item.OrderItemId});
             
-            //updating statuses
-            // console.log(finditem.Status+" "+item.Status);
-            if(finditem.Status!=item.Status){
-                if(finditem.Status=='ready_to_ship')
-                console.log(finditem.Status+" "+item.Status);
-                finditem.Status=item.Status;
-                //Update Stock for failed orders
-                // if(item.Status=="failed" && item.ShippingType=="dropshipping"){
-                //     await Sku.updateMany({useremail:item.useremail,name:item.BaseSku},{$inc:{FBMstock:-1}})
-                // }
+//             //updating statuses
+//             // console.log(finditem.Status+" "+item.Status);
+//             if(finditem.Status!=item.Status){
+//                 if(finditem.Status=='ready_to_ship')
+//                 console.log(finditem.Status+" "+item.Status);
+//                 finditem.Status=item.Status;
 
-        }
-            //Update Tracking if tracking available
-            // console.log('existing tracking',finditem.TrackingCode,'daraz tracking',item.TrackingCode)
-            // if(finditem.TrackingCode==""){
-            //     // console.log("Tracking first")
-            //     if(item.TrackingCode!="")
-            //     {
- 
-            //         finditem.TrackingCode=item.TrackingCode;
-            //         finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
- 
-            //     }
-                
-            // }
-             //New Updated Tracking if changed
-            if(finditem.TrackingCode!=item.TrackingCode)
-            {
-                finditem.PreviousTracking=finditem.TrackingCode
-                finditem.TrackingCode=item.TrackingCode;
-                finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
-                finditem.trackingChangeCount=finditem.trackingChangeCount+1
-                // console.log(result);
-            }
-            result = await finditem.save();
-        }
-        }
-        
- 
-        
-    // }
-    // catch(error){
-    //     console.log(error);
-    // }
-}
-    }
+//         }
 
-    }
-    console.log("Status Loop done");
+//              //New Updated Tracking if changed
+//             if(finditem.TrackingCode!=item.TrackingCode)
+//             {
+//                 finditem.PreviousTracking=finditem.TrackingCode
+//                 finditem.TrackingCode=item.TrackingCode;
+//                 finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
+//                 finditem.trackingChangeCount=finditem.trackingChangeCount+1
+//                 // console.log(result);
+//             }
+//             result = await finditem.save();
+//         }
+//         }
+// }
+//     }
 
-    try {
-        setTimeout(()=>{
-            updateOrderItemStatus();
-        },180000);
-    } catch (error) {
-        console.log(error);
-    }
+//     }
+//     console.log("Status Loop done");
+
+//     try {
+//         setTimeout(()=>{
+//             updateOrderItemStatus();
+//         },180000);
+//     } catch (error) {
+//         console.log(error);
+//     }
     
 
     
-}
+// }
 
-async function updateOrderItemStatusAndUserWise(user,status){
-    var darazid = await Darazid.find({useremail:user});
-
+async function updateOrderItemStatus(user,status){
+    var darazid = await Darazid.find({...user});
     for(var shop of darazid){
         //get order with statuses of this shop
         splitCount=150
-        var orderitemscount = await OrderItems.countDocuments({Status:status,ShopId:shop.shopid})
+        var orderitemscount = await OrderItems.countDocuments({...status,ShopId:shop.shopid})
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
         // console.log(end)
     for(let i=0;i<end;i++){
-        var orderitems = await OrderItems.find({Status:status,ShopId:shop.shopid})
+        var orderitems = await OrderItems.find({...status,ShopId:shop.shopid})
         .skip(i*splitCount)
         .limit(splitCount)
         console.log(shop.shopid+' '+orderitems.length)
@@ -158,25 +134,8 @@ async function updateOrderItemStatusAndUserWise(user,status){
                 if(finditem.Status=='ready_to_ship')
                 console.log(finditem.Status+" "+item.Status);
                 finditem.Status=item.Status;
-                //Update Stock for failed orders
-                // if(item.Status=="failed" && item.ShippingType=="dropshipping"){
-                //     await Sku.updateMany({useremail:item.useremail,name:item.BaseSku},{$inc:{FBMstock:-1}})
-                // }
 
         }
-            //Update Tracking if tracking available
-            // console.log('existing tracking',finditem.TrackingCode,'daraz tracking',item.TrackingCode)
-            // if(finditem.TrackingCode==""){
-            //     // console.log("Tracking first")
-            //     if(item.TrackingCode!="")
-            //     {
- 
-            //         finditem.TrackingCode=item.TrackingCode;
-            //         finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
- 
-            //     }
-                
-            // }
              //New Updated Tracking if changed
             if(finditem.TrackingCode!=item.TrackingCode)
             {

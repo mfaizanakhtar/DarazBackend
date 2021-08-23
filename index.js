@@ -11,7 +11,7 @@ const { OrderItems } = require('./models/orderItem');
 const orders = require('./routes/orders');
 const skus = require('./routes/skus');
 const {updateOrdersData,updateSingleOrder} = require('./scripts/updateOrders');
-const {updateItemPendingStatus,updateOrderItemStatus,updatePendingOrderStatus} = require('./scripts/updateStatus')
+const {updateItemPendingStatus,updateOrderItemStatus,updatePendingOrderStatus,updateOrderItemStatusAndUserWise} = require('./scripts/updateStatus')
 const {generateSingleOrderUrl,RtsURL} = require('./scripts/GenerateUrl');
 const {updateTransactions} = require("./scripts/updateFinance");
 const  {generateLabelUrl} = require("./scripts/GenerateUrl");
@@ -54,10 +54,33 @@ app.use('/api/skus',skus)
 // updateId()
 // updateSingleOrder('pkgadgies@gmail.com','131329258345032')
 updateOrdersData();
-updateOrderItemStatus();
+// updateOrderItemStatus();
 // updateItemPendingStatus();
 // updatePendingOrderStatus();
 updateTransactions();
+
+
+try {
+    setTimeout(()=>{
+
+        updateOrderItemStatus({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
+        ShippingType:'Dropshipping'},statusObj);
+
+    },180000);
+} catch (error) {
+    console.log(error);
+}
+
+try {
+    setTimeout(()=>{
+
+        updateOrderItemStatus({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
+        ShippingType:'Own Warehouse'},statusObj);
+
+    },18000000);
+} catch (error) {
+    console.log(error);
+}
 // labelFetch()
 // async function labelFetch(){
 

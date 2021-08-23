@@ -7,7 +7,7 @@ const router = express.Router();
 const {Darazid} = require('../models/darazid')
 const {RtsURL} = require('../scripts/GenerateUrl')
 const {GetData} = require('../scripts/HttpReq')
-const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatusAndUserWise} = require('../scripts/updateStatus')
+const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
 
 router.get('/orders/',auth,async(req,res)=>{
 
@@ -211,7 +211,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     console.log("shopSort",shopSort)
     // console.log(sort)
     // var updateResult=true
-    var updateResult = await updateOrderItemStatusAndUserWise(req.user.useremail,'ready_to_ship')
+    var updateResult = await updateOrderItemStatus({useremail:req.user.useremail,},{Status:'ready_to_ship',ShippingType:'Dropshipping'})
     if(updateResult==true) await fetchLabelsAndUpdate(req.user.useremail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
     trackingCount = await OrderItems.aggregate([{$match:{OrderId:{$in:req.body.Orders},ShippingType:'Dropshipping'}},{$group:{_id:'$TrackingCode',Count:{$sum:1}}}])
