@@ -16,9 +16,15 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
 
         // //get All Shops in db
         // console.log("updating status")
+        var result = setTimeout(async()=>{
+
         var updateResult = await updateOrderItemStatus({useremail:user},{Status:'pending',ShippingType:'Dropshipping'})
-        console.log("user status done")
         return updateResult
+
+        },3000)
+        
+        console.log("user status done")
+        return result
     }
 
     // },3000)
