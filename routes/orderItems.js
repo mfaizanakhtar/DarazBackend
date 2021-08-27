@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { OrderItems } = require('../models/orderItem');
+const {Sku} = require('../models/sku')
 const auth = require('../middleware/auth')
 
 // router.get('/data/:filter',auth,async(req,res)=>{
@@ -68,16 +69,23 @@ router.put('/return/:id',auth,async(req,res)=>{
             ReturnDate:new Date(req.body.date)
         }
     })
-
-    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1})
-    res.send([{Status:"Received"},updatedResult])
+    updatedResult = await OrderItems.find({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1,BaseSku:1,Sku:1})
+    for(var item of updatedResult){
+        console.log(item.Sku)
+        var update = await Sku.updateMany({name:item.BaseSku},{$inc:{FBMstock:1}})
+        console.log(update)
     }
+    res.send({Status:"Received",updatedResult:updatedResult[0]})
+    }
+    // updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1})
+    // res.send([{Status:"Received"},updatedResult])
+    // }
     else{
         orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id})
         if(orderItem.length>0){
-            res.send([{Status:"Already Received"}])
+            res.send({Status:"Already Received"})
         }
-        else res.send([{Status:"Tracking not Found"}])
+        else res.send({Status:"Tracking not Found"})
         
     }    
     
@@ -94,20 +102,20 @@ router.put('/dispatch/:id',auth,async(req,res)=>{
         }
     })
     updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{DispatchDate:1,OrderId:1,TrackingCode:1,ShopId:1})
-    res.send([{Status:"Dispatched"},updatedResult]);
+    res.send({Status:"Dispatched",updatedResult:updatedResult});
 }
 else{
   orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id,Status:"ready_to_ship"})
   if(orderItem.length>0){
-    res.send([{Status:"Duplicate"}])
+    res.send({Status:"Duplicate"})
   }
   else{
       orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id})
       if(orderItem.length>0){
-          res.send([{Status:"Order status not eligible to dispatch"}])
+          res.send({Status:"Order status not eligible to dispatch"})
       }
       else{
-          res.send([{Status:"Order not Found"}])
+          res.send({Status:"Order not Found"})
       }
   }
 } 

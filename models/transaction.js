@@ -19,7 +19,8 @@ const transactionSchema = new mongoose.Schema({
     ShipmentType:String,
     Reference:String,
     PaymentRefId:String,
-    useremail:String
+    useremail:String,
+    OrderItemUpdated:{type:Boolean,default:false}
 })
 
 const Transaction = new mongoose.model('Transaction',transactionSchema)

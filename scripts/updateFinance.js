@@ -18,16 +18,50 @@ async function updateTransactions(){
         // console.log(shopid.shopid+" "+transactions.length);
         for(var t of transactions){
             //check if transactions is in db
-            var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"]})
-            if(transaction.length==0){
+            var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"],useremail:shopid.useremail})
+            if(transaction.length>0){
+                if(transaction.OrderItemUpdated==false){
+
+                    var updateResult = await OrderItems.updateMany({OrderItemId:transaction.OrderItemNo},{
+                        $push:{Transactions:
+                                {
+                                _id:transaction._id,
+                                TransactionType:transaction.TransactionType,
+                                FeeName:transaction.FeeName,
+                                Amount:transaction.Amount,
+                                VATinAmount:transaction.VATinAmount,
+                                Statement:transaction.Statement
+                                }
+                            }
+                    })
+                
+                if(updateResult.n>0){
+                    await Transaction.updateMany({_id:transactResult._id},{OrderItemUpdated:true})
+                }
+
+                }
+            }
+            else if(transaction.length==0){
                 //if not found, save into db
                 var transaction = getTransactionObj(t,shopid.useremail)
             transactResult = await transaction.save()
             // console.log(transactResult)
             //find corresponding order and push transaction into order obj
-            OrderItems.update({OrderItemId:transactResult.OrderItemNo},{
-                $push:{Transactions:transactResult._id}
+            var updateResult = await OrderItems.updateMany({OrderItemId:transactResult.OrderItemNo},{
+                $push:{Transactions:
+                        {
+                        _id:transactResult._id,
+                        TransactionType:transactResult.TransactionType,
+                        FeeName:transactResult.FeeName,
+                        Amount:transactResult.Amount,
+                        VATinAmount:transactResult.VATinAmount,
+                        Statement:transactResult.Statement
+                        }
+                    }
             })
+            if(updateResult.n>0){
+                await Transaction.updateMany({_id:transactResult._id},{OrderItemUpdated:true})
+            }
         }
             
         };

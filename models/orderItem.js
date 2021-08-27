@@ -28,8 +28,13 @@ const OrderItemsSchema = new mongoose.Schema({
     ReturnDate:Date,
     useremail:String,
     Transactions:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Transaction'
+        _id:{ type:mongoose.Schema.Types.ObjectId,ref:'Transaction' },
+        TransactionType:String,
+        FeeName:String,
+        Amount:Number,
+        VATinAmount:Number,
+        Statement:String
+
     }],
     cost:Number,
     PortCode:{type:String,default:''},
@@ -42,7 +47,8 @@ const OrderItemsSchema = new mongoose.Schema({
     trackingChangeCount:{
         type:Number,
         default:0
-    }
+    },
+
 
 
     
