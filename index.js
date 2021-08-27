@@ -20,7 +20,7 @@ const cheerio = require('cheerio')
 const atob = require("atob");
  
 
-mongoose.connect(config.connectionstring)
+mongoose.connect(config.connectionstring,{useFindAndModify:false})
     .then(()=>{
         console.log(`Connected ${config.connectionstring}`)
     })
@@ -69,7 +69,10 @@ updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'delivered'}],
 ShippingType:'Dropshipping'},3000000);
 
 updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
-ShippingType:'Dropshipping'},180000);
+ShippingType:'Dropshipping',DispatchDate:{$ne:null}},180000);
+
+updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
+ShippingType:'Dropshipping',DispatchDate:null},180000);
 
 // updateOrderItemStatus({},{Status:'delivered',
 // ShippingType:'Dropshipping'})

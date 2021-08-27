@@ -24,7 +24,7 @@ const OrderItemsSchema = new mongoose.Schema({
     UpdatedAt:Date,
     productMainImage:String,
     Variation:String,
-    DispatchDate:Date,
+    DispatchDate:{type:Date,default:''},
     ReturnDate:Date,
     useremail:String,
     Transactions:[{
@@ -37,6 +37,7 @@ const OrderItemsSchema = new mongoose.Schema({
 
     }],
     cost:Number,
+    packagingCost:Number,
     PortCode:{type:String,default:''},
     trackingBarcode:String,
     portcodeBarcode:String,

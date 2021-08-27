@@ -85,7 +85,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
                 await Sku.updateMany({name:baseSku(item.Sku),useremail:useremail},{
                     $inc:stockType
                 })
-                orderItem = OrderItemObj(item,shopid,useremail,skuresult.cost)
+                orderItem = OrderItemObj(item,shopid,useremail,skuresult)
             }
 
             // creating orderitem object
@@ -105,8 +105,15 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
 
 }
 
-function OrderItemObj(item,shopid,useremail,cost){
+function OrderItemObj(item,shopid,useremail,sku){
     // console.log(item)
+    var packagingCost
+    if(item.ShippingType=="Dropshipping"){
+        packagingCost={packagingCost:sku.FBMpackagingCost}
+    }
+    else if(item.ShippingType=="Own Warehouse"){
+        packagingCost={packagingCost:sku.FBDpackagingCost}
+    }
     var orderItem = new OrderItems({
         OrderId:item.OrderId,
         OrderItemId:item.OrderItemId,
@@ -127,7 +134,8 @@ function OrderItemObj(item,shopid,useremail,cost){
         productMainImage:item.productMainImage,
         Variation:item.Variation,
         useremail:useremail,
-        cost:cost
+        cost:sku.cost,
+        ...packagingCost
     })
     // console.log(orderItem.ShipmentProvider)
     return orderItem;

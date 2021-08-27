@@ -6,6 +6,14 @@ const skuSchema = new mongoose.Schema({
         type:Number,
         default:0
     },
+    FBMpackagingCost:{
+        type:Number,
+        default:0
+    },
+    FBDpackagingCost:{
+        type:Number,
+        default:0
+    },
     FBMstock:{
         type:Number,
         default:0

@@ -15,9 +15,17 @@ router.get('/getAllSkus',auth,async (req,res)=>{
 })
 
 router.post('/updateSku',auth,async(req,res)=>{
-    await OrderItems.updateMany({useremail:req.user.useremail,BaseSku:req.body.name,cost:0},{cost:req.body.cost})
-    var result = await Sku.findOneAndUpdate({name:req.body.name,useremail:req.user.useremail},
-        {$inc:{FBMstock:req.body.stockChange},cost:req.body.cost})
+    await OrderItems.updateMany({useremail:req.user.useremail,BaseSku:req.body.name,cost:0,ShippingType:"Dropshipping"},
+    {cost:req.body.cost,packagingCost:req.body.FBMpackagingCost})
+
+    await OrderItems.updateMany({useremail:req.user.useremail,BaseSku:req.body.name,cost:0,ShippingType:"Own Warehouse"},
+    {cost:req.body.cost,packagingCost:req.body.FBDpackagingCost})
+
+    var result = await Sku.findOneAndUpdate(
+        {name:req.body.name,useremail:req.user.useremail},
+        {$inc:{FBMstock:req.body.stockChange},cost:req.body.cost,
+        FBDpackagingCost:req.body.FBDpackagingCost,FBMpackagingCost:req.body.FBMpackagingCost}
+        )
 
     // console.log(result)
 
