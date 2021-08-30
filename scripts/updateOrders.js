@@ -78,7 +78,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
                     ...stockType
                 })
                 await sku.save();
-                orderItem = OrderItemObj(item,shopid,useremail,{cost:0});
+                orderItem = OrderItemObj(item,shopid,useremail,{cost:0,FBMpackagingCost:0,FBDpackagingCost:0});
             }
             if(skuresult!=null){
                 //reducing stock
