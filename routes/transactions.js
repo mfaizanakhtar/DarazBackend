@@ -68,7 +68,7 @@ async function getAggregatedValues(req,Filter){
         
         var Statements = await Transaction.aggregate([
             {
-                $match:{useremail:req.user.useremail}
+                $match:{useremail:req.user.useremail,ShopId:{$ne:null}}
             },
             {
                 $sort:{"TransactionDate":1}
