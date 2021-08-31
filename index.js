@@ -65,7 +65,7 @@ updateTransactions();
 updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
 ShippingType:'Own Warehouse'},18000000);
 
-updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'delivered'}],
+updateOrderItemStatus({},{$or:[{Status:'shipped'}],
 ShippingType:'Dropshipping'},3000000);
 
 updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
