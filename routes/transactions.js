@@ -60,7 +60,7 @@ async function getAggregatedValues(req,Filter){
     
         var Stores = await Transaction.aggregate([
             {
-                $match:{useremail:req.user.useremail}
+                $match:{useremail:req.user.useremail,ShopId:{$ne:null}}
             },
             {
                 $group:{_id:"$ShopId"}
@@ -69,6 +69,9 @@ async function getAggregatedValues(req,Filter){
         var Statements = await Transaction.aggregate([
             {
                 $match:{useremail:req.user.useremail}
+            },
+            {
+                $sort:{"TransactionDate":-1}  
             },
             {
                 $group:{_id:"$Statement"}
