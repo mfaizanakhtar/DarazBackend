@@ -71,9 +71,6 @@ async function getAggregatedValues(req,Filter){
                 $match:{useremail:req.user.useremail}
             },
             {
-                $sort:{"TransactionDate":-1}  
-            },
-            {
                 $group:{_id:"$Statement"}
             }])
 
