@@ -7,6 +7,7 @@ const users = require('./routes/users')
 const auth = require('./routes/auth');
 const darazid = require('./routes/darazids');
 const orderitems = require('./routes/orderItems');
+const transactions = require('./routes/transactions')
 const { OrderItems } = require('./models/orderItem');
 const orders = require('./routes/orders');
 const skus = require('./routes/skus');
@@ -45,6 +46,7 @@ app.use('/api/darazid',darazid);
 app.use('/api/orderitems',orderitems);
 app.use('/api/orders',orders)
 app.use('/api/skus',skus)
+app.use('/api/transactions',transactions)
 
 
 // async function updateId(){
