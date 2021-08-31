@@ -93,21 +93,7 @@ async function FindQuery(query,user){
             foreignField:"_id",
             as:"OrderItems"
         }},
-        // {
-        //     $lookup:{
-        //         from:'orderitems',
-        //         let:{order_items:"$OrderItems"},
-        //         pipeline:[
-        //             {
-                        
-        //                 $match:{
-        //                     $expr:{$eq:["$$order_items","$_id"]}
-        //                 }
-        //             }
-        //         ],
-        //         as:"OrderItems"
-        //     }
-        // },
+
         {$match:FinalFilter},
         {$sort:{"CreatedAt":1}},
         ...skuSort,

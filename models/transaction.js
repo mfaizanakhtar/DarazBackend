@@ -19,6 +19,7 @@ const transactionSchema = new mongoose.Schema({
     ShipmentType:String,
     Reference:String,
     PaymentRefId:String,
+    ShopId:String,
     useremail:String,
     OrderItemUpdated:{type:Boolean,default:false}
 })

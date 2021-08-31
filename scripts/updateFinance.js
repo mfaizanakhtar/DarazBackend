@@ -43,7 +43,7 @@ async function updateTransactions(){
             }
             else if(transaction.length==0){
                 //if not found, save into db
-                var transaction = getTransactionObj(t,shopid.useremail)
+            var transaction = getTransactionObj(t,shopid.useremail,shopid.shopid)
             transactResult = await transaction.save()
             // console.log(transactResult)
             //find corresponding order and push transaction into order obj
@@ -81,7 +81,7 @@ catch(ex){
 }
 }
 
-function getTransactionObj(t,useremail){
+function getTransactionObj(t,useremail,shopid){
     var transaction = new Transaction({
         TransactionDate:t["Transaction Date"],
         TransactionType:t["Transaction Type"],
@@ -101,6 +101,7 @@ function getTransactionObj(t,useremail){
         ShipmentType:t["Shipment Type"],
         Reference:t["Reference"],
         PaymentRefId:t["Payment Ref Id"],
+        ShopId:shopid,
         useremail:useremail
     })
 
