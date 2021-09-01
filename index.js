@@ -71,10 +71,10 @@ updateOrderItemStatus({},{Status:'shipped',
 ShippingType:'Dropshipping'},3000000);
 
 updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
-ShippingType:'Dropshipping',DispatchDate:{$ne:null}},180000);
+ShippingType:'Dropshipping'},180000);
 
-updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
-ShippingType:'Dropshipping',DispatchDate:null},180000);
+// updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
+// ShippingType:'Dropshipping',DispatchDate:null},180000);
 
 // updateOrderItemStatus({},{Status:'delivered',
 // ShippingType:'Dropshipping'})

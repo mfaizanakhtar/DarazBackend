@@ -112,12 +112,12 @@ async function updateOrderItemStatus(user,status,repeatTime){
         var orderitems = await OrderItems.find({...status,ShopId:shop.shopid})
         .skip(i*splitCount)
         .limit(splitCount)
-        console.log(shop.shopid+' '+orderitems.length)
+        // console.log(shop.shopid+' '+orderitems.length)
         var orderitemsrray = getOrderIdArray(orderitems)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsrray);
         orderitemsdata = await GetData(url);
         if(orderitemsdata!=null){
-        console.log(orderitemsdata.Orders.length)
+        // console.log(orderitemsdata.Orders.length)
 
         orderitemsdata = orderitemsdata.Orders
         //iterate all orders fetched from api

@@ -7,17 +7,26 @@ const {OrderItems} = require('../models/orderItem')
 async function updateTransactions(){
     try{
     var shopids = await Darazid.find()
+    transactionTypes=[-1]
+    // transactionTypes=[-1,13,8,16,3,28,14,85,15,145,104]
     //get start and enddate for query
-    date = getDates()
+    var dates = getDates()
+    // console.log(dates)
     for(shopid of shopids){
+        for(date of dates){
+        for(transType of transactionTypes){
         //get Url for transaction
-        url= generateTransactionsUrl(shopid.shopid,shopid.secretkey,date.start,date.end,300)
+        url= generateTransactionsUrl(shopid.shopid,shopid.secretkey,date,transType)
         //get transactions data
         var transactions = await GetData(url);
         transactions = transactions.TransactionDOs.transactionDOs
+        console.log("Shop "+shopid.shopid+" Length "+transactions.length+" date "+date+" Type "+transType)
+        // console.log(date)
         // console.log(shopid.shopid+" "+transactions.length);
+        if(transactions.length>0){console.log(transactions[0]["Fee Name"])}
         for(var t of transactions){
             //check if transactions is in db
+            // if(t["Order No."]=='132205169891061'){console.log(t)}
             var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"],useremail:shopid.useremail})
             if(transaction.length>0){
                 if(transaction.OrderItemUpdated==false){
@@ -65,7 +74,9 @@ async function updateTransactions(){
         }
             
         };
+    }
     };
+}
     console.log("Transaction Loop Done")
 }
 catch(ex){
@@ -116,6 +127,7 @@ function getDates(){
     var startdate = dd
     var startmonth = mm
     var startyear = yyyy
+
     if(startdate=='01'){
         if(startmonth=='01'){
             startdate='31'
@@ -126,7 +138,7 @@ function getDates(){
             startdate='28'
             startmonth='02'
         }
-        else if(startmonth=="2"||startmonth=="6"||startmonth=="8"||startmonth=="9"||startmonth=="11"){
+        else if(startmonth=="02"||startmonth=="06"||startmonth=="08"||startmonth=="09"||startmonth=="11"){
             startdate='31'
             startmonth=startmonth-1
         }
@@ -136,7 +148,7 @@ function getDates(){
         }
     }
 
-    return {start:startyear+"-"+startmonth+"-"+startdate,end:yyyy+"-"+mm+"-"+dd}
+    return [startyear+"-"+startmonth+"-"+startdate,yyyy+"-"+mm+"-"+dd]
 }
 
 module.exports.updateTransactions = updateTransactions

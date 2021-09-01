@@ -1,16 +1,16 @@
 const {SignParameters} = require('./signParameters');
 
 
-function generateTransactionsUrl(userid,secretkey,starttime,endtime,maxitem){
+function generateTransactionsUrl(userid,secretkey,date,transType){
     var url="https://api.sellercenter.daraz.pk?"
     Action="Action=GetTransactionDetails"
     Timestamp=getTimeStamp();
 
     let userID=encodeURIComponent(userid);
     apiparams=Action+"&Format=json"+"&Timestamp="+Timestamp+"&UserID="+userID+
-    "&Version=1.0"+"&endTime="+endtime+"&maxtime="+maxitem+"&startTime="+starttime+"&transType=-1"
+    "&Version=1.0"+"&endTime="+date+"&maxitem=100"+"&startTime="+date+"&transType="+transType
     url=url+apiparams+"&"+"Signature="+SignParameters(secretkey,apiparams)
-
+    // console.log(url)
     return url
 
 }
