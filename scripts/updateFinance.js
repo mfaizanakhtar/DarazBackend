@@ -7,8 +7,18 @@ const {OrderItems} = require('../models/orderItem')
 async function updateTransactions(){
     try{
     var shopids = await Darazid.find()
-    transactionTypes=[-1]
-    // transactionTypes=[-1,13,8,16,3,28,14,85,15,145,104]
+    // transactionTypes=[155]
+    transactionTypes=[13,8,16,3,28,14,85,15,145,104]
+    //13 - Item Price Credit
+    //8 - Shipping Fee (Paid By Customer)
+    //16 - Commission
+    //3 - Payment Fee
+    //28 - Automatic Shipping Fee
+    //14 - Reversal Item Price
+    //85 - Lost And Damaged Claim
+    //15 - Reversal Commission
+    //145 - Other Debits (Returns)
+    //104 - Adjustments Others
     //get start and enddate for query
     var dates = getDates()
     // console.log(dates)
@@ -19,11 +29,12 @@ async function updateTransactions(){
         url= generateTransactionsUrl(shopid.shopid,shopid.secretkey,date,transType)
         //get transactions data
         var transactions = await GetData(url);
+        if(transactions!=null){
         transactions = transactions.TransactionDOs.transactionDOs
         console.log("Shop "+shopid.shopid+" Length "+transactions.length+" date "+date+" Type "+transType)
         // console.log(date)
         // console.log(shopid.shopid+" "+transactions.length);
-        if(transactions.length>0){console.log(transactions[0]["Fee Name"])}
+        // if(transactions.length>0){console.log(transactions[0]["Fee Name"]+" "+transactions[0]["Transaction Number"])}
         for(var t of transactions){
             //check if transactions is in db
             // if(t["Order No."]=='132205169891061'){console.log(t)}
@@ -52,7 +63,7 @@ async function updateTransactions(){
             }
             else if(transaction.length==0){
                 //if not found, save into db
-            var transaction = getTransactionObj(t,shopid.useremail,shopid.shopid)
+            var transaction = getTransactionObj(t,shopid.useremail,shopid.shopid,transType)
             transactResult = await transaction.save()
             // console.log(transactResult)
             //find corresponding order and push transaction into order obj
@@ -75,6 +86,7 @@ async function updateTransactions(){
             
         };
     }
+    }
     };
 }
     console.log("Transaction Loop Done")
@@ -85,14 +97,14 @@ catch(ex){
 try{
     setTimeout(()=>{
         updateTransactions();
-    },300000);
+    },3000000);
 }
 catch(ex){
     console.log(ex)
 }
 }
 
-function getTransactionObj(t,useremail,shopid){
+function getTransactionObj(t,useremail,shopid,transType){
     var transaction = new Transaction({
         TransactionDate:t["Transaction Date"],
         TransactionType:t["Transaction Type"],
@@ -113,7 +125,8 @@ function getTransactionObj(t,useremail,shopid){
         Reference:t["Reference"],
         PaymentRefId:t["Payment Ref Id"],
         ShopId:shopid,
-        useremail:useremail
+        useremail:useremail,
+        transType:transType
     })
 
     return transaction

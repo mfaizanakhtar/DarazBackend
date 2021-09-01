@@ -21,7 +21,8 @@ const transactionSchema = new mongoose.Schema({
     PaymentRefId:String,
     ShopId:String,
     useremail:String,
-    OrderItemUpdated:{type:Boolean,default:false}
+    OrderItemUpdated:{type:Boolean,default:false},
+    transType:String
 })
 
 const Transaction = new mongoose.model('Transaction',transactionSchema)
