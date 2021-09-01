@@ -131,7 +131,7 @@ async function updateOrderItemStatus(user,status,repeatTime){
                 ShippingAmount:item.ShippingAmount
                 ,Variation:item.Variation},
                 {Status:item.Status,TrackingCode:item.TrackingCode,
-                    ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2)})
+                    ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2),UpdatedAt:item.UpdatedAt})
             
                 if(status.DispatchDate!=null){
                     await Sku.updateMany({name:updateResult.BaseSku,useremail:updateResult.useremail},{FBMstock:{$inc:1}})
@@ -295,23 +295,23 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     for(let i=0;i<trackings.length;i++){
         console.log("3rd Checkpoint")
 
-        if(portCodes.length==trackingbarcodes.length){
+        // if(portCodes.length==trackingbarcodes.length){
         updateResult = await OrderItems.updateMany({TrackingCode:trackings[i].toString(),OrderId:labelOrderNumbers[i].toString()},{
             $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],labelPrice:labelPrices[i],deliveryPoint:deliveryPoints[i],labelTracking:trackings[i]}
         })
         console.log(updateResult)
-        }
-        else{
-            console.log("PortCode Length: ",portCodes.length)
-            console.log("trackingbarcodes Length: ",trackingbarcodes.length)
-            console.log("qrcodes Length: ",qrcodes.length)
-            console.log("labelPrices Length: ",labelPrices.length)
-            console.log("deliveryPoints Length: ",deliveryPoints.length)
-            console.log("trackings Length: ",trackings.length)
-            console.log("labelOrderNumbers Length: ",labelOrderNumbers.length)
+        // }
+        // else{
+        //     console.log("PortCode Length: ",portCodes.length)
+        //     console.log("trackingbarcodes Length: ",trackingbarcodes.length)
+        //     console.log("qrcodes Length: ",qrcodes.length)
+        //     console.log("labelPrices Length: ",labelPrices.length)
+        //     console.log("deliveryPoints Length: ",deliveryPoints.length)
+        //     console.log("trackings Length: ",trackings.length)
+        //     console.log("labelOrderNumbers Length: ",labelOrderNumbers.length)
 
 
-        }
+        // }
         
     }
 }catch(error){
