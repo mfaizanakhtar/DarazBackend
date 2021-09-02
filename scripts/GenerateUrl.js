@@ -8,7 +8,7 @@ function generateTransactionsUrl(userid,secretkey,date,transType){
 
     let userID=encodeURIComponent(userid);
     apiparams=Action+"&Format=json"+"&Timestamp="+Timestamp+"&UserID="+userID+
-    "&Version=1.0"+"&endTime="+date+"&maxitem=100&pageIndex=1&pageSize=10"+"&startTime=2021-08-01"+"&transType="+transType
+    "&Version=1.0"+"&endTime="+date+"&maxitem=100"+"&startTime="+date+"&transType="+transType
     url=url+apiparams+"&"+"Signature="+SignParameters(secretkey,apiparams)
     // console.log(url)
     return url
