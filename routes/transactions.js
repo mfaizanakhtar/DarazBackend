@@ -39,6 +39,28 @@ router.get('/',auth,async(req,res)=>{
     res.send({Transactions:Transactions,...DropDownVal})
 })
 
+router.get('/Statement',auth,async(req,res)=>{
+    var query = req.query
+    for(var propName in query){
+        if(query[propName]=="null"){
+            delete query[propName]
+        }
+    }
+
+    var Statement = await Transaction.aggregate([
+        {
+            $match:{useremail:req.user.useremail,...query}
+        },
+        {
+            $group:{_id:"$FeeName",Amount:{$sum:"$Amount"},Vat:{$sum:"$VATinAmount"}}
+        }
+    ])
+
+    var Aggregated= await getAggregatedValues(req,{useremail:req.user.useremail})
+
+    res.send({Statement:Statement,DropDown:Aggregated})
+})
+
 async function getAggregatedValues(req,Filter){
     var Length = await Transaction.find(Filter).countDocuments()
 
