@@ -21,7 +21,7 @@ async function updateTransactions(){
     //104 - Adjustments Others
     //get start and enddate for query
     var dates = getDates()
-    // console.log(dates)
+    console.log(dates)
     for(shopid of shopids){
         for(date of dates){
         for(transType of transactionTypes){
@@ -160,7 +160,10 @@ function getDates(){
             startmonth=startmonth-1
         }
     }
-
+    else{
+        startdate=startdate-1
+        startdate = String(startdate).padStart(2,0)
+    }
     return [startyear+"-"+startmonth+"-"+startdate,yyyy+"-"+mm+"-"+dd]
 }
 
