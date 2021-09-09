@@ -19,6 +19,7 @@ const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
 const cheerio = require('cheerio')
 const atob = require("atob");
+const {getSkus} = require('./scripts/updateSku')
  
 
 mongoose.connect(config.connectionstring,{useFindAndModify:false})
@@ -63,6 +64,7 @@ updateOrdersData();
 // updateItemPendingStatus();
 // updatePendingOrderStatus();
 updateTransactions();
+// getSkus('techatronixs@gmail.com','["45CM+7FT","Holder5208"]')
 
 updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
 ShippingType:'Own Warehouse'},18000000);

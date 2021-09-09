@@ -3,8 +3,10 @@ const {OrderItems} = require('../models/orderItem');
 const { Darazid } = require('../models/darazid');
 const {Order} = require('../models/order');
 const {Sku} = require('../models/sku');
+const {darazSku}=require('../models/darazsku')
 const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl,generateLabelUrl, generateSingleOrderUrl} = require('./GenerateUrl');
 const cheerio = require('cheerio')
+const {getSkus} = require('./updateSku')
 const atob = require("atob");
 
 
@@ -48,6 +50,8 @@ async function updateOrders(id,OrdersData){
 }
 
 async function updateOrderItems(shopid,secretkey,useremail,Orders){
+    var darazSkusArray=[]
+    var updatedarazSkusArray=[]
     // console.log(Orders)
     //fetch orderItems data from daraz api
     OrderItemsData = await getOrderItemsData(shopid,secretkey,Orders)
@@ -63,9 +67,11 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
 
         if(item.ShippingType=="Dropshipping"){
             var stockType={FBMstock:-1}
+            var darazSkuStockType={"FBMstock.totalQuantity":-1}
         }
         else if(item.ShippingType=="Own Warehouse"){
             var stockType={FBMstock:0}
+            var darazSkuStockType={"FBDstock.totalQuantity":-1}
         }
         // console.log(stockType)
 
@@ -80,7 +86,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
                 await sku.save();
                 orderItem = OrderItemObj(item,shopid,useremail,{cost:0,FBMpackagingCost:0,FBDpackagingCost:0});
             }
-            if(skuresult!=null){
+            else if(skuresult!=null){
                 //reducing stock
                 await Sku.updateMany({name:baseSku(item.Sku),useremail:useremail},{
                     $inc:stockType
@@ -92,6 +98,19 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             
             var result = await orderItem.save();
             // console.log(result)
+            //find darazSku in db
+            var dSku = await darazSku.findOne({ShopSku:result.ShopSku,SellerSku:result.Sku,useremail:useremail})
+            if(dSku==null){
+                if(!darazSkusArray.includes('"'+result.Sku+'"')) darazSkusArray.push('"'+result.Sku+'"')
+                
+            }
+            if(dSku!=null){
+                if(!updatedarazSkusArray.includes('"'+result.Sku+'"')) updatedarazSkusArray.push('"'+result.Sku+'"')
+
+                await darazSku.findOneAndUpdate({ShopSku:result.ShopSku,SellerSku:result.Sku,useremail:useremail},{
+                    $inc:darazSkuStockType,$inc:{quantity:-1}
+                })
+            }
             //pushing orderItemId._id in Order Record for reference
             await Order.updateMany({
                 OrderId:result.OrderId,ShopId:shopid
@@ -102,6 +121,13 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
         }
     }
     };
+    if(darazSkusArray.length>0){
+        await getSkus(shopid,darazSkusArray,false)
+    }
+    if(updatedarazSkusArray.length>0){
+        await getSkus(shopid,darazSkusArray,true)
+    }
+    
 
 }
 

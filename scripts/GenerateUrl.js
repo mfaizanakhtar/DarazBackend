@@ -8,11 +8,25 @@ function generateTransactionsUrl(userid,secretkey,date,transType){
 
     let userID=encodeURIComponent(userid);
     apiparams=Action+"&Format=json"+"&Timestamp="+Timestamp+"&UserID="+userID+
-    "&Version=1.0"+"&endTime="+date+"&maxitem=100"+"&startTime="+date+"&transType="+transType
+    "&Version=1.0"+"&endTime="+date+"&startTime="+date+"&transType="+transType
     url=url+apiparams+"&"+"Signature="+SignParameters(secretkey,apiparams)
     // console.log(url)
     return url
 
+}
+
+function generateSkuUrl(userid,secretkey,Skus){
+    var url="https://api.sellercenter.daraz.pk?"
+    Action="Action=GetProducts"
+    Timestamp=getTimeStamp();
+
+    let userID=encodeURIComponent(userid);
+    let encodedSkus = encodeURIComponent(Skus)
+    apiparams=Action+"&Filter=all&Format=json"+"&SkuSellerList="+encodedSkus+"&Timestamp="+Timestamp+"&UserID="+userID+
+    "&Version=1.0"
+    url=url+apiparams+"&"+"Signature="+SignParameters(secretkey,apiparams)
+    // console.log(url)
+    return url
 }
 
 
@@ -123,3 +137,4 @@ module.exports.generateMultipleOrderItemsUrl = generateMultipleOrderItemsUrl;
 module.exports.getOrderIdArray = getOrderIdArray;
 module.exports.generateLabelUrl = generateLabelUrl;
 module.exports.RtsURL = RtsURL;
+module.exports.generateSkuUrl = generateSkuUrl
