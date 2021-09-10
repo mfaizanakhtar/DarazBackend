@@ -21,7 +21,7 @@ async function updateTransactions(){
     //104 - Adjustments Others
     //get start and enddate for query
     var dates = getDates()
-    console.log(dates)
+    // console.log(dates)
     for(shopid of shopids){
         for(date of dates){
         for(transType of transactionTypes){
@@ -31,7 +31,7 @@ async function updateTransactions(){
         var transactions = await GetData(url);
         if(transactions!=null){
         transactions = transactions.TransactionDOs.transactionDOs
-        console.log("Shop "+shopid.shopid+" Length "+transactions.length+" date "+date+" Type "+transType)
+        // console.log("Shop "+shopid.shopid+" Length "+transactions.length+" date "+date+" Type "+transType)
         // console.log(date)
         // console.log(shopid.shopid+" "+transactions.length);
         // if(transactions.length>0){console.log(transactions[0]["Fee Name"]+" "+transactions[0]["Transaction Number"])}

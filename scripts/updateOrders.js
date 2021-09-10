@@ -108,7 +108,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
                 if(!updatedarazSkusArray.includes('"'+result.Sku+'"')) updatedarazSkusArray.push('"'+result.Sku+'"')
 
                 await darazSku.findOneAndUpdate({ShopSku:result.ShopSku,SellerSku:result.Sku,useremail:useremail},{
-                    $inc:darazSkuStockType,$inc:{quantity:-1}
+                    $inc:darazSkuStockType,$inc:{localQuantity:-1}
                 })
             }
             //pushing orderItemId._id in Order Record for reference

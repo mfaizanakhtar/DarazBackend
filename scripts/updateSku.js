@@ -17,6 +17,7 @@ async function getSkus(darazid,skus,update){
             
             sku.ShopId=shop.shopid
             sku.useremail=shop.useremail
+            
             // sku.FBMstock=0
             // sku.FBDstock=0
             
@@ -27,6 +28,7 @@ async function getSkus(darazid,skus,update){
             if(!update){
                 sku.FBMstock=result.multiWarehouseInventories
                 sku.FBDstock=result.fblWarehouseInventories
+                sku.localQuantity=sku.quantity
             }
 
             skuResult = await darazSku.updateMany({SellerSku:sku.Sellersku,ShopSku:sku.ShopSku,SkuId:sku.SkuId,

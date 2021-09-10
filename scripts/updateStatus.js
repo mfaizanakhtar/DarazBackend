@@ -7,9 +7,9 @@ const {Sku} = require('../models/sku')
 const {getOrderIdArray} = require('../scripts/GenerateUrl')
 const cheerio = require('cheerio')
 const atob = require("atob");
+const { darazSku } = require('../models/darazsku');
 
 async function updateOrderItemsForRts(user,RtsOrdersResponse){
-    // setTimeout(async()=>{
 
         console.log("status ",user)
         if(RtsOrdersResponse>0){
@@ -21,81 +21,9 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
         return updateResult
     }
 
-    // },3000)
 
     
 }
-
-// async function updateOrderItemStatus(darazid){
-//     var darazid = await Darazid.find();
-
-//     for(var shop of darazid){
-//         //get order with statuses of this shop
-//         splitCount=150
-//         var orderitemscount = await OrderItems.countDocuments({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
-//         // console.log(orderitemscount)
-//         end = Math.ceil(orderitemscount/splitCount)
-//         // console.log(end)
-//     for(let i=0;i<end;i++){
-//         var orderitems = await OrderItems.find({$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],ShopId:shop.shopid})
-//         .skip(i*splitCount)
-//         .limit(splitCount)
-//         console.log(shop.shopid+' '+orderitems.length)
-//         var orderitemsarray = getOrderIdArray(orderitems)
-//         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsarray);
-//         // console.log(url)
-//         orderitemsdata = await GetData(url);
-//         if(orderitemsdata!=null){
-//         console.log(orderitemsdata.Orders.length)
-        
-//         orderitemsdata = orderitemsdata.Orders
-//         //iterate all orders fetched from api
-//         // try{
-//         for(var orders of orderitemsdata){
-//             for(item of orders.OrderItems){
-//                 // console.log(item)
-  
-//             //find fetched order
-//             var finditem = await OrderItems.findOne({OrderItemId:item.OrderItemId});
-            
-//             //updating statuses
-//             // console.log(finditem.Status+" "+item.Status);
-//             if(finditem.Status!=item.Status){
-//                 if(finditem.Status=='ready_to_ship')
-//                 console.log(finditem.Status+" "+item.Status);
-//                 finditem.Status=item.Status;
-
-//         }
-
-//              //New Updated Tracking if changed
-//             if(finditem.TrackingCode!=item.TrackingCode)
-//             {
-//                 finditem.PreviousTracking=finditem.TrackingCode
-//                 finditem.TrackingCode=item.TrackingCode;
-//                 finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
-//                 finditem.trackingChangeCount=finditem.trackingChangeCount+1
-//                 // console.log(result);
-//             }
-//             result = await finditem.save();
-//         }
-//         }
-// }
-//     }
-
-//     }
-//     console.log("Status Loop done");
-
-//     try {
-//         setTimeout(()=>{
-//             updateOrderItemStatus();
-//         },180000);
-//     } catch (error) {
-//         console.log(error);
-//     }
-    
-
-    
-// }
 
 async function updateOrderItemStatus(user,status,repeatTime){
     var updateResult
@@ -133,34 +61,18 @@ async function updateOrderItemStatus(user,status,repeatTime){
                 {Status:item.Status,TrackingCode:item.TrackingCode,
                     ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2),UpdatedAt:item.UpdatedAt})
             
-                if(status.DispatchDate!=null){
+                // if(status.DispatchDate!=null){
+                //     await Sku.updateMany({name:updateResult.BaseSku,useremail:updateResult.useremail},{FBMstock:{$inc:1}})
+                // }
+                if(updateResult.ShippingType=='Dropshipping' && updateResult.DispatchDate!=null && updateResult.Status=='canceled'){
                     await Sku.updateMany({name:updateResult.BaseSku,useremail:updateResult.useremail},{FBMstock:{$inc:1}})
+                    await darazSku.updateMany({SellerSku:updateResult.ShopSku,useremail:updateResult.useremail},{"FBMstock.totalQuantity":{$inc:1},localQuantity:{$inc:1}})
                 }
+                if(updateResult.ShippingType=='Own Warehouse' && (updateResult.Status=='canceled' || updateResult.Status=='failed')){
+                    await darazSku.updateMany({SellerSku:updateResult.ShopSku,useremail:updateResult.useremail},{"FBDstock.totalQuantity":{$inc:1},localQuantity:{$inc:1}})
+                }
+                
   
-        //     //find fetched order
-        //     var finditem = await OrderItems.findOne({OrderId:item.OrderId,Name:item.Name,Sku:item.Sku,ShopSku:item.ShopSku,
-        //         ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,ShippingAmount:item.ShippingAmount
-        //     ,Variation:item.Variation});
-            
-        //     //updating statuses
-        //     // console.log(finditem.Status+" "+item.Status);
-        //     if(finditem.Status!=item.Status){
-        //         if(finditem.Status=='ready_to_ship' && finditem.ShippingType=='Dropshipping')
-        //         console.log("Status",finditem.Status+" "+item.Status);
-        //         console.log("Order",finditem.OrderItemId+" "+item.OrderItemId)
-        //         finditem.Status=item.Status;
-
-        // }
-        //      //New Updated Tracking if changed
-        //     if(finditem.TrackingCode!=item.TrackingCode)
-        //     {
-        //         finditem.PreviousTracking=finditem.TrackingCode
-        //         finditem.TrackingCode=item.TrackingCode;
-        //         finditem.ShipmentProvider=item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2);
-        //         finditem.trackingChangeCount=finditem.trackingChangeCount+1
-        //         // console.log(result);
-        //     }
-        //     result = await finditem.save();
         }
         }
     }

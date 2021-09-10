@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const darazSkuSchema=new mongoose.Schema({
         Status:String,
         quantity:Number,
+        localQuantity:Number,
         _compatible_variation_:String,
         Images:[String],
         SellerSku:String,
