@@ -67,11 +67,11 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
 
         if(item.ShippingType=="Dropshipping"){
             var stockType={FBMstock:-1}
-            var darazSkuStockType={"FBMstock.totalQuantity":-1}
+            var darazSkuStockType={FBMstock:{quantity:-1}}
         }
         else if(item.ShippingType=="Own Warehouse"){
             var stockType={FBMstock:0}
-            var darazSkuStockType={"FBDstock.totalQuantity":-1}
+            var darazSkuStockType={FBDstock:{quantity:-1}}
         }
         // console.log(stockType)
 
