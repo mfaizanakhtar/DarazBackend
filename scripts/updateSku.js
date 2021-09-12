@@ -6,6 +6,7 @@ const {darazSku} = require('../models/darazsku')
 
 async function getSkus(darazid,skus,update){
     console.log(skus.length)
+    console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     shop = await Darazid.findOne({shopid:darazid})
     Url = generateSkuUrl(shop.shopid,shop.secretkey,'['+skus.toString()+']')
     // console.log(Url)
@@ -29,10 +30,16 @@ async function getSkus(darazid,skus,update){
                 sku.FBMstock=result.multiWarehouseInventories
                 sku.FBDstock=result.fblWarehouseInventories
                 sku.localQuantity=sku.quantity
+                sku.cost = 0
+                sku.FBMpackagingCost=0
+                sku.FBDpackagingCost=0
             }
 
-            skuResult = await darazSku.updateMany({SellerSku:sku.Sellersku,ShopSku:sku.ShopSku,SkuId:sku.SkuId,
-                ShopId:shop.shopid,useremail:shop.useremail},sku,{upsert:true})
+            skuResult = await darazSku.updateMany(
+                {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
+                {$set:sku},
+                {upsert:true}
+            )
             if(skuResult.upserted.length>0) skuIdArray.push(skuResult.upserted[0]._id)
         }
         
@@ -65,8 +72,8 @@ function InventoryStringToJSon(sku){
         withholdQuantity: 0,
         sellableQuantity: 0
       }
-
-    if(sku.fblWarehouseInventories.length>0){
+    // console.log(sku)
+    if(sku.fblWarehouseInventories.length!=[]){
         for(var fbl of sku.fblWarehouseInventories){
             var tempData = fbl.match(/[A-z]+\=[0-9]+/g)
             var tempfblInventory="{"

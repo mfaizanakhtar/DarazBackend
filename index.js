@@ -11,6 +11,7 @@ const transactions = require('./routes/transactions')
 const { OrderItems } = require('./models/orderItem');
 const orders = require('./routes/orders');
 const skus = require('./routes/skus');
+const darazskus=require('./routes/darazskus')
 const {updateOrdersData,updateSingleOrder} = require('./scripts/updateOrders');
 const {updateOrderItemStatus} = require('./scripts/updateStatus')
 const {generateSingleOrderUrl,RtsURL} = require('./scripts/GenerateUrl');
@@ -48,6 +49,7 @@ app.use('/api/orderitems',orderitems);
 app.use('/api/orders',orders)
 app.use('/api/skus',skus)
 app.use('/api/transactions',transactions)
+app.use('/api/darazskus',darazskus)
 
 
 // async function updateId(){

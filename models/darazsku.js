@@ -54,6 +54,15 @@ const darazSkuSchema=new mongoose.Schema({
             withholdQuantity: Number,
             sellableQuantity: Number
         },
+        cost:Number,
+        FBMpackagingCost:{
+            type:Number,
+            default:0
+        },
+        FBDpackagingCost:{
+            type:Number,
+            default:0
+        },
         GroupSku:String,
         ShopId:String,
         useremail:String
