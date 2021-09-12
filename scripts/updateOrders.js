@@ -125,7 +125,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
         await getSkus(shopid,darazSkusArray,false)
     }
     if(updatedarazSkusArray.length>0){
-        await getSkus(shopid,darazSkusArray,true)
+        await getSkus(shopid,updatedarazSkusArray,true)
     }
     
 
