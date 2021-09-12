@@ -67,11 +67,11 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
 
         if(item.ShippingType=="Dropshipping"){
             var stockType={FBMstock:-1}
-            var darazSkuStockType={FBMstock:{quantity:-1}}
+            var darazSkuStockType={"FBMstock.totalQuantity":-1}
         }
         else if(item.ShippingType=="Own Warehouse"){
             var stockType={FBMstock:0}
-            var darazSkuStockType={FBDstock:{quantity:-1}}
+            var darazSkuStockType={"FBDstock.totalQuantity":-1}
         }
         // console.log(stockType)
 
@@ -99,7 +99,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             var result = await orderItem.save();
             // console.log(result)
             //find darazSku in db
-            var dSku = await darazSku.findOne({SellerSku:result.Sku,useremail:useremail})
+            var dSku = await darazSku.findOne({ShopSku:result.ShopSku,useremail:useremail})
             if(dSku==null){
                 if(!darazSkusArray.includes('"'+result.Sku+'"')) darazSkusArray.push('"'+result.Sku+'"')
                 
@@ -107,7 +107,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             if(dSku!=null){
                 if(!updatedarazSkusArray.includes('"'+result.Sku+'"')) updatedarazSkusArray.push('"'+result.Sku+'"')
 
-                await darazSku.findOneAndUpdate({SellerSku:result.Sku,useremail:useremail},{
+                await darazSku.findOneAndUpdate({ShopSku:result.ShopSku,useremail:useremail},{
                     $inc:darazSkuStockType,$inc:{localQuantity:-1}
                 })
             }
