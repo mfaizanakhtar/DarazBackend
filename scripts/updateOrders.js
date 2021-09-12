@@ -67,11 +67,11 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
 
         if(item.ShippingType=="Dropshipping"){
             var stockType={FBMstock:-1}
-            var darazSkuStockType={FBMstock:{quantity:-1}}
+            var darazSkuStockType={"FBMstock.quantity":-1}
         }
         else if(item.ShippingType=="Own Warehouse"){
             var stockType={FBMstock:0}
-            var darazSkuStockType={FBDstock:{quantity:-1}}
+            var darazSkuStockType={"FBDstock.quantity":-1}
         }
         // console.log(stockType)
 
@@ -107,7 +107,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             if(dSku!=null){
                 if(!updatedarazSkusArray.includes('"'+result.Sku+'"')) updatedarazSkusArray.push('"'+result.Sku+'"')
 
-                await darazSku.findOneAndUpdate({ShopSku:result.ShopSku,useremail:useremail},{
+                await darazSku.updateMany({ShopSku:result.ShopSku,useremail:useremail},{
                     $inc:darazSkuStockType,$inc:{localQuantity:-1}
                 })
             }
