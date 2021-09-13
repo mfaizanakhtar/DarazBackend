@@ -99,17 +99,19 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             var result = await orderItem.save();
             // console.log(result)
             //find darazSku in db
-            var dSku = await darazSku.findOne({ShopSku:result.ShopSku,useremail:useremail})
+            var dSku = await darazSku.findOne({ShopSku:item.ShopSku,useremail:useremail})
             if(dSku==null){
-                if(!darazSkusArray.includes('"'+result.Sku+'"')) darazSkusArray.push('"'+result.Sku+'"')
+                if(!darazSkusArray.includes('"'+item.Sku+'"')) darazSkusArray.push('"'+item.Sku+'"')
                 
             }
             if(dSku!=null){
-                if(!updatedarazSkusArray.includes('"'+result.Sku+'"')) updatedarazSkusArray.push('"'+result.Sku+'"')
-
-                await darazSku.updateMany({ShopSku:result.ShopSku,useremail:useremail},{
-                    $inc:darazSkuStockType,$inc:{localQuantity:-1}
+                console.log("Sku "+dSku.SellerSku+" before "+dSku.fblWarehouseInventories.quantity+" local: "+dSku.localQuantity)
+                if(!updatedarazSkusArray.includes('"'+item.Sku+'"')) updatedarazSkusArray.push('"'+item.Sku+'"')
+                var updateResult = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:useremail},{
+                        $inc:{...darazSkuStockType,localQuantity:-1}
                 })
+
+                console.log("Sku "+updateResult.SellerSku+" After "+updateResult.fblWarehouseInventories.quantity+" local: "+updateResult.localQuantity)
             }
             //pushing orderItemId._id in Order Record for reference
             await Order.updateMany({

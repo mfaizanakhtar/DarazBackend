@@ -44,4 +44,25 @@ router.get('/getSkus',auth,async(req,res)=>{
 
 })
 
+router.delete('/:id',auth,async(req,res)=>{
+    var deleteResult = await darazSku.deleteMany({_id:req.params.id,useremail:req.user.useremail})
+    res.send({DeleteResult:deleteResult})
+})
+
+router.put('/:id',auth,async(req,res)=>{
+    // console.log(req.body)
+    var result = await darazSku.findOneAndUpdate(
+        {_id:req.params.id,useremail:req.user.useremail},
+        {
+            
+            $inc:{"FBMstock.quantity":req.body.FBMchange,"FBDstock.quantity":req.body.FBDchange},
+            cost:req.body.cost,
+            FBDpackagingCost:req.body.FBDpackagingCost,FBMpackagingCost:req.body.FBMpackagingCost
+                
+        }
+        )
+
+    res.send({updatedResult:result})
+})
+
 module.exports = router

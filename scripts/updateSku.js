@@ -40,7 +40,7 @@ async function getSkus(darazid,skus,update){
                 {$set:sku},
                 {upsert:true}
             )
-            if(skuResult.upserted.length>0) skuIdArray.push(skuResult.upserted[0]._id)
+            if(skuResult.upserted!=undefined) skuIdArray.push(skuResult.upserted[0]._id)
         }
         
         product.Skus=skuIdArray
@@ -72,14 +72,15 @@ function InventoryStringToJSon(sku){
         withholdQuantity: 0,
         sellableQuantity: 0
       }
-    // console.log(sku)
-    if(sku.fblWarehouseInventories.length!=[]){
+    // console.log("FBL Length: "+sku.fblWarehouseInventories.length)
+    if(sku.fblWarehouseInventories.length>0){
         for(var fbl of sku.fblWarehouseInventories){
             var tempData = fbl.match(/[A-z]+\=[0-9]+/g)
             var tempfblInventory="{"
 
             for(var [i,data] of tempData.entries()){
                 tempfblInventory=tempfblInventory+'"'+data.replace(/=/g,'":"')+'"'
+
                 if(i!=tempData.length-1){
                     tempfblInventory=tempfblInventory+','
                 }

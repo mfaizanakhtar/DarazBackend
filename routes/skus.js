@@ -35,7 +35,7 @@ router.post('/updateSku',auth,async(req,res)=>{
 router.delete('/:id',auth,async(req,res)=>{
     // console.log(req.body)
     var deleteResult = await Sku.deleteMany({_id:req.params.id,useremail:req.user.useremail})
-    res.send({DeleteResul:deleteResult})
+    res.send({DeleteResult:deleteResult})
 
 })
 
