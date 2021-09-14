@@ -8,6 +8,7 @@ const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl,generateL
 const cheerio = require('cheerio')
 const {getSkus} = require('./updateSku')
 const atob = require("atob");
+const {updateOrderItemStatus} = require('../scripts/updateStatus')
 
 
 async function getOrderItemsData(userid,secretkey,data){
@@ -52,6 +53,7 @@ async function updateOrders(id,OrdersData){
 async function updateOrderItems(shopid,secretkey,useremail,Orders){
     var darazSkusArray=[]
     var updatedarazSkusArray=[]
+    var updateOrdersSkusArray=[]
     // console.log(Orders)
     //fetch orderItems data from daraz api
     OrderItemsData = await getOrderItemsData(shopid,secretkey,Orders)
@@ -100,18 +102,20 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             // console.log(result)
             //find darazSku in db
             var dSku = await darazSku.findOne({ShopSku:item.ShopSku,useremail:useremail})
+            if(!updateOrdersSkusArray.includes(item.Sku)) updateOrdersSkusArray.push(item.Sku)
+
             if(dSku==null){
                 if(!darazSkusArray.includes('"'+item.Sku+'"')) darazSkusArray.push('"'+item.Sku+'"')
                 
             }
             if(dSku!=null){
-                console.log("Sku "+dSku.SellerSku+" before "+dSku.fblWarehouseInventories.quantity+" local: "+dSku.localQuantity)
+                // console.log("Sku "+dSku.SellerSku+" before "+dSku.fblWarehouseInventories.quantity+" local: "+dSku.localQuantity)
                 if(!updatedarazSkusArray.includes('"'+item.Sku+'"')) updatedarazSkusArray.push('"'+item.Sku+'"')
                 var updateResult = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:useremail},{
                         $inc:{...darazSkuStockType,localQuantity:-1}
                 })
 
-                console.log("Sku "+updateResult.SellerSku+" After "+updateResult.fblWarehouseInventories.quantity+" local: "+updateResult.localQuantity)
+                // console.log("Sku "+updateResult.SellerSku+" After "+updateResult.fblWarehouseInventories.quantity+" local: "+updateResult.localQuantity)
             }
             //pushing orderItemId._id in Order Record for reference
             await Order.updateMany({
@@ -123,6 +127,12 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
         }
     }
     };
+
+    if(updateOrdersSkusArray.length>0){ 
+        await updateOrderItemStatus({shopid:shopid},{Sku:{$in:updateOrdersSkusArray},Status:{$in:["shipped","pending"]},
+        ShippingType:"Own Warehouse"})
+    }
+    
     if(darazSkusArray.length>0){
         await getSkus(shopid,darazSkusArray,false)
     }

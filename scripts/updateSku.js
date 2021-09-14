@@ -3,10 +3,11 @@ const {generateSkuUrl} = require('./GenerateUrl')
 const {Darazid} = require('../models/darazid')
 const {darazProduct} = require('../models/darazproduct')
 const {darazSku} = require('../models/darazsku')
+const {updateOrderItemStatus} = require('../scripts/updateStatus')
 
 async function getSkus(darazid,skus,update){
-    console.log(skus.length)
-    console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
+    // console.log(skus.length)
+    // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     shop = await Darazid.findOne({shopid:darazid})
     Url = generateSkuUrl(shop.shopid,shop.secretkey,'['+skus.toString()+']')
     // console.log(Url)
