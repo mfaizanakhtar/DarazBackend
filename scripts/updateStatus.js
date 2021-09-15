@@ -26,7 +26,7 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
     
 }
 
-async function updateOrderItemStatus(user,status,repeatTime){
+async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
     var updateResult
     var skuUpdateArray=[]
     // console.log(status)
@@ -81,7 +81,7 @@ async function updateOrderItemStatus(user,status,repeatTime){
                     }
                 }
                 
-                if (skuUpdateArray.length>0) await getSkus(updateResult.ShopId,skuUpdateArray,true)
+                if (skuUpdateArray.length>0 && updateSkuStock==undefined) await getSkus(updateResult.ShopId,skuUpdateArray,true)
         }
         }
     }

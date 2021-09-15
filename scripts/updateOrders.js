@@ -130,7 +130,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
 
     if(updateOrdersSkusArray.length>0){ 
         await updateOrderItemStatus({shopid:shopid},{Sku:{$in:updateOrdersSkusArray},Status:{$in:["shipped","pending"]},
-        ShippingType:"Own Warehouse"})
+        ShippingType:"Own Warehouse"},undefined,true)
     }
     
     if(darazSkusArray.length>0){
