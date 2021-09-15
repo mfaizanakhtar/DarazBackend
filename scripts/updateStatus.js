@@ -8,6 +8,7 @@ const {getOrderIdArray} = require('../scripts/GenerateUrl')
 const cheerio = require('cheerio')
 const atob = require("atob");
 const { darazSku } = require('../models/darazsku');
+const { getSkus } = require('../scripts/updateSku')
 
 async function updateOrderItemsForRts(user,RtsOrdersResponse){
 
@@ -27,6 +28,7 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
 
 async function updateOrderItemStatus(user,status,repeatTime){
     var updateResult
+    var skuUpdateArray=[]
     // console.log(status)
 
     var darazid = await Darazid.find({...user});
@@ -74,10 +76,12 @@ async function updateOrderItemStatus(user,status,repeatTime){
                         console.log("updateResultStatus: "+updateResult.Status+" itemStatus: "+item.Status)
                         var SkuUpdate = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:updateResult.useremail},{$inc:{"FBDstock.quantity":1,localQuantity:1}})
                         console.log(SkuUpdate)
+                        skuUpdateArray.push('"'+SkuUpdate.SellerSku+'"')
+                        
                     }
                 }
                 
-  
+                if (skuUpdateArray.length>0) await getSkus(updateResult.ShopId,skuUpdateArray,true)
         }
         }
     }
