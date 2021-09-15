@@ -56,9 +56,35 @@ router.get('/Statement',auth,async(req,res)=>{
         }
     ])
 
-    var Aggregated= await getAggregatedValues(req,{useremail:req.user.useremail})
+    res.send({Statement:Statement})
+})
 
-    res.send({Statement:Statement,DropDown:Aggregated})
+router.get('/ViewStatementFilters',auth,async(req,res)=>{
+    var Statements = await Transaction.aggregate([
+        {
+            $match:{useremail:req.user.useremail}
+        },
+        {
+            $group:{_id:"$Statement",Date:{$first:"$TransactionDate"}}
+        },
+        {
+            $sort:{Date:-1}
+        }
+    ])
+
+    var Stores = await Transaction.aggregate([
+        {
+            $match:{useremail:req.user.useremail,ShopId:{$ne:null}}
+        },
+        {
+            $group:{_id:"$ShopId"}
+        },
+        {
+            $sort:{_id:1}
+        }
+        ])
+
+    res.send({Statements:Statements,Stores:Stores})
 })
 
 async function getAggregatedValues(req,Filter){
@@ -96,7 +122,7 @@ async function getAggregatedValues(req,Filter){
                 $group:{_id:"$Statement",Date:{$first:"$TransactionDate"}}
             },
             {
-                $sort:{Date:1}
+                $sort:{Date:-1}
             }
         ])
 
