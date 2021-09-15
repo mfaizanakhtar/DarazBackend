@@ -67,11 +67,13 @@ async function updateOrderItemStatus(user,status,repeatTime){
                 // }
                 if(updateResult.ShippingType=='Dropshipping' && updateResult.DispatchDate!=null && item.Status=='canceled'){
                     await Sku.updateMany({name:updateResult.BaseSku,useremail:updateResult.useremail},{FBMstock:{$inc:1}})
-                    await darazSku.updateMany({SellerSku:updateResult.ShopSku,useremail:updateResult.useremail},{$inc:{"FBMstock.quantity":1,localQuantity:1}})
+                    await darazSku.updateMany({ShopSku:updateResult.ShopSku,useremail:updateResult.useremail},{$inc:{"FBMstock.quantity":1,localQuantity:1}})
                 }
                 if(updateResult.ShippingType=='Own Warehouse' && (updateResult.Status=='shipped' || updateResult.Status=='pending' || updateResult.Status=='ready_to_ship')){
                     if(item.Status=='canceled' || item.Status=='failed'){
-                        await darazSku.updateMany({SellerSku:item.ShopSku,useremail:updateResult.useremail},{$inc:{"FBDstock.quantity":1,localQuantity:1}})
+                        console.log("updateResultStatus: "+updateResult.Status+" itemStatus: "+item.Status)
+                        var SkuUpdate = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:updateResult.useremail},{$inc:{"FBDstock.quantity":1,localQuantity:1}})
+                        console.log(SkuUpdate)
                     }
                 }
                 
