@@ -93,11 +93,12 @@ async function getAggregatedValues(req,Filter){
                 $match:{useremail:req.user.useremail}
             },
             {
-                $sort:{TransactionDate:1}
+                $group:{_id:"$Statement",Date:{$first:"$TransactionDate"}}
             },
             {
-                $group:{_id:"$Statement"}
-            }])
+                $sort:{Date:1}
+            }
+        ])
 
         var Sum = await Transaction.aggregate([
             {
