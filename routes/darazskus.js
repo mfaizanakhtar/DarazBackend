@@ -70,8 +70,10 @@ router.put('/:id',auth,async(req,res)=>{
             {cost:req.body.cost,packagingCost:req.body.FBMpackagingCost})
 
         if(req.body.GroupSkuChangeStock>0){
-            await Sku.findOneAndUpdate({useremail:req.user.useremail,name:result.BaseSku},
+            console.log("BaseSku: "+result.BaseSku)
+            var updateResult = await Sku.findOneAndUpdate({useremail:req.user.useremail,name:result.BaseSku},
                 {$inc:{FBMstock:req.body.GroupSkuChangeStock}})
+            console.log(updateResult)
         }
 
     res.send({updatedResult:result})
