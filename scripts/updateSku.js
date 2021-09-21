@@ -34,6 +34,7 @@ async function getSkus(darazid,skus,update,costs){
                 sku.cost = costs[i].cost
                 sku.FBMpackagingCost=costs[i].FBMpackagingCost
                 sku.FBDpackagingCost=costs[i].FBDpackagingCost
+                sku.BaseSku=baseSku(sku.SellerSku)
             }
 
             skuResult = await darazSku.updateMany(
@@ -99,6 +100,12 @@ function InventoryStringToJSon(sku){
     }
 
     return {multiWarehouseInventories:multiWarehouseInventories,fblWarehouseInventories:fblWarehouseInventories}
+}
+
+function baseSku(Sku){
+    var seperator = Sku.indexOf("-");
+    if(seperator<0) return Sku
+    return Sku.substr(0,seperator)
 }
 
 module.exports.getSkus = getSkus

@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router()
 const auth = require('../middleware/auth')
 const {darazSku} = require('../models/darazsku')
+const { OrderItems } = require('../models/orderItem')
+const { Sku } = require('../models/sku')
 
 
 router.get('/getSkus',auth,async(req,res)=>{
@@ -61,6 +63,16 @@ router.put('/:id',auth,async(req,res)=>{
                 
         }
         )
+        await OrderItems.updateMany({ShopSku:result.ShopSku,cost:0,ShippingType:"Own Warehouse"},
+            {cost:req.body.cost,packagingCost:req.body.FBDpackagingCost})
+
+        await OrderItems.updateMany({ShopSku:result.ShopSku,cost:0,ShippingType:"Dropshipping"},
+            {cost:req.body.cost,packagingCost:req.body.FBMpackagingCost})
+
+        if(req.body.GroupSkuChangeStock>0){
+            await Sku.findOneAndUpdate({useremail:req.user.useremail,name:result.BaseSku},
+                {$inc:{FBMstock:req.body.GroupSkuChangeStock}})
+        }
 
     res.send({updatedResult:result})
 })

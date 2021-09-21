@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { OrderItems } = require('../models/orderItem');
 const {Sku} = require('../models/sku');
+const {darazSku} = require('../models/darazsku')
 
 
 router.get('/getAllSkus',auth,async (req,res)=>{
@@ -20,6 +21,10 @@ router.post('/updateSku',auth,async(req,res)=>{
 
     await OrderItems.updateMany({useremail:req.user.useremail,BaseSku:req.body.name,cost:0,ShippingType:"Own Warehouse"},
     {cost:req.body.cost,packagingCost:req.body.FBDpackagingCost})
+
+    await darazSku.updateMany({useremail:req.user.useremail,BaseSku:req.body.name},{
+        cost:req.body.cost,FBDpackagingCost:req.body.FBDpackagingCost,FBMpackagingCost:req.body.FBMpackagingCost
+    })
 
     var result = await Sku.findOneAndUpdate(
         {name:req.body.name,useremail:req.user.useremail},

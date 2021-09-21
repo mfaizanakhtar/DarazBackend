@@ -65,7 +65,8 @@ const darazSkuSchema=new mongoose.Schema({
         },
         GroupSku:String,
         ShopId:String,
-        useremail:String
+        useremail:String,
+        BaseSku:String
 
 })
 
