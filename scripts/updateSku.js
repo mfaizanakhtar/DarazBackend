@@ -31,9 +31,9 @@ async function getSkus(darazid,skus,update,costs){
                 sku.FBMstock=result.multiWarehouseInventories
                 sku.FBDstock=result.fblWarehouseInventories
                 sku.localQuantity=sku.quantity
-                sku.cost = costs.cost
-                sku.FBMpackagingCost=costs.FBMpackagingCost
-                sku.FBDpackagingCost=costs.FBDpackagingCost
+                sku.cost = costs[i].cost
+                sku.FBMpackagingCost=costs[i].FBMpackagingCost
+                sku.FBDpackagingCost=costs[i].FBDpackagingCost
             }
 
             skuResult = await darazSku.updateMany(
