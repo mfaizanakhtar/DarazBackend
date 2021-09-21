@@ -29,14 +29,14 @@ async function getSkus(darazid,skus,update,costs){
             sku.fblWarehouseInventories = result.fblWarehouseInventories
 
             if(!update){
-                var GroupSku = await Sku.find({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
+                var GroupSku = await Sku.findOne({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
                 console.log(GroupSku)
                 sku.FBMstock=result.multiWarehouseInventories
                 sku.FBDstock=result.fblWarehouseInventories
                 sku.localQuantity=sku.quantity
-                sku.cost = GroupSku[0].cost
-                sku.FBMpackagingCost=GroupSku[0].FBMpackagingCost
-                sku.FBDpackagingCost=GroupSku[0].FBDpackagingCost
+                sku.cost = GroupSku.cost
+                sku.FBMpackagingCost=GroupSku.FBMpackagingCost
+                sku.FBDpackagingCost=GroupSku.FBDpackagingCost
                 sku.BaseSku=GroupSku.name
             }
 
