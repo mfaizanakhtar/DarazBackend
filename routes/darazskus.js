@@ -69,7 +69,7 @@ router.put('/:id',auth,async(req,res)=>{
         await OrderItems.updateMany({ShopSku:result.ShopSku,cost:0,ShippingType:"Dropshipping"},
             {cost:req.body.cost,packagingCost:req.body.FBMpackagingCost})
 
-        if(req.body.GroupSkuChangeStock>0){
+        if(req.body.GroupSkuChangeStock!=0){
             console.log("BaseSku: "+result.BaseSku)
             var updateResult = await Sku.findOneAndUpdate({useremail:req.user.useremail,name:result.BaseSku},
                 {$inc:{FBMstock:req.body.GroupSkuChangeStock}})
