@@ -5,7 +5,7 @@ const {darazProduct} = require('../models/darazproduct')
 const {darazSku} = require('../models/darazsku')
 const {updateOrderItemStatus} = require('../scripts/updateStatus')
 
-async function getSkus(darazid,skus,update){
+async function getSkus(darazid,skus,update,costs){
     // console.log(skus.length)
     // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     shop = await Darazid.findOne({shopid:darazid})
@@ -15,7 +15,7 @@ async function getSkus(darazid,skus,update){
     var Products = ProductSku.Products
     for(product of Products){
         var skuIdArray=[]
-        for(sku of product.Skus){
+        for(const [i,sku] of product.Skus){
             
             sku.ShopId=shop.shopid
             sku.useremail=shop.useremail
@@ -31,9 +31,9 @@ async function getSkus(darazid,skus,update){
                 sku.FBMstock=result.multiWarehouseInventories
                 sku.FBDstock=result.fblWarehouseInventories
                 sku.localQuantity=sku.quantity
-                sku.cost = 0
-                sku.FBMpackagingCost=0
-                sku.FBDpackagingCost=0
+                sku.cost = costs.cost
+                sku.FBMpackagingCost=costs.FBMpackagingCost
+                sku.FBDpackagingCost=costs.FBDpackagingCost
             }
 
             skuResult = await darazSku.updateMany(
