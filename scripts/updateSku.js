@@ -11,7 +11,7 @@ async function getSkus(darazid,skus,update,costs){
     // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     shop = await Darazid.findOne({shopid:darazid})
     Url = generateSkuUrl(shop.shopid,shop.secretkey,'['+skus.toString()+']')
-    console.log(Url)
+    // console.log(Url)
     var ProductSku = await GetData(Url)
     var Products = ProductSku.Products
     for(product of Products){
@@ -30,13 +30,13 @@ async function getSkus(darazid,skus,update,costs){
 
             if(!update){
                 var GroupSku = await Sku.find({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
-
+                console.log(GroupSku)
                 sku.FBMstock=result.multiWarehouseInventories
                 sku.FBDstock=result.fblWarehouseInventories
                 sku.localQuantity=sku.quantity
-                sku.cost = GroupSku.cost
-                sku.FBMpackagingCost=GroupSku.FBMpackagingCost
-                sku.FBDpackagingCost=GroupSku.FBDpackagingCost
+                sku.cost = GroupSku[0].cost
+                sku.FBMpackagingCost=GroupSku[0].FBMpackagingCost
+                sku.FBDpackagingCost=GroupSku[0].FBDpackagingCost
                 sku.BaseSku=GroupSku.name
             }
 
