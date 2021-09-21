@@ -15,7 +15,7 @@ async function getSkus(darazid,skus,update,costs){
     var Products = ProductSku.Products
     for(product of Products){
         var skuIdArray=[]
-        for(const [i,sku] of product.Skus){
+        for(const [i,sku] of product.Skus.entries()){
             
             sku.ShopId=shop.shopid
             sku.useremail=shop.useremail

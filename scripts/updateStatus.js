@@ -73,9 +73,9 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
                 }
                 if(updateResult.ShippingType=='Own Warehouse' && (updateResult.Status=='shipped' || updateResult.Status=='pending' || updateResult.Status=='ready_to_ship')){
                     if(item.Status=='canceled' || item.Status=='failed'){
-                        console.log("updateResultStatus: "+updateResult.Status+" itemStatus: "+item.Status)
+                        // console.log("updateResultStatus: "+updateResult.Status+" itemStatus: "+item.Status)
                         var SkuUpdate = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:updateResult.useremail},{$inc:{"FBDstock.quantity":1,localQuantity:1}})
-                        console.log(SkuUpdate)
+                        // console.log(SkuUpdate.SellerSku)
                         skuUpdateArray.push('"'+SkuUpdate.SellerSku+'"')
                         
                     }
