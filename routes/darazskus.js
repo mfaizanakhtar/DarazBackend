@@ -27,7 +27,7 @@ router.get('/getSkus',auth,async(req,res)=>{
     .skip(pSize*pIndex)
     .limit(pSize)
 
-    var darazskusCount=await darazSku.countDocuments({useremail:req.user.useremail,...req.query})
+    var darazskusCount=await darazSku.countDocuments({useremail:req.user.useremail,...req.query,...StockFilter})
 
     var darazStores=await darazSku.aggregate([
         {
