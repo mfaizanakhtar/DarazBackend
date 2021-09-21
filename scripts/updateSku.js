@@ -3,6 +3,7 @@ const {generateSkuUrl} = require('./GenerateUrl')
 const {Darazid} = require('../models/darazid')
 const {darazProduct} = require('../models/darazproduct')
 const {darazSku} = require('../models/darazsku')
+const {Sku} = require('../models/sku')
 const {updateOrderItemStatus} = require('../scripts/updateStatus')
 
 async function getSkus(darazid,skus,update,costs){
@@ -10,7 +11,7 @@ async function getSkus(darazid,skus,update,costs){
     // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     shop = await Darazid.findOne({shopid:darazid})
     Url = generateSkuUrl(shop.shopid,shop.secretkey,'['+skus.toString()+']')
-    // console.log(Url)
+    console.log(Url)
     var ProductSku = await GetData(Url)
     var Products = ProductSku.Products
     for(product of Products){
@@ -28,13 +29,15 @@ async function getSkus(darazid,skus,update,costs){
             sku.fblWarehouseInventories = result.fblWarehouseInventories
 
             if(!update){
+                var GroupSku = await Sku.find({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
+
                 sku.FBMstock=result.multiWarehouseInventories
                 sku.FBDstock=result.fblWarehouseInventories
                 sku.localQuantity=sku.quantity
-                sku.cost = costs[i].cost
-                sku.FBMpackagingCost=costs[i].FBMpackagingCost
-                sku.FBDpackagingCost=costs[i].FBDpackagingCost
-                sku.BaseSku=baseSku(sku.SellerSku)
+                sku.cost = GroupSku.cost
+                sku.FBMpackagingCost=GroupSku.FBMpackagingCost
+                sku.FBDpackagingCost=GroupSku.FBDpackagingCost
+                sku.BaseSku=GroupSku.name
             }
 
             skuResult = await darazSku.updateMany(
