@@ -98,9 +98,11 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     async function timezone(){
 
         startdate = new Date(req.query.startdate);
-        // startdate.setHours(startdate.getHours()+5);
-        startdate.setHours(0,0,0,0);
         enddate = new Date(req.query.enddate);
+        console.log('Beforestardate: ',startdate)
+        console.log('Beforeenddate: ',enddate)
+
+        startdate.setHours(0,0,0,0);
         enddate.setHours(23,59,59,59);
         console.log('stardate: ',startdate)
         console.log('enddate: ',enddate)
