@@ -52,7 +52,6 @@ async function updateOrders(id,OrdersData){
 
 async function updateOrderItems(shopid,secretkey,useremail,Orders){
     var darazSkusArray=[]
-    var darazSkusArrayCosts=[]
     var updatedarazSkusArray=[]
     var updateOrdersSkusArray=[]
     // console.log(Orders)
@@ -106,9 +105,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
             if(dSku==null){
                 if(!darazSkusArray.includes('"'+item.Sku+'"')){
                     darazSkusArray.push('"'+item.Sku+'"')
-                    darazSkusArrayCosts.push({cost:skuresult.cost,
-                        FBDpackagingCost:skuresult.FBDpackagingCost,
-                        FBMpackagingCost:skuresult.FBMpackagingCost})
+
                 } 
                 orderItem = OrderItemObj(item,shopid,useremail,skuresult)
                 
@@ -141,7 +138,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
     }
     
     if(darazSkusArray.length>0){
-        await getSkus(shopid,darazSkusArray,false,darazSkusArrayCosts)
+        await getSkus(shopid,darazSkusArray,false)
     }
     if(updatedarazSkusArray.length>0){
         await getSkus(shopid,updatedarazSkusArray,true)

@@ -6,7 +6,7 @@ const {darazSku} = require('../models/darazsku')
 const {Sku} = require('../models/sku')
 const {updateOrderItemStatus} = require('../scripts/updateStatus')
 
-async function getSkus(darazid,skus,update,costs){
+async function getSkus(darazid,skus,update){
     // console.log(skus.length)
     // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     shop = await Darazid.findOne({shopid:darazid})
