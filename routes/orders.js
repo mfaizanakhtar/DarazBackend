@@ -218,10 +218,10 @@ router.post('/getLabelsData',auth,async(req,res)=>{
 })
 
 router.post('/getStockChecklist',auth,async(req,res)=>{
-    if(req.body.trackings.length>0){
+    if(req.body.trackings!=undefined){
         var matchFilter = {$match:{TrackingCode:{$in:req.body.trackings},useremail:req.user.useremail}}
     }  
-    else if(req.body.orders.length>0){
+    else if(req.body.orders!=undefined){
     var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping",useremail:req.user.useremail}}
     }
     else{
