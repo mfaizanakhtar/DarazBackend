@@ -4,40 +4,6 @@ const { OrderItems } = require('../models/orderItem');
 const {Sku} = require('../models/sku')
 const auth = require('../middleware/auth')
 
-// router.get('/data/:filter',auth,async(req,res)=>{
-//     var orderItem;
-//     if(req.params.filter=="claimable")
-//     {
-//     date = new Date();
-//     date.setDate(date.getDate()-30);
-//     console.log(date);
-//     orderItem = await OrderItems.find({CreatedAt: {$lte:date},WarehouseStatus:"Dispatched",Status:{$ne:"delivered"}});
-//     }
-//     else if(req.params.filter=="all"){
-//         orderItem=await OrderItems.find().populate('Order').sort({CreatedAt:1})
-//     }
-//     else if(req.params.filter=="ready_to_ship"){
-//         orderItem=await OrderItems.find({Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}}).sort({CreatedAt:1})
-//     }
-//     else if(req.params.filter=="failed"){
-//         orderItem=await OrderItems.find({Status:"failed",WarehouseStatus:{$ne:"Received"}}).sort({CreatedAt:1})
-//     }
-//     else if(req.params.filter=="ready_to_ship-dispatched"){
-//         orderItem=await OrderItems.find({Status:"ready_to_ship",WarehouseStatus:"Dispatched"}).sort({CreatedAt:1})
-//     }
-//     else if(req.params.filter=="failed-received"){
-//         orderItem=await OrderItems.find({WarehouseStatus:"Received"}).sort({CreatedAt:1})
-//     }
-//     else if(req.params.filter=="Claim Filed"){
-//         orderItem=await OrderItems.find({$or:[{WarehouseStatus:"Claim Filed"},{WarehouseStatus:"Claim Approved"},{WarehouseStatus:"Claim Rejected"},{WarehouseStatus:"Claim POD Dispute"}]}).sort({CreatedAt:1})
-//     }
-//     else if(req.params.filter=="Claim Received"){
-//         orderItem=await OrderItems.find({WarehouseStatus:"Claim Received"}).sort({CreatedAt:1})
-//     }
-//     else orderItem = await OrderItems.find({Status:req.params.filter}).sort({CreatedAt:1});
-//     res.send(orderItem);
-
-// })
 
 router.put('/Update/:Status',async(req,res)=>{
     console.log(req.body)
@@ -46,6 +12,9 @@ router.put('/Update/:Status',async(req,res)=>{
             dateArgs={DispatchDate:new Date(req.body.date)}
         }else if(req.params.Status=='Received'){
             dateArgs={ReturnDate:new Date(req.body.date)}
+        }
+        else if(req.params.Status=='Reverse Dispatch'){
+            dateArgs={DispatchDate:null}
         }
         ordersUpdated = await OrderItems.updateMany({OrderId:{$in:req.body.orders}},{
             $set:{
@@ -70,11 +39,11 @@ router.put('/return/:id',auth,async(req,res)=>{
         }
     })
     updatedResult = await OrderItems.find({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1,BaseSku:1,Sku:1})
-    for(var item of updatedResult){
-        console.log(item.Sku)
-        var update = await Sku.updateMany({name:item.BaseSku},{$inc:{FBMstock:1}})
-        console.log(update)
-    }
+    // for(var item of updatedResult){
+    //     console.log(item.Sku)
+    //     var update = await Sku.updateMany({name:item.BaseSku},{$inc:{FBMstock:1}})
+    //     console.log(update)
+    // }
     res.send({Status:"Received",updatedResult:updatedResult[0]})
     }
     // updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1})
@@ -128,10 +97,10 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     var enddate;
     async function timezone(){
 
-        startdate = new Date(req.query.date);
+        startdate = new Date(req.query.startdate);
         // startdate.setHours(startdate.getHours()+5);
         startdate.setHours(0,0,0,0);
-        enddate = new Date(req.query.date);
+        enddate = new Date(req.query.enddate);
         enddate.setHours(23,59,59,59);
         console.log('stardate: ',startdate)
         console.log('enddate: ',enddate)
@@ -149,7 +118,7 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     orderItem = await OrderItems.aggregate([{
         $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'}}
     },{
-        $match:{useremail:req.user.useremail,WarehouseStatus:req.params.filter,$and:[{Date:{$gte:startdate}},{Date:{$lte:enddate}}]}
+        $match:{useremail:req.user.useremail,$and:[{Date:{$gte:startdate}},{Date:{$lte:enddate}}]}
     }]).sort({Date:-1})
     
     // console.log(orderItem)
@@ -293,6 +262,13 @@ router.get('/allstats',auth,async(req,res)=>{
         return a._id - b._id
     }))
 
+})
+
+router.put('/ReturnedStockAdded',auth,async (req,res)=>{
+        for(var item of req.body.orderitems){
+            await OrderItems.updateMany({useremail:req.user.useremail,ShopId:item.ShopId,TrackingCode:item._id},{ReturnedStockAdded:true})
+        }
+        res.send({Status:"Order Items Updated"})
 })
 
 module.exports = router;

@@ -55,7 +55,7 @@ async function FindQuery(query,user){
     
     AdditionStatus={
         ready_to_ship:{"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":{$ne:"Dispatched"}},
-        RTSDispatched : {"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":"Dispatched"},
+        RTSDispatched : {"OrderItems.Status":"ready_to_ship","OrderItems.DispatchDate":{$ne:null}},
         DeliveryFailedReceived : {"OrderItems.Status":"failed","OrderItems.WarehouseStatus":"Received"},
         Claimable : {CreatedAt: {$lte:claimDate},"OrderItems.WarehouseStatus":"Dispatched","OrderItems.Status":{$ne:"delivered"}},
         ClaimFiled : {$or:[{"OrderItems.WarehouseStatus":"Claim Filed"},{"OrderItems.WarehouseStatus":"Claim Approved"},{"OrderItems.WarehouseStatus":"Claim Rejected"},{"OrderItems.WarehouseStatus":"Claim POD Dispute"}]},
@@ -218,7 +218,10 @@ router.post('/getLabelsData',auth,async(req,res)=>{
 })
 
 router.post('/getStockChecklist',auth,async(req,res)=>{
-    if(req.body.orders.length>0){
+    if(req.body.trackings.length>0){
+        var matchFilter = {$match:{TrackingCode:{$in:req.body.trackings},useremail:req.user.useremail}}
+    }  
+    else if(req.body.orders.length>0){
     var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping",useremail:req.user.useremail}}
     }
     else{
@@ -229,28 +232,12 @@ router.post('/getStockChecklist',auth,async(req,res)=>{
         {$group:{
             _id:"$BaseSku",
             count:{$sum:1},
+            ReturnedStockAdded:{$first:"$ReturnedStockAdded"},
             img:{$first:"$productMainImage"}
         }},
         {$sort:{"_id":1}}
     ])
     res.send(result)
 })
-
-// router.get('/statusstats',async(req,res)=>{
-//     //join then find
-//     var result = await Order.aggregate([
-//         {$group : { _id: '$Statuses', Count : {$sum : 1}}}
-//     ])
-//     res.send(result)
-// })
-
-// router.get('/skustats',async(req,res)=>{
-//     //join then find
-//     var result = await Order.aggregate([
-//         {$group : { _id: '$BaseSkus', Count : {$sum : 1}}}
-//     ])
-//     console.log(result)
-//     res.send(result)
-// })
 
 module.exports = router

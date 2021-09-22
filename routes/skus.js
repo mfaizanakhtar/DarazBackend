@@ -44,4 +44,11 @@ router.delete('/:id',auth,async(req,res)=>{
 
 })
 
+router.post('/AddReturnedStock',auth,async(req,res)=>{
+    for(var stock of req.body.stock){
+        await Sku.findOneAndUpdate({useremail:req.user.useremail,name:stock._id},{$inc:{FBMstock:stock.count}})
+    }
+    res.send({Status:"Stock Updated"})
+})
+
 module.exports = router
