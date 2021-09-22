@@ -102,8 +102,8 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
         console.log('Beforestardate: ',startdate)
         console.log('Beforeenddate: ',enddate)
 
-        startdate.setHours(0,0,0,0);
-        enddate.setHours(23,59,59,59);
+        // startdate.setHours(0,0,0,0);
+        enddate.setHours(28,59,59,59);
         console.log('stardate: ',startdate)
         console.log('enddate: ',enddate)
     }
