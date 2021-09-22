@@ -24,7 +24,7 @@ async function getSkus(darazid,skus,update,costs){
             // sku.FBMstock=0
             // sku.FBDstock=0
             
-            var result = InventoryStringToJSon(sku)
+            var result = await InventoryStringToJSon(sku)
             sku.multiWarehouseInventories = result.multiWarehouseInventories
             sku.fblWarehouseInventories = result.fblWarehouseInventories
 
@@ -58,7 +58,15 @@ async function getSkus(darazid,skus,update,costs){
     }
 }
 
-function InventoryStringToJSon(sku){
+async function InventoryStringToJSon(sku){
+    var fblWarehouseInventories={
+        occupyQuantity: 0,
+        quantity: 0,
+        totalQuantity: 0,
+        withholdQuantity: 0,
+        sellableQuantity: 0
+      }
+
     var multiWarehouseInventories="{"
     var tempData = sku.multiWarehouseInventories[0].match(/[A-z]+\=[0-9]+/g)
     for(var [i,data] of tempData.entries()){
@@ -70,13 +78,7 @@ function InventoryStringToJSon(sku){
     multiWarehouseInventories=multiWarehouseInventories+"}"
     multiWarehouseInventories=JSON.parse(multiWarehouseInventories)
 
-    var fblWarehouseInventories={
-        occupyQuantity: 0,
-        quantity: 0,
-        totalQuantity: 0,
-        withholdQuantity: 0,
-        sellableQuantity: 0
-      }
+
     // console.log("FBL Length: "+sku.fblWarehouseInventories.length)
     if(sku.fblWarehouseInventories.length>0){
         for(var fbl of sku.fblWarehouseInventories){
