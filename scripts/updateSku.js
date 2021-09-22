@@ -23,8 +23,24 @@ async function getSkus(darazid,skus,update){
             
             // sku.FBMstock=0
             // sku.FBDstock=0
-            
-            var result = await InventoryStringToJSon(sku)
+            var result = null
+            result = await InventoryStringToJSon(sku)
+            if(result==null){
+                result.multiWarehouseInventories={
+                    occupyQuantity: 0,
+                    quantity: 0,
+                    totalQuantity: 0,
+                    withholdQuantity: 0,
+                    sellableQuantity: 0
+                  }
+                result.fblWarehouseInventories={
+                    occupyQuantity: 0,
+                    quantity: 0,
+                    totalQuantity: 0,
+                    withholdQuantity: 0,
+                    sellableQuantity: 0
+                  }
+            }
             sku.multiWarehouseInventories = result.multiWarehouseInventories
             sku.fblWarehouseInventories = result.fblWarehouseInventories
 
