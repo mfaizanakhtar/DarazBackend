@@ -76,7 +76,7 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
                         // console.log("updateResultStatus: "+updateResult.Status+" itemStatus: "+item.Status)
                         var SkuUpdate = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:updateResult.useremail},{$inc:{"FBDstock.quantity":1,localQuantity:1}})
                         // console.log(SkuUpdate.SellerSku)
-                        skuUpdateArray.push('"'+SkuUpdate.SellerSku+'"')
+                        skuUpdateArray.push('"'+item.Sku+'"')
                         
                     }
                 }
