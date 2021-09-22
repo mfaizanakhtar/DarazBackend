@@ -221,7 +221,7 @@ router.post('/getStockChecklist',auth,async(req,res)=>{
     if(req.body.trackings!=undefined){
         var matchFilter = {$match:{TrackingCode:{$in:req.body.trackings},useremail:req.user.useremail}}
     }  
-    else if(req.body.orders!=undefined){
+    else if(req.body.orders!=undefined && req.body.orders.length>0){
     var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping",useremail:req.user.useremail}}
     }
     else{
