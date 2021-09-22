@@ -92,7 +92,7 @@ else{
 
 router.get('/ordermovement/:filter',auth,async(req,res)=>{
     var orderItem;
-
+    console.log(req.query)
     var startdate;
     var enddate;
     async function timezone(){
