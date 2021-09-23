@@ -7,11 +7,12 @@ const bcrypt = require('bcrypt');
 router.post('/',async(req,res)=>{
     // console.log(req.body)
     
-    const user = await User.findOne({ useremail:req.body.useremail })
+    const user = await User.findOne({ loginemail:req.body.loginemail })
     if(!user) {
-        if(req.body.useremail=='admin'){
+        if(req.body.loginemail=='admin'){
             admin = new User({
                 useremail:'admin',
+                loginemail:'admin',
                 password:'admin',
                 usertype:'admin'
             })
