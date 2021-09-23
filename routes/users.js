@@ -12,7 +12,7 @@ router.get('/',async(req,res)=>{
 
 router.post('/',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
-        let user =await User.findOne({useremail:req.body.useremail,loginemail:req.body.useremail});
+        let user =await User.findOne({$or:[{useremail:req.body.useremail},{loginemail:req.body.useremail}]});
         if (user) return res.status(400).send({message:"User already exists"}); 
 
             user = new User({
