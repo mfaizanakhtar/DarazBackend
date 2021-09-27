@@ -5,13 +5,15 @@ const {Sku} = require('../models/sku')
 const auth = require('../middleware/auth')
 
 
-router.put('/Update/:Status',async(req,res)=>{
+router.put('/Update/:Status',auth,async(req,res)=>{
     console.log(req.body)
     var dateArgs
         if(req.params.Status=='Dispatched'){
-            dateArgs={DispatchDate:new Date(req.body.date)}
+            dateArgs={DispatchDate:new Date(req.body.date)},
+            Username={DispatchBy:req.user.username}
         }else if(req.params.Status=='Received'){
-            dateArgs={ReturnDate:new Date(req.body.date)}
+            dateArgs={ReturnDate:new Date(req.body.date)},
+            Username={ReceiveBy:req.user.username}
         }
         else if(req.params.Status=='Reverse Dispatch'){
             dateArgs={DispatchDate:null}
@@ -35,7 +37,8 @@ router.put('/return/:id',auth,async(req,res)=>{
     orderItem = await OrderItems.updateMany({useremail:req.user.useremail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Received",
-            ReturnDate:new Date(req.body.date)
+            ReturnDate:new Date(req.body.date),
+            ReceiveBy:req.user.username
         }
     })
     updatedResult = await OrderItems.find({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1,BaseSku:1,Sku:1})
@@ -67,7 +70,9 @@ router.put('/dispatch/:id',auth,async(req,res)=>{
     orderItem = await OrderItems.updateMany({useremail:req.user.useremail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Dispatched",
-            DispatchDate:new Date(req.body.date)
+            DispatchDate:new Date(req.body.date),
+            DispatchBy:req.user.username
+
         }
     })
     updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{DispatchDate:1,OrderId:1,TrackingCode:1,ShopId:1})
@@ -109,15 +114,18 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     await timezone();
 
     var sortBy
+    var Username
     if(req.params.filter == "Dispatched"){
     sortBy='$DispatchDate'
+    Username="$DispatchBy"
     }
     else if(req.params.filter == "Received"){
     sortBy='$ReturnDate'
+    Username="$ReceiveBy"
     }
 
     orderItem = await OrderItems.aggregate([{
-        $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'}}
+        $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'},User:{$first:Username}}
     },{
         $match:{useremail:req.user.useremail,$and:[{Date:{$gte:startdate}},{Date:{$lte:enddate}}]}
     }]).sort({Date:-1})

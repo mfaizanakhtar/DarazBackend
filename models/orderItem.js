@@ -52,7 +52,9 @@ const OrderItemsSchema = new mongoose.Schema({
     ReturnedStockAdded:{
         type:Boolean,
         default:false
-    }
+    },
+    ReceiveBy:String,
+    DispatchBy:String
 
 
 
