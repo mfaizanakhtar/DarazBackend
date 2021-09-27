@@ -108,7 +108,7 @@ router.get('/getSubAccounts',auth,async(req,res)=>{
 router.post('/addSubAccount',auth,async(req,res)=>{
     // console.log(req.body)
     if(req.user.accountType=="root"){
-    var user = await User.findOne({loginemail:req.body.loginemail})
+    var user = await User.findOne({$or:[{loginemail:req.body.loginemail},{loginemail:req.body.loginemail,username:req.body.username}] })
     if(user) return res.status(400).send({message:"User already exists"});
 
     user = new User({
@@ -158,6 +158,21 @@ router.put('/updateSubAccount',auth,async(req,res)=>{
 router.post('/deleteSubAccount',auth,async(req,res)=>{
     deleteResult = await User.deleteOne({loginemail:req.body.loginemail,useremail:req.user.useremail})
     res.send(deleteResult)
+})
+
+router.put('/resetSubPassword/:loginemail',auth,async(req,res)=>{
+    if(req.user.accountType=="root"){
+        const salt = await bcrypt.genSalt(10);
+        var password=await bcrypt.hash('password.123',salt)
+
+        var update = await User.updateOne({loginemail:req.params.loginemail},{
+            password:password
+        });
+        res.send(update)
+        }
+    else{
+        res.send({Status:"Unauthorized"})
+    }
 })
 
 module.exports = router;
