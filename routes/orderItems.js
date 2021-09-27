@@ -41,7 +41,7 @@ router.put('/return/:id',auth,async(req,res)=>{
             ReceiveBy:req.user.username
         }
     })
-    updatedResult = await OrderItems.find({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1,BaseSku:1,Sku:1,ReceiveBy:1},{$rename:{'ReceiveBy':'Username'}})
+    updatedResult = await OrderItems.find({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1,BaseSku:1,Sku:1,ReceiveBy:1})
     // for(var item of updatedResult){
     //     console.log(item.Sku)
     //     var update = await Sku.updateMany({name:item.BaseSku},{$inc:{FBMstock:1}})
@@ -75,7 +75,7 @@ router.put('/dispatch/:id',auth,async(req,res)=>{
 
         }
     })
-    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{DispatchDate:1,OrderId:1,TrackingCode:1,ShopId:1,DispatchBy:1},{$rename:{'DispatchBy':'Username'}})
+    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{DispatchDate:1,OrderId:1,TrackingCode:1,ShopId:1,DispatchBy:1})
     res.send({Status:"Dispatched",updatedResult:updatedResult});
 }
 else{
@@ -117,15 +117,15 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     var Username
     if(req.params.filter == "Dispatched"){
     sortBy='$DispatchDate'
-    Username="$DispatchBy"
+    Username={DispatchBy:{$first:"$DispatchBy"}}
     }
     else if(req.params.filter == "Received"){
     sortBy='$ReturnDate'
-    Username="$ReceiveBy"
+    Username={ReceiveBy:{$first:"$ReceiveBy"}}
     }
 
     orderItem = await OrderItems.aggregate([{
-        $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'},Username:{$first:Username}}
+        $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'},...Username}
     },{
         $match:{useremail:req.user.useremail,$and:[{Date:{$gte:startdate}},{Date:{$lte:enddate}}]}
     }]).sort({Date:-1})
