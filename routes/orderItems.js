@@ -41,7 +41,7 @@ router.put('/return/:id',auth,async(req,res)=>{
             ReceiveBy:req.user.username
         }
     })
-    updatedResult = await OrderItems.find({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1,BaseSku:1,Sku:1})
+    updatedResult = await OrderItems.find({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1,BaseSku:1,Sku:1,ReceiveBy:1})
     // for(var item of updatedResult){
     //     console.log(item.Sku)
     //     var update = await Sku.updateMany({name:item.BaseSku},{$inc:{FBMstock:1}})
@@ -75,7 +75,7 @@ router.put('/dispatch/:id',auth,async(req,res)=>{
 
         }
     })
-    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{DispatchDate:1,OrderId:1,TrackingCode:1,ShopId:1})
+    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{DispatchDate:1,OrderId:1,TrackingCode:1,ShopId:1,DispatchBy:1})
     res.send({Status:"Dispatched",updatedResult:updatedResult});
 }
 else{
