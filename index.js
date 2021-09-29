@@ -20,7 +20,7 @@ const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
 const cheerio = require('cheerio')
 const atob = require("atob");
-const {getSkus} = require('./scripts/updateSku')
+const {getSkus, getAllSkus} = require('./scripts/updateSku')
  
 
 mongoose.connect(config.connectionstring,{useFindAndModify:false})
@@ -69,18 +69,15 @@ updateTransactions();
 // getSkus('techatronixs@gmail.com','["45CM+7FT","Holder5208"]')
 
 updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
-ShippingType:'Own Warehouse'},18000000);
+ShippingType:'Own Warehouse'},5*60*60*1000);
 
 updateOrderItemStatus({},{Status:'shipped',
-ShippingType:'Dropshipping'},3000000);
+ShippingType:'Dropshipping'},50*60*1000);
 
 updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
-ShippingType:'Dropshipping'},180000);
+ShippingType:'Dropshipping'},5*60*1000);
 
-// async function AlogySkus(){
-//     await getSkus('accesology@gmail.com',false)
-// }
-// AlogySkus()
+getAllSkus(24*60*60*1000)
 
 
 // updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],

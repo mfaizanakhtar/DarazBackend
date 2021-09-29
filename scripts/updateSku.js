@@ -52,23 +52,75 @@ async function getSkus(darazid,update,skus){
                     {$set:sku},
                     {upsert:true}
                 )
-                if(skuResult.upserted!=undefined) skuIdArray.push(skuResult.upserted[0]._id)
+                // if(skuResult.upserted!=undefined) skuIdArray.push(skuResult.upserted[0]._id)
+
+                // product.Skus=skuIdArray
+                // product.ShopId=shop.shopid
+                // product.useremail=shop.useremail
+                // productResult = await darazProduct.updateMany({ItemId:product.ItemId,ShopId:product.ShopId,useremail:product.useremail},product,{upsert:true})
             }
             else if(update){
             skuResult = await darazSku.updateMany(
                 {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
                 {$set:sku}
             )
-            if(skuResult.n>0) skuIdArray.push(skuResult.upserted[0]._id)
          }
         }
         
-        product.Skus=skuIdArray
-        product.ShopId=shop.shopid
-        product.useremail=shop.useremail
-        productResult = await darazProduct.updateMany({ItemId:product.ItemId,ShopId:product.ShopId,useremail:product.useremail},product,{upsert:true})
+
 
     }
+}
+
+async function getAllSkus(repeatTime){
+    shops = await Darazid.find()
+    for(var shop of shops){
+        Url=generateSkuUrl(shop.shopid,shop.secretkey)
+        var ProductSku = await GetData(Url)
+        var Products = ProductSku.Products
+        for(product of Products){
+            // var skuIdArray=[]
+            for(const [i,sku] of product.Skus.entries()){
+
+                dSku = await darazSku.findOne({ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail})
+                if(!dSku){
+                    sku.ShopId=shop.shopid
+                    sku.useremail=shop.useremail
+                    result = await InventoryStringToJSon(sku)
+                    sku.multiWarehouseInventories = result.multiWarehouseInventories
+                    sku.fblWarehouseInventories = result.fblWarehouseInventories
+
+                    var GroupSku = await Sku.findOne({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
+
+                    if(GroupSku==null) GroupSku={cost:0,FBMpackagingCost:0,FBDpackagingCost:0}
+                    sku.FBMstock=result.multiWarehouseInventories
+                    sku.FBDstock=result.fblWarehouseInventories
+                    sku.localQuantity=sku.quantity
+                    sku.cost = GroupSku.cost
+                    sku.FBMpackagingCost=GroupSku.FBMpackagingCost
+                    sku.FBDpackagingCost=GroupSku.FBDpackagingCost
+                    sku.BaseSku=GroupSku.name
+    
+                    skuResult = await darazSku.updateMany(
+                        {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
+                        {$set:sku},
+                        {upsert:true}
+                    )
+                    // if(skuResult.upserted!=undefined) skuIdArray.push(skuResult.upserted[0]._id)
+                }
+                // product.Skus=skuIdArray
+                // product.ShopId=shop.shopid
+                // product.useremail=shop.useremail
+                // productResult = await darazProduct.updateMany({ItemId:product.ItemId,ShopId:product.ShopId,useremail:product.useremail},product,{upsert:true})
+
+            }
+    }
+}
+if(repeatTime!=undefined){
+    setTimeout(() => {
+        getAllSkus(repeatTime)
+    }, repeatTime);
+}
 }
 
 async function InventoryStringToJSon(sku){
@@ -128,3 +180,4 @@ function baseSku(Sku){
 }
 
 module.exports.getSkus = getSkus
+module.exports.getAllSkus=getAllSkus
