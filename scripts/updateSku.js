@@ -46,14 +46,21 @@ async function getSkus(darazid,update,skus){
                 sku.FBMpackagingCost=GroupSku.FBMpackagingCost
                 sku.FBDpackagingCost=GroupSku.FBDpackagingCost
                 sku.BaseSku=GroupSku.name
-            }
 
+                skuResult = await darazSku.updateMany(
+                    {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
+                    {$set:sku},
+                    {upsert:true}
+                )
+                if(skuResult.upserted!=undefined) skuIdArray.push(skuResult.upserted[0]._id)
+            }
+            else if(update){
             skuResult = await darazSku.updateMany(
                 {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
-                {$set:sku},
-                {upsert:true}
+                {$set:sku}
             )
-            if(skuResult.upserted!=undefined) skuIdArray.push(skuResult.upserted[0]._id)
+            if(skuResult.n>0) skuIdArray.push(skuResult.upserted[0]._id)
+         }
         }
         
         product.Skus=skuIdArray
