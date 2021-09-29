@@ -6,11 +6,18 @@ const {darazSku} = require('../models/darazsku')
 const {Sku} = require('../models/sku')
 const {updateOrderItemStatus} = require('../scripts/updateStatus')
 
-async function getSkus(darazid,skus,update){
+async function getSkus(darazid,update,skus){
     // console.log(skus.length)
     // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     shop = await Darazid.findOne({shopid:darazid})
-    Url = generateSkuUrl(shop.shopid,shop.secretkey,'['+skus.toString()+']')
+    var Url
+    if(skus!=undefined){
+        Url = generateSkuUrl(shop.shopid,shop.secretkey,'['+skus.toString()+']')
+    }
+    else if(skus==undefined){
+        Url = generateSkuUrl(shop.shopid,shop.secretkey)
+    }
+    
     // console.log(Url)
     var ProductSku = await GetData(Url)
     var Products = ProductSku.Products
@@ -25,28 +32,12 @@ async function getSkus(darazid,skus,update){
             // sku.FBDstock=0
             var result = null
             result = await InventoryStringToJSon(sku)
-            if(result==null){
-                result.multiWarehouseInventories={
-                    occupyQuantity: 0,
-                    quantity: 0,
-                    totalQuantity: 0,
-                    withholdQuantity: 0,
-                    sellableQuantity: 0
-                  }
-                result.fblWarehouseInventories={
-                    occupyQuantity: 0,
-                    quantity: 0,
-                    totalQuantity: 0,
-                    withholdQuantity: 0,
-                    sellableQuantity: 0
-                  }
-            }
             sku.multiWarehouseInventories = result.multiWarehouseInventories
             sku.fblWarehouseInventories = result.fblWarehouseInventories
 
             if(!update){
                 var GroupSku = await Sku.findOne({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
-                console.log(GroupSku)
+
                 if(GroupSku==null) GroupSku={cost:0,FBMpackagingCost:0,FBDpackagingCost:0}
                 sku.FBMstock=result.multiWarehouseInventories
                 sku.FBDstock=result.fblWarehouseInventories
@@ -69,9 +60,7 @@ async function getSkus(darazid,skus,update){
         product.ShopId=shop.shopid
         product.useremail=shop.useremail
         productResult = await darazProduct.updateMany({ItemId:product.ItemId,ShopId:product.ShopId,useremail:product.useremail},product,{upsert:true})
-        // console.log(productResult)
-        // delete product.Skus
-        // console.log(product)
+
     }
 }
 
@@ -86,6 +75,7 @@ async function InventoryStringToJSon(sku){
 
     var multiWarehouseInventories="{"
     var tempData = sku.multiWarehouseInventories[0].match(/[A-z]+\=[0-9]+/g)
+    // console.log(tempData)
     for(var [i,data] of tempData.entries()){
         multiWarehouseInventories=multiWarehouseInventories+'"'+data.replace(/=/g,'":"')+'"'
         if(i!=tempData.length-1){

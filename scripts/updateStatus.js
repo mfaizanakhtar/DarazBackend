@@ -81,7 +81,7 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
                     }
                 }
                 
-                if (skuUpdateArray.length>0 && updateSkuStock==undefined) await getSkus(updateResult.ShopId,skuUpdateArray,true)
+                if (skuUpdateArray.length>0 && updateSkuStock==undefined) await getSkus(updateResult.ShopId,true,skuUpdateArray)
         }
         }
     }

@@ -77,6 +77,12 @@ ShippingType:'Dropshipping'},3000000);
 updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
 ShippingType:'Dropshipping'},180000);
 
+async function AlogySkus(){
+    await getSkus('accesology@gmail.com',false)
+}
+AlogySkus()
+
+
 // updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
 // ShippingType:'Dropshipping',DispatchDate:null},180000);
 

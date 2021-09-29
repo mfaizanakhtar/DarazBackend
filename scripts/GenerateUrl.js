@@ -22,8 +22,15 @@ function generateSkuUrl(userid,secretkey,Skus){
 
     let userID=encodeURIComponent(userid);
     let encodedSkus = encodeURIComponent(Skus)
-    apiparams=Action+"&Filter=all&Format=json"+"&SkuSellerList="+encodedSkus+"&Timestamp="+Timestamp+"&UserID="+userID+
-    "&Version=1.0"
+    var apiparams
+    if(Skus!=undefined){
+        apiparams=Action+"&Filter=all&Format=json"+"&SkuSellerList="+encodedSkus+"&Timestamp="+Timestamp+"&UserID="+userID+
+        "&Version=1.0"
+    }
+    else if(Skus==undefined){
+        apiparams=Action+"&Filter=all&Format=json"+"&Timestamp="+Timestamp+"&UserID="+userID+
+        "&Version=1.0"
+    }
     url=url+apiparams+"&"+"Signature="+SignParameters(secretkey,apiparams)
     // console.log(url)
     return url
