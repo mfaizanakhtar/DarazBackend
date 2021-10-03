@@ -39,6 +39,9 @@ async function updateTransactions(){
             //check if transactions is in db
             // if(t["Order No."]=='132205169891061'){console.log(t)}
             var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"],useremail:shopid.useremail})
+            var increment
+            if(transaction.TransactionType=="Automatic Shipping Fee") increment={$inc:{TransactionsPayout:-transaction.VATinAmount}}
+            else increment={$inc:{TransactionsPayout:transaction.Amount}}
             if(transaction.length>0){
                 if(transaction.OrderItemUpdated==false){
 
@@ -52,7 +55,9 @@ async function updateTransactions(){
                                 VATinAmount:transaction.VATinAmount,
                                 Statement:transaction.Statement
                                 }
-                            }
+                            },
+                        ...increment,
+                        PayoutCycle:transaction.Statement
                     })
                 
                 if(updateResult.n>0){
@@ -77,7 +82,9 @@ async function updateTransactions(){
                         VATinAmount:transactResult.VATinAmount,
                         Statement:transactResult.Statement
                         }
-                    }
+                    },
+                ...increment,
+                PayoutCycle:transaction.Statement
             })
             if(updateResult.n>0){
                 await Transaction.updateMany({_id:transactResult._id},{OrderItemUpdated:true})

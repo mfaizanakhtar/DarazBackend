@@ -36,9 +36,11 @@ const OrderItemsSchema = new mongoose.Schema({
         Statement:String
 
     }],
+    TransactionsPayout:{type:Number,default:0},
+    PayoutCycle:String,
     cost:Number,
     packagingCost:Number,
-    PortCode:{type:String,default:''},
+    PortCode:{type:String,defaults:''},
     trackingBarcode:String,
     portcodeBarcode:String,
     orderIdBarcode:String,
