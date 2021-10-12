@@ -40,8 +40,10 @@ async function updateTransactions(){
             // if(t["Order No."]=='132205169891061'){console.log(t)}
             var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"],useremail:shopid.useremail})
             var increment
-            if(transaction.TransactionType=="Automatic Shipping Fee") increment={$inc:{TransactionsPayout:-transaction.VATinAmount}}
-            else increment={$inc:{TransactionsPayout:transaction.Amount}}
+            // console.log(t)
+            if(t["Transaction Type"]=="Automatic Shipping Fee") increment={$inc:{TransactionsPayout:-t["VAT in Amount"]}}
+            else increment={$inc:{TransactionsPayout:t["Amount"]}}
+            // console.log(increment);
             if(transaction.length>0){
                 if(transaction.OrderItemUpdated==false){
 
