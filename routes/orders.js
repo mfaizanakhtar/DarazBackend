@@ -225,7 +225,7 @@ router.post('/getStockChecklist',auth,async(req,res)=>{
     var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping",useremail:req.user.useremail}}
     }
     else{
-    var matchFilter = {$match:{Status:"ready_to_ship",ShippingType:"Dropshipping",useremail:req.user.useremail}}
+    var matchFilter = {$match:{Status:"ready_to_ship",DispatchDate:null,ShippingType:"Dropshipping",useremail:req.user.useremail}}
     }
     var result = await OrderItems.aggregate([
         matchFilter,

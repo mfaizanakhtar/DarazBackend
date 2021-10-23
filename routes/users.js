@@ -12,12 +12,12 @@ router.get('/',async(req,res)=>{
 
 router.post('/',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
-        let user =await User.findOne({$or:[{useremail:req.body.useremail},{loginemail:req.body.useremail}]});
+        let user =await User.findOne({$or:[{useremail:req.body.useremail.toLowerCase()},{loginemail:req.body.useremail.toLowerCase()}]});
         if (user) return res.status(400).send({message:"User already exists"}); 
 
             user = new User({
-            useremail:req.body.useremail,
-            loginemail:req.body.useremail,
+            useremail:req.body.useremail.toLowerCase(),
+            loginemail:req.body.useremail.toLowerCase(),
             password:req.body.password,
             usertype:req.body.usertype
         })
@@ -37,7 +37,7 @@ router.post('/',auth,async(req,res)=>{
 router.put('/updateUser/:loginemail',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
         // console.log(req.params.useremail)
-        var update = await User.updateOne({loginemail:req.params.loginemail},{
+        var update = await User.updateOne({loginemail:req.params.loginemail.toLowerCase()},{
             usertype:req.body.usertype
         });
         res.send(update)
@@ -52,7 +52,7 @@ router.put('/resetPassword/:loginemail',auth,async(req,res)=>{
         const salt = await bcrypt.genSalt(10);
         var password=await bcrypt.hash('password.123',salt)
 
-        var update = await User.updateOne({loginemail:req.params.loginemail},{
+        var update = await User.updateOne({loginemail:req.params.loginemail.toLowerCase()},{
             password:password
         });
         res.send(update)
@@ -64,7 +64,7 @@ router.put('/resetPassword/:loginemail',auth,async(req,res)=>{
 
 router.post('/deleteUser',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
-        var del = await User.deleteMany({useremail:req.body.useremail})
+        var del = await User.deleteMany({useremail:req.body.useremail.toLowerCase()})
         res.send(del)
     }
     else{
@@ -74,7 +74,7 @@ router.post('/deleteUser',auth,async(req,res)=>{
 
 router.put('/updatePassword',auth,async(req,res)=>{
     // console.log(req.body)
-    let user = await User.findOne({loginemail:req.user.loginemail})
+    let user = await User.findOne({loginemail:req.user.loginemail.toLowerCase()})
     const password = await bcrypt.compare(req.body.oldPassword,user.password)
     // console.log(password)
     if(password==true){
@@ -90,7 +90,7 @@ router.put('/updatePassword',auth,async(req,res)=>{
 router.put('/addSubscription/:useremail',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
         var addSubscription=new Date(req.body.subscriptionEndDate)
-        result = await User.updateMany({useremail:req.params.useremail},{subscriptionEndDate:addSubscription})
+        result = await User.updateMany({useremail:req.params.useremail.toLowerCase()},{subscriptionEndDate:addSubscription})
         res.send(result)
     }
     else{
@@ -101,14 +101,14 @@ router.put('/addSubscription/:useremail',auth,async(req,res)=>{
 
 
 router.get('/getSubAccounts',auth,async(req,res)=>{
-    subusers = await User.find({useremail:req.user.useremail,accountType:"sub"},{password:0,_id:0})
+    subusers = await User.find({useremail:req.user.useremail.toLowerCase(),accountType:"sub"},{password:0,_id:0})
     res.send(subusers)
 })
 
 router.post('/addSubAccount',auth,async(req,res)=>{
     // console.log(req.body)
     if(req.user.accountType=="root"){
-    var user = await User.findOne({$or:[{loginemail:req.body.loginemail},{loginemail:req.body.loginemail,username:req.body.username}] })
+    var user = await User.findOne({$or:[{loginemail:req.body.loginemail.toLowerCase()},{loginemail:req.body.loginemail.toLowerCase(),username:req.body.username.toLowerCase()}] })
     if(user) return res.status(400).send({message:"User already exists"});
 
     user = new User({
@@ -141,7 +141,7 @@ router.post('/addSubAccount',auth,async(req,res)=>{
 })
 
 router.put('/updateSubAccount',auth,async(req,res)=>{
-    updateResult = await User.updateOne({loginemail:req.body.loginemail,useremail:req.user.useremail},{
+    updateResult = await User.updateOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.useremail.toLowerCase()},{
         username:req.body.username,
         Orders:req.body.Orders,
         Finance:req.body.Finance,
@@ -156,7 +156,7 @@ router.put('/updateSubAccount',auth,async(req,res)=>{
 })
 
 router.post('/deleteSubAccount',auth,async(req,res)=>{
-    deleteResult = await User.deleteOne({loginemail:req.body.loginemail,useremail:req.user.useremail})
+    deleteResult = await User.deleteOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.useremail.toLowerCase()})
     res.send(deleteResult)
 })
 
@@ -165,7 +165,7 @@ router.put('/resetSubPassword/:loginemail',auth,async(req,res)=>{
         const salt = await bcrypt.genSalt(10);
         var password=await bcrypt.hash('password.123',salt)
 
-        var update = await User.updateOne({loginemail:req.params.loginemail},{
+        var update = await User.updateOne({loginemail:req.params.loginemail.toLowerCase()},{
             password:password
         });
         res.send(update)

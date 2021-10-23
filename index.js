@@ -8,6 +8,7 @@ const auth = require('./routes/auth');
 const darazid = require('./routes/darazids');
 const orderitems = require('./routes/orderItems');
 const transactions = require('./routes/transactions')
+const dashboards = require('./routes/dashboards');
 const { OrderItems } = require('./models/orderItem');
 const orders = require('./routes/orders');
 const skus = require('./routes/skus');
@@ -50,7 +51,7 @@ app.use('/api/orders',orders)
 app.use('/api/skus',skus)
 app.use('/api/transactions',transactions)
 app.use('/api/darazskus',darazskus)
-
+app.use('/api/dashboard',dashboards)
 
 // async function updateId(){
 //     const result = await OrderItems.updateMany({},{

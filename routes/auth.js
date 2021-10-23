@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 router.post('/',async(req,res)=>{
     // console.log(req.body)
     
-    const user = await User.findOne({ loginemail:req.body.loginemail })
+    const user = await User.findOne({ loginemail:req.body.loginemail.toLowerCase() })
     if(!user) {
         if(req.body.loginemail=='admin'){
             admin = new User({
@@ -33,6 +33,7 @@ router.post('/',async(req,res)=>{
         let token = user.generateAuthToken();
         res.send({"token":token});
     }
+    else return res.send({message:'Incorrect Password'});
     
     
 })
