@@ -122,15 +122,15 @@ async function fetchLabelsAndUpdate(useremail){
 async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     console.log(orderItemIds,orderItemIds.length)
     console.log("Entry Checkpoint")
-    var portCodes=[]
-    var trackings=[]
-    trackingbarcodes=[]
-    portcodebarcodes=[]
-    // orderidbarcodes=[]
-    qrcodes=[]
-    deliveryPoints=[]
-    labelPrices=[]
-    labelOrderNumbers=[]
+    // var portCodes=[]
+    // var trackings=[]
+    // trackingbarcodes=[]
+    // portcodebarcodes=[]
+    // // orderidbarcodes=[]
+    // qrcodes=[]
+    // deliveryPoints=[]
+    // labelPrices=[]
+    // labelOrderNumbers=[]
 
     splitCount=35
     lastCount=0
@@ -138,12 +138,14 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     for(let j=0;j<Math.ceil(orderItemIds.length/splitCount);j++){
         var portCodes=[]
         var trackings=[]
-        trackingbarcodes=[]
-        portcodebarcodes=[]
+        var trackingbarcodes=[]
+        var portcodebarcodes=[]
         // orderidbarcodes=[]
-        qrcodes=[]
-        deliveryPoints=[]
-        labelPrices=[]
+        var qrcodes=[]
+        var deliveryPoints=[]
+        var labelPrices=[]
+        var labelOrderNumbers=[]
+        var sellerAddress=[]
         console.log("First Loop")
     
     OrderItemStringArray='['
@@ -203,11 +205,19 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     //     }
 
     // });
-
+    //scrape qr codes
     $('div[class="box left qrcode"]').find('img').each(function(index,element){
 
             qrcodes.push($(element).attr('src'))
 
+    });
+    //scrape seller address
+    $("div").find('div:nth-child(15)').each(function(index,element){
+        // Address=$(element).text().substr(9)
+        // PortCode=PortCode.substr(0,PortCode.length-1)
+        // portCodes.push(PortCode)
+        // console.log(Address)
+        sellerAddress.push($(element).text().substr(8))
     });
     console.log("2nd Checkpoint")
     console.log(trackings.length)
@@ -218,7 +228,12 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
 
         // if(portCodes.length==trackingbarcodes.length){
         updateResult = await OrderItems.updateMany({TrackingCode:trackings[i].toString(),OrderId:labelOrderNumbers[i].toString()},{
-            $set:{PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],qrCode:qrcodes[i],labelPrice:labelPrices[i],deliveryPoint:deliveryPoints[i],labelTracking:trackings[i]}
+            $set:{
+                PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],
+                qrCode:qrcodes[i],labelPrice:labelPrices[i],
+                deliveryPoint:deliveryPoints[i],labelTracking:trackings[i],
+                sellerAddress:sellerAddress[i]
+            }
         })
         console.log(updateResult)
         // }

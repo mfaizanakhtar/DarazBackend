@@ -77,11 +77,14 @@ async function FindQuery(query,user){
             pageArgs={...pageArgs,[propName]:query[propName]}
             delete query[propName]
         }
+        else if(propName=="OrderId" || propName=="OrderItems.TrackingCode"){
+            const regex = new RegExp(query[propName])
+            query[propName] = regex
+        }
     }
-    
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail,...isPrinted}
-    // console.log(FinalFilter)
+    console.log(FinalFilter)
     //query generated
     const orders = await Order.aggregate([
         {

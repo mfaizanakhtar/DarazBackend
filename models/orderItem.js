@@ -47,6 +47,7 @@ const OrderItemsSchema = new mongoose.Schema({
     qrCode:String,
     labelPrice:String,
     deliveryPoint:String,
+    sellerAddress:String,
     trackingChangeCount:{
         type:Number,
         default:0

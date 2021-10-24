@@ -21,10 +21,13 @@ router.get('/getSkus',auth,async(req,res)=>{
                 StockFilter={quantity:{$lte:0}}
             }
         }
-        if(req.query[key]=='null' || key=='pSize' || key=='pIndex' || key=='Stock')
-        delete req.query[key] 
-    }
+        if(req.query[key]=='null' || key=='pSize' || key=='pIndex' || key=='Stock') {delete req.query[key]} 
+        else if(key=='ShopSku' || key=='SellerSku'){
+            const regex = new RegExp(`${req.query[key]}`,'i')
+            req.query[key] = regex
+        }
 
+    }
     var darazskus = await darazSku.find({useremail:req.user.useremail,...req.query,...StockFilter}).sort({quantity:-1})
     .skip(pSize*pIndex)
     .limit(pSize)
