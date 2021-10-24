@@ -80,6 +80,7 @@ router.get("/OrdersAnalyticsGraph",auth,async(req,res)=>{
         {$group:{_id:{ $dayOfYear: "$CreatedAt"},orders:{$sum:1},day:{$first:{$dayOfMonth:"$CreatedAt"}},month:{$first:{$month:"$CreatedAt"}},year:{$first:{$year:"$CreatedAt"}}}},
         {$sort:{"_id":1}}
     ])
+    console.log(ordersGraphQuery)
 
     var itemsResponse={name:"Items",type:"line",data:[]}
     var ordersResponse={name:"Orders",type:"line",data:[]}
