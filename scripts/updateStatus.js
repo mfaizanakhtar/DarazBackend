@@ -46,18 +46,21 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
         // console.log(shop.shopid+' '+orderitems.length)
         var orderitemsrray = getOrderIdArray(orderitems)
         url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsrray);
+        // console.log(url)
         orderitemsdata = await GetData(url);
-        if(orderitemsdata!=null){
+        if(orderitemsdata!=null && orderitemsdata!=undefined){
         // console.log(orderitemsdata.Orders.length)
 
         orderitemsdata = orderitemsdata.Orders
         //iterate all orders fetched from api
 
         for(var orders of orderitemsdata){
+            // console.log(orders)
             for(item of orders.OrderItems){
                 // console.log(item)
+                // if(orders.OrderItems==undefined || orders.OrderItems==null) {console.log("null here")}
                 updateResult = await OrderItems.findOneAndUpdate(
-                {OrderId:item.OrderId,Name:item.Name,Sku:item.Sku,ShopSku:item.ShopSku,
+                {OrderId:item.OrderId,Sku:item.Sku,ShopSku:item.ShopSku,
                 ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,
                 ShippingAmount:item.ShippingAmount
                 ,Variation:item.Variation},
@@ -66,6 +69,11 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
             
                 // if(status.DispatchDate!=null){
                 //     await Sku.updateMany({name:updateResult.BaseSku,useremail:updateResult.useremail},{FBMstock:{$inc:1}})
+                // }
+                // if(updateResult==null) {
+                //     console.log(item)
+                //     dbitem = await OrderItems.find({OrderItemId:item.OrderItemId})
+                //     console.log(dbitem)
                 // }
                 if(updateResult.ShippingType=='Dropshipping' && updateResult.DispatchDate!=null && item.Status=='canceled'){
                     await Sku.updateMany({name:updateResult.BaseSku,useremail:updateResult.useremail},{FBMstock:{$inc:1}})
