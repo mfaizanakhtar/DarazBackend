@@ -48,6 +48,7 @@ const OrderItemsSchema = new mongoose.Schema({
     labelPrice:String,
     deliveryPoint:String,
     sellerAddress:String,
+    Reason:String,
     trackingChangeCount:{
         type:Number,
         default:0

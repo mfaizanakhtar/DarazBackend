@@ -65,7 +65,7 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
                 ShippingAmount:item.ShippingAmount
                 ,Variation:item.Variation},
                 {Status:item.Status,TrackingCode:item.TrackingCode,
-                    ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2),UpdatedAt:item.UpdatedAt})
+                    ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2),UpdatedAt:item.UpdatedAt,Reason:item.Reason})
             
                 // if(status.DispatchDate!=null){
                 //     await Sku.updateMany({name:updateResult.BaseSku,useremail:updateResult.useremail},{FBMstock:{$inc:1}})

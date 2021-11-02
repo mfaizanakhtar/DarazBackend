@@ -15,7 +15,7 @@ const skus = require('./routes/skus');
 const darazskus=require('./routes/darazskus')
 const {updateOrdersData,updateSingleOrder} = require('./scripts/updateOrders');
 const {updateOrderItemStatus} = require('./scripts/updateStatus')
-const {generateSingleOrderUrl,RtsURL} = require('./scripts/GenerateUrl');
+const {generateSingleOrderUrl,RtsURL, generateMultipleOrderItemsUrl} = require('./scripts/GenerateUrl');
 const {updateTransactions} = require("./scripts/updateFinance");
 const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
@@ -77,6 +77,11 @@ ShippingType:'Dropshipping'},50*60*1000);
 
 updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
 ShippingType:'Dropshipping'},5*60*1000);
+
+var startingDate=new Date();
+startingDate=startingDate.setDate(startingDate.getDate()-20)
+
+updateOrderItemStatus({},{Status:'delivered',UpdatedAt:{$gte:startingDate}},8*60*60*1000);
 
 getAllSkus(24*60*60*1000)
 
@@ -160,6 +165,7 @@ getAllSkus(24*60*60*1000)
 // }
 
 // console.log(RtsURL('accesology@gmail.com','j6hn60ggpQaDUW1nR2kXZ6vN1JUjIAxPJrQZdWmiMFsqvc3DZCjxTZYs','[130295377502752,129666658371249]'))
+// console.log(generateMultipleOrderItemsUrl('accesology@gmail.com','j6hn60ggpQaDUW1nR2kXZ6vN1JUjIAxPJrQZdWmiMFsqvc3DZCjxTZYs',"[133492028676272]"))
 
 
 const port = process.env.PORT || 3000;
