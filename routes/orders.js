@@ -22,7 +22,7 @@ router.get('/orders/',auth,async(req,res)=>{
 
 
 async function FindQuery(query,user){
-
+    // console.log(query)
 
     var skuSort=[]
     var shopSort=[]
