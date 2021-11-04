@@ -8,6 +8,7 @@ const {Darazid} = require('../models/darazid')
 const {RtsURL} = require('../scripts/GenerateUrl')
 const {GetData} = require('../scripts/HttpReq')
 const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
+const {getDateFilter,getAdditionStatus,updateQuery, updateQueryForStockChecklist} = require('./ordersService')
 
 router.get('/orders/',auth,async(req,res)=>{
 
@@ -22,69 +23,28 @@ router.get('/orders/',auth,async(req,res)=>{
 
 async function FindQuery(query,user){
 
-    var startdate;
-    var enddate;
+
     var skuSort=[]
     var shopSort=[]
     var isPrinted={}
-    //setting timezone startdate and enddate
-    async function timezone(){
     
-    startdate = new Date(query.startDate);
-    startdate.setHours(startdate.getHours()+5);
-    enddate = new Date(query.endDate);
-    enddate.setHours(enddate.getHours()+28,59,59,59);
-
-    }
-    await timezone();
-    console.log(startdate)
-    console.log(enddate)
-    //initializing filters object variables
-    var pageArgs={}
-    var FinalFilter={}
-    dateFilter={$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
-    //check if sort is true, set Skus sort to 1 to enable sorting by sku
-    if(query.skuSort=="true") skuSort=[{$sort:{"Skus":1}}]
-    if(query.shopSort=="true") shopSort=[{$sort:{"ShopId":1}}]
-
     if(query.Printed=="true") isPrinted={isPrinted:true}
     if(query.unPrinted=="true") isPrinted={isPrinted:false}
-        
-    claimDate = new Date();
-    claimDate.setDate(claimDate.getDate()-30);
-    
-    AdditionStatus={
-        ready_to_ship:{"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":{$ne:"Dispatched"}},
-        RTSDispatched : {"OrderItems.Status":"ready_to_ship","OrderItems.DispatchDate":{$ne:null}},
-        DeliveryFailedReceived : {"OrderItems.Status":"failed","OrderItems.WarehouseStatus":"Received"},
-        Claimable : {CreatedAt: {$lte:claimDate},"OrderItems.WarehouseStatus":"Dispatched","OrderItems.Status":{$ne:"delivered"}},
-        ClaimFiled : {$or:[{"OrderItems.WarehouseStatus":"Claim Filed"},{"OrderItems.WarehouseStatus":"Claim Approved"},{"OrderItems.WarehouseStatus":"Claim Rejected"},{"OrderItems.WarehouseStatus":"Claim POD Dispute"}]},
-        ClaimReceived : {"OrderItems.WarehouseStatus":"Claim Received"}
-    }
-    //removing datefilter if status = claimaible
-    if(AdditionStatus[query["OrderItems.Status"]]){
-        if(query["OrderItems.Status"]=="Claimable" || query["OrderItems.Status"]=="ClaimFiled" || query["OrderItems.Status"]=="ClaimReceived") dateFilter={}
-        //if status found from additionstatus, delete orderitems.status
-        FinalFilter={...AdditionStatus[query["OrderItems.Status"]]}
-        query["OrderItems.Status"]="null"
-    } 
-    //iterate the query object
-    for(var propName in query){//if value is null,startdate or enddate, delete the object key value
-        if(query[propName] == "null" || propName=="startDate" || propName=="endDate" || propName=="skuSort" || propName=="shopSort" || propName=="Printed" || propName=="unPrinted") 
-        delete query[propName]//if pagesize or page number, move to pageArgs object and delete that from query
-        else if(propName=="pageSize" || propName=="pageNumber")
-        {
-            pageArgs={...pageArgs,[propName]:query[propName]}
-            delete query[propName]
-        }
-        else if(propName=="OrderId" || propName=="OrderItems.TrackingCode"){
-            const regex = new RegExp(query[propName])
-            query[propName] = regex
-        }
-    }
+
+    dateFilter=getDateFilter(query);
+    updateQueryResult = updateQuery(query);
+
+    query = updateQueryResult.query;
+    var pageArgs=updateQueryResult.pageArgs
+    var FinalFilter=updateQueryResult.FinalFilter
+
+    //check if sort is true, set Skus sort to 1 to enable sorting by sku
+    // if(query.skuSort=="true") skuSort=[{$sort:{"Skus":1}}]
+    // if(query.shopSort=="true") shopSort=[{$sort:{"ShopId":1}}]
+
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail,...isPrinted}
-    console.log(FinalFilter)
+    // console.log(FinalFilter)
     //query generated
     const orders = await Order.aggregate([
         {
@@ -240,6 +200,42 @@ router.post('/getStockChecklist',auth,async(req,res)=>{
         }},
         {$sort:{"_id":1}}
     ])
+    res.send(result)
+})
+
+router.get('/getFilterStockChecklist',auth,async(req,res)=>{
+    var query=req.query
+    var user = req.user
+
+    var isPrinted={}
+    
+    if(query.Printed=="true") isPrinted={isPrinted:true}
+    if(query.unPrinted=="true") isPrinted={isPrinted:false}
+
+    dateFilter=getDateFilter(query);
+    updateQueryResult = updateQueryForStockChecklist(query);
+
+    console.log(query)
+    query = updateQueryResult.query;
+    console.log(query)
+    var FinalFilter=updateQueryResult.FinalFilter
+
+    //spread the finalfilter,query,date and assign it to final filter
+    FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail,...isPrinted}
+    // console.log(FinalFilter)
+    var matchFilter={$match:FinalFilter}
+
+    var result = await OrderItems.aggregate([
+        matchFilter,
+        {$group:{
+            _id:"$BaseSku",
+            count:{$sum:1},
+            // ReturnedStockAdded:{$first:"$ReturnedStockAdded"},
+            img:{$first:"$productMainImage"}
+        }},
+        {$sort:{"_id":1}}
+    ])
+    console.log(result)
     res.send(result)
 })
 
