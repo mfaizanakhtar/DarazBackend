@@ -8,7 +8,7 @@ async function updateTransactions(){
     try{
     var shopids = await Darazid.find()
     // transactionTypes=[155]
-    transactionTypes=[13,8,16,3,28,14,85,15,145,104]
+    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4]
     //13 - Item Price Credit
     //8 - Shipping Fee (Paid By Customer)
     //16 - Commission
@@ -27,6 +27,7 @@ async function updateTransactions(){
         for(transType of transactionTypes){
         //get Url for transaction
         url= generateTransactionsUrl(shopid.shopid,shopid.secretkey,date,transType)
+        // console.log(url)
         //get transactions data
         var transactions = await GetData(url);
         if(transactions!=null){
@@ -41,7 +42,8 @@ async function updateTransactions(){
             var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"],useremail:shopid.useremail})
             var increment
             // console.log(t)
-            if(t["Transaction Type"]=="Automatic Shipping Fee") increment={$inc:{TransactionsPayout:-t["VAT in Amount"]}}
+            if(t["Fee Name"]=="Automatic Shipping Fee") increment={$inc:{TransactionsPayout:-t["VAT in Amount"]}}
+            else if(t["Fee Name"]=="Shipping Fee (Paid By Customer)") increment={$inc:0}
             else increment={$inc:{TransactionsPayout:t["Amount"]}}
             // console.log(increment);
             if(transaction.length>0){
