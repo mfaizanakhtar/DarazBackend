@@ -178,6 +178,7 @@ function OrderItemObj(item,shopid,useremail,sku){
         Variation:item.Variation,
         useremail:useremail,
         cost:sku.cost,
+        Reason:item.Reason,
         ...packagingCost
     })
     // console.log(orderItem.ShipmentProvider)
