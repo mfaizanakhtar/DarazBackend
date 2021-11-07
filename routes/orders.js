@@ -239,4 +239,15 @@ router.get('/getFilterStockChecklist',auth,async(req,res)=>{
     res.send(result)
 })
 
+router.put("/updateClaim/:id",auth,async (req,res)=>{
+    // console.log(req.body)
+    // console.log(req.params)
+    var result = await Order.findOneAndUpdate({_id:req.params.id},{ClaimNumber:req.body.ClaimNumber},{returnNewDocument:true})
+    console.log(result)
+    if(result==null){
+        res.sendStatus(404).send({message:"Not Found"})
+    }
+    res.send(result)
+})
+
 module.exports = router
