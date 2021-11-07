@@ -21,7 +21,7 @@ function updateQuery(query){
     claimDate = new Date();
     claimDate.setDate(claimDate.getDate()-30);
     
-    var AdditionStatus = getAdditionStatus()
+    var AdditionStatus = getAdditionStatus(false)
 
     //removing datefilter if status = claimaible
     if(AdditionStatus[query["OrderItems.Status"]]){
@@ -55,7 +55,7 @@ function updateQueryForStockChecklist(query){
     claimDate = new Date();
     claimDate.setDate(claimDate.getDate()-30);
     
-    var AdditionStatus = getAdditionStatus()
+    var AdditionStatus = getAdditionStatus(true)
 
     //removing datefilter if status = claimaible
     if(AdditionStatus[query["Status"]]){
@@ -83,8 +83,11 @@ function updateQueryForStockChecklist(query){
     return({query:query,pageArgs:pageArgs,FinalFilter:FinalFilter})
 }
 
-function getAdditionStatus(){
-    return  {
+function getAdditionStatus(stockCheckList){
+    
+    var AdditionStatus={}
+    if(stockCheckList){
+    AdditionStatus = {
         ready_to_ship:{"Status":"ready_to_ship","WarehouseStatus":{$ne:"Dispatched"}},
         RTSDispatched : {"Status":"ready_to_ship","DispatchDate":{$ne:null}},
         DeliveryFailedReceived : {"Status":"failed","WarehouseStatus":"Received"},
@@ -92,7 +95,20 @@ function getAdditionStatus(){
         ClaimFiled : {$or:[{"WarehouseStatus":"Claim Filed"},{"WarehouseStatus":"Claim Approved"},{"WarehouseStatus":"Claim Rejected"},{"WarehouseStatus":"Claim POD Dispute"}]},
         ClaimReceived : {"WarehouseStatus":"Claim Received"}
     }
+    }
+    else {
+        AdditionStatus = {
+            ready_to_ship:{"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":{$ne:"Dispatched"}},
+            RTSDispatched : {"OrderItems.Status":"ready_to_ship","OrderItems.DispatchDate":{$ne:null}},
+            DeliveryFailedReceived : {"OrderItems.Status":"failed","OrderItems.WarehouseStatus":"Received"},
+            Claimable : {CreatedAt: {$lte:claimDate},"OrderItems.WarehouseStatus":"Dispatched","Status":{$ne:"delivered"}},
+            ClaimFiled : {$or:[{"OrderItems.WarehouseStatus":"Claim Filed"},{"OrderItems.WarehouseStatus":"Claim Approved"},{"OrderItems.WarehouseStatus":"Claim Rejected"},{"OrderItems.WarehouseStatus":"Claim POD Dispute"}]},
+            ClaimReceived : {"OrderItems.WarehouseStatus":"Claim Received"}
+        } 
+    }
+    return  AdditionStatus
 }
+
 
 module.exports.getAdditionStatus=getAdditionStatus;
 module.exports.getDateFilter=getDateFilter;
