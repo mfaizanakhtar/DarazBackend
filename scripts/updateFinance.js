@@ -43,10 +43,11 @@ async function updateTransactions(){
             var increment
             // console.log(t)
             if(t["Fee Name"]=="Automatic Shipping Fee") increment={$inc:{TransactionsPayout:-t["VAT in Amount"]}}
-            else if(t["Fee Name"]=="Shipping Fee (Paid By Customer)") increment={$inc:0}
+            else if(t["Fee Name"]=="Shipping Fee (Paid By Customer)") increment={$inc:{TransactionsPayout:0}}
             else increment={$inc:{TransactionsPayout:t["Amount"]}}
             // console.log(increment);
             if(transaction.length>0){
+                            console.log(transactions.length)
                 if(transaction.OrderItemUpdated==false){
 
                     var updateResult = await OrderItems.updateMany({OrderItemId:transaction.OrderItemNo},{
