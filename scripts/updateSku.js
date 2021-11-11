@@ -118,6 +118,7 @@ async function getAllSkus(repeatTime){
             }
     }
 }
+console.log("All Skus Updated")
 if(repeatTime!=undefined){
     setTimeout(() => {
         getAllSkus(repeatTime)
