@@ -20,6 +20,7 @@ async function getSkus(darazid,update,skus){
     
     // console.log(Url)
     var ProductSku = await GetData(Url)
+    if(ProductSku!=null){
     var Products = ProductSku.Products
     for(product of Products){
         var skuIdArray=[]
@@ -70,6 +71,7 @@ async function getSkus(darazid,update,skus){
 
 
     }
+}
 }
 
 async function getAllSkus(repeatTime){

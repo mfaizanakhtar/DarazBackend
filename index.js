@@ -83,7 +83,7 @@ startingDate=startingDate.setDate(startingDate.getDate()-20)
 
 updateOrderItemStatus({},{Status:'delivered',UpdatedAt:{$gte:startingDate}},8*60*60*1000);
 
-getAllSkus(24*60*60*1000)
+getAllSkus(30*60*1000)
 
 
 // updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
