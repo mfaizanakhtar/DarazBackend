@@ -47,7 +47,7 @@ async function updateTransactions(){
             else increment={$inc:{TransactionsPayout:t["Amount"]}}
             // console.log(increment);
             if(transaction.length>0){
-                            console.log(transactions.length)
+                            // console.log(transactions.length)
                 if(transaction.OrderItemUpdated==false){
 
                     var updateResult = await OrderItems.updateMany({OrderItemId:transaction.OrderItemNo},{
