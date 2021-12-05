@@ -79,6 +79,9 @@ async function getAllSkus(repeatTime){
     for(var shop of shops){
         Url=generateSkuUrl(shop.shopid,shop.secretkey)
         var ProductSku = await GetData(Url)
+        if(ProductSku){
+
+        
         var Products = ProductSku.Products
         for(product of Products){
             // var skuIdArray=[]
@@ -117,6 +120,7 @@ async function getAllSkus(repeatTime){
 
             }
     }
+}
 }
 console.log("All Skus Updated")
 if(repeatTime!=undefined){
