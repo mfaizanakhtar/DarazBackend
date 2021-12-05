@@ -1,4 +1,4 @@
 {
-    "connectionstring" : "mongodb://database:27017/Daraz",
+    "connectionstring" : "mongodb://localhost/Daraz",
     "jwtprivatekey":"1234"
     }
