@@ -100,19 +100,10 @@ async function updateAllSkus(repeatTime){
                         result = await InventoryStringToJSon(sku)
                         sku.multiWarehouseInventories = result.multiWarehouseInventories
                         sku.fblWarehouseInventories = result.fblWarehouseInventories
-    
-                        var GroupSku = await Sku.findOne({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
-    
-                        if(GroupSku==null) GroupSku={cost:0,FBMpackagingCost:0,FBDpackagingCost:0}
-                        sku.cost = GroupSku.cost
-                        sku.FBMpackagingCost=GroupSku.FBMpackagingCost
-                        sku.FBDpackagingCost=GroupSku.FBDpackagingCost
-                        sku.BaseSku=GroupSku.name
         
                         skuResult = await darazSku.updateMany(
                             {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
-                            {$set:sku},
-                            {upsert:true}
+                            {...sku}
                         )
     
                 }
