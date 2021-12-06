@@ -21,7 +21,7 @@ const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
 const cheerio = require('cheerio')
 const atob = require("atob");
-const {getSkus, getAllSkus} = require('./scripts/updateSku')
+const {getSkus, getAllSkus,updateAllSkus} = require('./scripts/updateSku')
  
 
 mongoose.connect(config.connectionstring,{useFindAndModify:false})
@@ -83,7 +83,8 @@ startingDate=startingDate.setDate(startingDate.getDate()-20)
 
 updateOrderItemStatus({},{Status:'delivered',UpdatedAt:{$gte:startingDate}},8*60*60*1000);
 
-getAllSkus(30*60*1000)
+getAllSkus(6*60*60*1000)
+updateAllSkus(30*60*1000)
 
 
 // updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],

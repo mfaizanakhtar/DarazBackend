@@ -74,6 +74,69 @@ async function getSkus(darazid,update,skus){
 }
 }
 
+async function updateAllSkus(repeatTime){
+    shops = await Darazid.find()
+    for(var shop of shops){
+        
+        splitCount=30
+        var skuitemscount = await darazSku.countDocuments({ShopId:shop.shopid})
+        
+        end = Math.ceil(skuitemscount/splitCount)
+        
+        for(let i=0;i<end;i++){
+            var AllShopSkus = await darazSku.find({ShopId:shop.shopid})
+            .skip(i*splitCount)
+            .limit(splitCount)
+            AllShopSkusUrl = await generateSkuUrl(shop.shopid,shop.secretkey,await generateSkuStrings(AllShopSkus))
+            var ProductSku = await GetData(Url)
+            if(ProductSku){
+    
+            
+            var Products = ProductSku.Products
+            for(product of Products){
+                // var skuIdArray=[]
+                for(const [i,sku] of product.Skus.entries()){
+    
+                        result = await InventoryStringToJSon(sku)
+                        sku.multiWarehouseInventories = result.multiWarehouseInventories
+                        sku.fblWarehouseInventories = result.fblWarehouseInventories
+    
+                        var GroupSku = await Sku.findOne({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
+    
+                        if(GroupSku==null) GroupSku={cost:0,FBMpackagingCost:0,FBDpackagingCost:0}
+                        sku.cost = GroupSku.cost
+                        sku.FBMpackagingCost=GroupSku.FBMpackagingCost
+                        sku.FBDpackagingCost=GroupSku.FBDpackagingCost
+                        sku.BaseSku=GroupSku.name
+        
+                        skuResult = await darazSku.updateMany(
+                            {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
+                            {$set:sku},
+                            {upsert:true}
+                        )
+    
+                }
+            }
+            }
+        }
+    }
+console.log("All Skus Updated")
+if(repeatTime!=undefined){
+    setTimeout(() => {
+        updateAllSkus(repeatTime)
+    }, repeatTime);
+}
+}
+
+async function generateSkuStrings(AllSkus){
+    SkuArray=[]
+    for(sku of AllSkus){
+        SkuArray.push('"'+sku.SellerSku+'"')
+    }
+    SkuString='['+SkuArray.toString()+']'
+    return SkuString
+}
+
 async function getAllSkus(repeatTime){
     shops = await Darazid.find()
     for(var shop of shops){
@@ -113,16 +176,12 @@ async function getAllSkus(repeatTime){
                     )
                     // if(skuResult.upserted!=undefined) skuIdArray.push(skuResult.upserted[0]._id)
                 }
-                // product.Skus=skuIdArray
-                // product.ShopId=shop.shopid
-                // product.useremail=shop.useremail
-                // productResult = await darazProduct.updateMany({ItemId:product.ItemId,ShopId:product.ShopId,useremail:product.useremail},product,{upsert:true})
 
             }
     }
 }
 }
-console.log("All Skus Updated")
+console.log("New Skus Fetched")
 if(repeatTime!=undefined){
     setTimeout(() => {
         getAllSkus(repeatTime)
@@ -188,3 +247,4 @@ function baseSku(Sku){
 
 module.exports.getSkus = getSkus
 module.exports.getAllSkus=getAllSkus
+module.exports.updateAllSkus=updateAllSkus
