@@ -58,12 +58,16 @@ router.put('/:id',auth,async(req,res)=>{
     // console.log(req.body)
     var result = await darazSku.findOneAndUpdate(
         {_id:req.params.id,useremail:req.user.useremail},
-        {
+        // {
             
-            $inc:{"FBMstock.quantity":req.body.FBMchange,"FBDstock.quantity":req.body.FBDchange},
-            cost:req.body.cost,
-            FBDpackagingCost:req.body.FBDpackagingCost,FBMpackagingCost:req.body.FBMpackagingCost
+        //     $inc:{"FBMstock.quantity":req.body.FBMchange,"FBDstock.quantity":req.body.FBDchange},
+        //     cost:req.body.cost,
+        //     FBDpackagingCost:req.body.FBDpackagingCost,FBMpackagingCost:req.body.FBMpackagingCost
                 
+        // }
+        {
+            cost:req.body.cost,
+            FBDpackagingCost:req.body.FBDpackagingCost,FBMpackagingCost:req.body.FBMpackagingCost  
         }
         )
         await OrderItems.updateMany({ShopSku:result.ShopSku,cost:0,ShippingType:"Own Warehouse"},
@@ -72,12 +76,12 @@ router.put('/:id',auth,async(req,res)=>{
         await OrderItems.updateMany({ShopSku:result.ShopSku,cost:0,ShippingType:"Dropshipping"},
             {cost:req.body.cost,packagingCost:req.body.FBMpackagingCost})
 
-        if(req.body.GroupSkuChangeStock!=0){
-            console.log("BaseSku: "+result.BaseSku)
-            var updateResult = await Sku.findOneAndUpdate({useremail:req.user.useremail,name:result.BaseSku},
-                {$inc:{FBMstock:req.body.GroupSkuChangeStock}})
-            console.log(updateResult)
-        }
+        // if(req.body.GroupSkuChangeStock!=0){
+        //     console.log("BaseSku: "+result.BaseSku)
+        //     var updateResult = await Sku.findOneAndUpdate({useremail:req.user.useremail,name:result.BaseSku},
+        //         {$inc:{FBMstock:req.body.GroupSkuChangeStock}})
+        //     console.log(updateResult)
+        // }
 
     res.send({updatedResult:result})
 })
