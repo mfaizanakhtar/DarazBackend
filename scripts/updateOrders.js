@@ -258,15 +258,14 @@ async function updateOrdersData(){
     var data = await GetData(url);
     var previousUpdateData = await previousOrder.find({ShopId:id.shopid,OrdersData:{$all:data.Orders}})
     if(previousUpdateData.length<=0){
-
+        await updateOrders(id,data.Orders)
+        await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
         previousUpdateData = await previousOrder.find({ShopId:id.shopid})
 
         if(previousUpdateData.length>0){
             await previousOrder.updateMany({ShopId:id.shopid},{OrdersData:data.Orders})
         }else await new previousOrder({ShopId:id.shopid,OrdersData:data.Orders}).save()
         console.log("New Data Found");
-        await updateOrders(id,data.Orders)
-        await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
     }
     else{
         console.log("data is same as previousOrder");
