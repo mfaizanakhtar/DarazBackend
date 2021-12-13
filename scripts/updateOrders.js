@@ -259,8 +259,8 @@ async function updateOrdersData(){
     var previousUpdateData = await previousOrder.find({ShopId:id.shopid,OrdersData:data.Orders})
     if(previousUpdateData.length<=0){
 
-        var previousUpdateData = await previousOrder.find({ShopId:id.shopid})
-        
+        previousUpdateData = await previousOrder.find({ShopId:id.shopid})
+
         if(previousUpdateData.length>0){
             await previousOrder.updateMany({ShopId:id.shopid},{OrdersData:data.Orders})
         }else await new previousOrder({ShopId:id.shopid,OrdersData:data.Orders}).save()
