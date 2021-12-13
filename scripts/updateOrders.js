@@ -10,6 +10,7 @@ const {getSkus} = require('./updateSku')
 const atob = require("atob");
 const {updateOrderItemStatus} = require('../scripts/updateStatus');
 const { previousOrder } = require('../models/previousOrder');
+const e = require('express');
 
 
 async function getOrderItemsData(userid,secretkey,data){
@@ -257,7 +258,13 @@ async function updateOrdersData(){
     var data = await GetData(url);
     var previousUpdateData = await previousOrder.find({ShopId:id.shopid,OrdersData:data.Orders})
     if(previousUpdateData.length<=0){
-        await new previousOrder({ShopId:id.shopid,OrdersData:data.Orders}).save()
+
+        var previousUpdateData = await previousOrder.find({ShopId:id.shopid})
+        
+        if(previousUpdateData.length>0){
+            await previousOrder.updateMany({ShopId:id.shopid},{OrdersData:data.Orders})
+        }else await new previousOrder({ShopId:id.shopid,OrdersData:data.Orders}).save()
+        
         await updateOrders(id,data.Orders)
         await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
     }
