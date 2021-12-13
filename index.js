@@ -70,21 +70,21 @@ updateTransactions();
 // getSkus('techatronixs@gmail.com','["45CM+7FT","Holder5208"]')
 
 updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
-ShippingType:'Own Warehouse'},5*60*60*1000);
+ShippingType:'Own Warehouse'},8*60*60*1000);
 
 updateOrderItemStatus({},{Status:'shipped',
-ShippingType:'Dropshipping'},50*60*1000);
+ShippingType:'Dropshipping'},8*60*60*1000);
 
 updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
-ShippingType:'Dropshipping'},5*60*1000);
+ShippingType:'Dropshipping'},15*60*1000);
 
 var startingDate=new Date();
 startingDate=startingDate.setDate(startingDate.getDate()-20)
 
 updateOrderItemStatus({},{Status:'delivered',UpdatedAt:{$gte:startingDate}},8*60*60*1000);
 
-getAllSkus(6*60*60*1000)
-updateAllSkus(30*60*1000)
+getAllSkus(24*60*60*1000)
+updateAllSkus(3*60*60*1000)
 
 
 // updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
