@@ -256,7 +256,7 @@ async function updateOrdersData(){
     let url = generateOrdersUrl(id.shopid,id.secretkey,0);
     // console.log(url)
     var data = await GetData(url);
-    var previousUpdateData = await previousOrder.find({ShopId:id.shopid,OrdersData:data.Orders})
+    var previousUpdateData = await previousOrder.find({ShopId:id.shopid,OrdersData:{$all:data.Orders}})
     if(previousUpdateData.length<=0){
 
         previousUpdateData = await previousOrder.find({ShopId:id.shopid})
@@ -264,7 +264,7 @@ async function updateOrdersData(){
         if(previousUpdateData.length>0){
             await previousOrder.updateMany({ShopId:id.shopid},{OrdersData:data.Orders})
         }else await new previousOrder({ShopId:id.shopid,OrdersData:data.Orders}).save()
-        
+        console.log("New Data Found");
         await updateOrders(id,data.Orders)
         await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
     }
@@ -283,7 +283,7 @@ async function updateOrdersData(){
     try {
         setTimeout(()=>{
             updateOrdersData();
-        },5*60*1000);
+        },60*1000);
     } catch (error) {
         console.log(error);
     }
