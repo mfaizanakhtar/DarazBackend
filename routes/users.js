@@ -2,7 +2,8 @@ const { User } = require('../models/user');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const auth = require('../middleware/auth')
+const auth = require('../middleware/auth');
+const { UserSubsciprtion } = require('../models/userSubscription');
 
 router.get('/',async(req,res)=>{
     const user =await User.find({accountType:"root"},{password:0,_id:0});
@@ -14,6 +15,11 @@ router.post('/',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
         let user =await User.findOne({$or:[{useremail:req.body.useremail.toLowerCase()},{loginemail:req.body.useremail.toLowerCase()}]});
         if (user) return res.status(400).send({message:"User already exists"}); 
+
+            userSubscription = new UserSubsciprtion({
+                loginemail:req.body.useremail.toLowerCase(),
+                type:null
+            })
 
             user = new User({
             useremail:req.body.useremail.toLowerCase(),
@@ -97,6 +103,16 @@ router.put('/addSubscription/:useremail',auth,async(req,res)=>{
         res.send({Status:"Unauthorized"})
     }
 
+})
+
+router.put('/selectSubscription',auth,async(req,res)=>{
+    var result = await User.updateOne({useremail:req.user.useremail},{subscriptionType:req.body.subscriptionType})
+    res.status(201).send({successMessage:"subscription successfully updated"})
+})
+
+router.get('/currentSubscription',auth,async(req,res)=>{
+    var result = await User.findOne({useremail:req.user.useremail})
+    res.status(200).send({subscriptionType:result.subscriptionType})
 })
 
 
