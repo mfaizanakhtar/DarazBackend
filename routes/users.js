@@ -3,7 +3,6 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
-const { UserSubsciprtion } = require('../models/userSubscription');
 
 router.get('/',async(req,res)=>{
     const user =await User.find({accountType:"root"},{password:0,_id:0});
