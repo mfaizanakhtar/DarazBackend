@@ -109,7 +109,7 @@ catch(ex){
 try{
     setTimeout(()=>{
         updateTransactions();
-    },3000000);
+    },14*60*60*1000);
 }
 catch(ex){
     console.log(ex)
