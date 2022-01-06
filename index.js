@@ -21,7 +21,9 @@ const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
 const cheerio = require('cheerio')
 const atob = require("atob");
-const {getSkus, getAllSkus,updateAllSkus} = require('./scripts/updateSku')
+const {getSkus, getAllSkus,updateAllSkus} = require('./scripts/updateSku');
+const { plans } = require('./routes/plans');
+const { dataQueries } = require('./scripts/insertData')
  
 
 mongoose.connect(config.connectionstring,{useFindAndModify:false})
@@ -52,6 +54,7 @@ app.use('/api/skus',skus)
 app.use('/api/transactions',transactions)
 app.use('/api/darazskus',darazskus)
 app.use('/api/dashboard',dashboards)
+app.use('/api/plans',plans)
 
 // async function updateId(){
 //     const result = await OrderItems.updateMany({},{
@@ -85,6 +88,8 @@ updateOrderItemStatus({},{Status:'delivered',UpdatedAt:{$gte:startingDate}},8*60
 
 getAllSkus(6*60*60*1000)
 updateAllSkus(30*60*1000)
+
+dataQueries()
 
 
 // updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
