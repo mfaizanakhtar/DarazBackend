@@ -16,11 +16,6 @@ router.post('/',auth,async(req,res)=>{
         let user =await User.findOne({$or:[{useremail:req.body.useremail.toLowerCase()},{loginemail:req.body.useremail.toLowerCase()}]});
         if (user) return res.status(400).send({message:"User already exists"}); 
 
-            userSubscription = new UserSubsciprtion({
-                loginemail:req.body.useremail.toLowerCase(),
-                type:null
-            })
-
             user = new User({
             useremail:req.body.useremail.toLowerCase(),
             loginemail:req.body.useremail.toLowerCase(),

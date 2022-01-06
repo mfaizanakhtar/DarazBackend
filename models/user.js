@@ -35,9 +35,8 @@ const userSchema = new mongoose.Schema({
     GroupedInventory:{type:Boolean,default:true},
     Profitibility:{type:Boolean,default:true},
     ReturnsDispatch:{type:Boolean,default:true},
-    subscription:{type:mongoose.Schema.Types.ObjectId,ref:'userSubscription'},
-    // subscriptionEndDate:{type:Date,default:() => Date.now() + 7*24*60*60*1000},
-    // subscriptionType:String
+    subscriptionEndDate:{type:Date,default:() => Date.now() + 7*24*60*60*1000},
+    subscriptionType:String
 })
 
 userSchema.methods.generateAuthToken = function () {
