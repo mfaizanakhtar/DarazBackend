@@ -35,7 +35,8 @@ const userSchema = new mongoose.Schema({
     GroupedInventory:{type:Boolean,default:true},
     Profitibility:{type:Boolean,default:true},
     ReturnsDispatch:{type:Boolean,default:true},
-    subscriptionEndDate:{type:Date,default:() => Date.now() + 7*24*60*60*1000}
+    subscriptionEndDate:{type:Date,default:() => Date.now() + 7*24*60*60*1000},
+    subscriptionType:String
 })
 
 userSchema.methods.generateAuthToken = function () {
@@ -43,7 +44,7 @@ userSchema.methods.generateAuthToken = function () {
         usertype:this.usertype,accountType:this.accountType,
         Orders:this.Orders,Finance:this.Finance,DSCInventory:this.DSCInventory,GroupedInventory:this.GroupedInventory,
         Profitibility:this.Profitibility,ReturnsDispatch:this.ReturnsDispatch,
-        subscriptionEndDate:this.subscriptionEndDate},config.get("jwtprivatekey"),{expiresIn:"1d"});
+        subscriptionEndDate:this.subscriptionEndDate,subscriptionType:this.subscriptionType},config.get("jwtprivatekey"),{expiresIn:"1d"});
     return token;
 }
 
