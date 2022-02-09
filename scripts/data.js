@@ -25,4 +25,11 @@ plansData  = [
     }
 ]
 
+bankData={
+    bankName:"Meezan Bank",
+    bankTitle:"Faizan Akhter",
+    bankAccount:"0102409866"
+}
+
 module.exports.plansData = plansData;
+module.exports.bankData = bankData;

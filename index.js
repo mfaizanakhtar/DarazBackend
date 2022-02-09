@@ -23,7 +23,9 @@ const cheerio = require('cheerio')
 const atob = require("atob");
 const {getSkus, getAllSkus,updateAllSkus} = require('./scripts/updateSku');
 const { plans } = require('./routes/plans');
-const { dataQueries } = require('./scripts/insertData')
+const { dataQueries } = require('./scripts/insertData');
+const { lookups } = require('./routes/lookups');
+const { billings } = require('./routes/billings');
  
 
 mongoose.connect(config.connectionstring,{useFindAndModify:false})
@@ -55,6 +57,8 @@ app.use('/api/transactions',transactions)
 app.use('/api/darazskus',darazskus)
 app.use('/api/dashboard',dashboards)
 app.use('/api/plans',plans)
+app.use('/api/lookups',lookups)
+app.use('/api/billings',billings)
 
 // async function updateId(){
 //     const result = await OrderItems.updateMany({},{
