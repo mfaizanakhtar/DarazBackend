@@ -2,7 +2,7 @@ const { User } = require('../models/user');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const auth = require('../middleware/auth')
+const auth = require('../middleware/auth');
 
 router.get('/',async(req,res)=>{
     const user =await User.find({accountType:"root"},{password:0,_id:0});
@@ -97,6 +97,16 @@ router.put('/addSubscription/:useremail',auth,async(req,res)=>{
         res.send({Status:"Unauthorized"})
     }
 
+})
+
+router.put('/selectSubscription',auth,async(req,res)=>{
+    var result = await User.updateOne({useremail:req.user.useremail},{subscriptionType:req.body.subscriptionType})
+    res.status(201).send({successMessage:"subscription successfully updated"})
+})
+
+router.get('/currentSubscription',auth,async(req,res)=>{
+    var result = await User.findOne({useremail:req.user.useremail})
+    res.status(200).send({subscriptionType:result.subscriptionType})
 })
 
 

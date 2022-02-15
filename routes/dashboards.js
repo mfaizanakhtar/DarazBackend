@@ -6,14 +6,25 @@ const auth = require("../middleware/auth")
 
 router.get('/OrderStatuses',auth,async (req,res)=>{
     var response=[]
-    var statuses=['pending','ready_to_ship','shipped','delivered']
+    var statuses=['pending','ready_to_ship','shipped','delivered','returned','failed']
     for (var status of statuses) {
         jsonStatus={status:status}
-        jsonStatus.count= await getStatus(status,req.user.useremail,req.query)
+        jsonStatus.count= await getStatus({Status:status},req.user.useremail,req.query)
         response.push(jsonStatus)
         
     }
-    // console.log(response)
+    var extraStatuses=[{label:'failed-Not Received',Status:'failed',ReturnDate:null}]
+    for (var s of extraStatuses){
+        jsonStatus={status:s.label}
+        var query={}
+        for(const prop in s){
+            if(prop!='label')
+            query[prop]=s[prop]
+        }
+        jsonStatus.count= await getStatus(query,req.user.useremail,req.query)
+        response.push(jsonStatus)
+    }
+    console.log(response)
 
     res.send(response)
 })
@@ -380,7 +391,7 @@ router.get('/getStoreSkuProfitStats',auth,async(req,res)=>{
     res.send(Skuitems)
 })
 
-async function getStatus(status,useremail,query){
+async function getStatus(filter,useremail,query){
     // console.log(query.startdate)
     startdate=new Date(query.startdate)
     startdate.setHours(startdate.getHours()+5)
@@ -388,7 +399,7 @@ async function getStatus(status,useremail,query){
     enddate.setHours(enddate.getHours()+28,59,59,59)
     var items = await OrderItems.aggregate([
         {
-            $match:{Status:status,useremail:useremail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{...filter,useremail:useremail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:"$OrderItemId"}
@@ -400,7 +411,7 @@ async function getStatus(status,useremail,query){
 
     var orders = await OrderItems.aggregate([
         {
-            $match:{Status:status,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{...filter,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:"$OrderId"}
@@ -410,9 +421,20 @@ async function getStatus(status,useremail,query){
         }
     ])
 
+    var sales = await OrderItems.aggregate([
+        {
+            $match:{...filter,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+        },
+        {
+            $group:{_id:null,sales:{$sum:"$ItemPrice"}}
+        }
+    ])
+    if(sales[0]) delete sales[0]['_id']
+    // console.log(sales[0])
     if(items.length==0) items.push({ItemCount:0})
     if(orders.length==0) orders.push({OrderCount:0})
-    var response={...items[0],...orders[0]}
+    if(sales.length==0) sales.push({sales:0})
+    var response={...items[0],...orders[0],...sales[0]}
     return response
 }
 
