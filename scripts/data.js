@@ -31,5 +31,15 @@ bankData={
     bankAccount:"0102409866"
 }
 
+permissions={
+    Orders:{value:true,label:"Orders"},
+    Finance:{value:true,label:"Finance"},
+    DSCInventory:{value:true,label:"Returns/Dispatch"},
+    GroupedInventory:{value:true,label:"DSC Inventory"},
+    Profitibility:{value:true,label:"Grouped Inventory"},
+    ReturnsDispatch:{value:true,label:"Profitibility"},
+}
+
 module.exports.plansData = plansData;
 module.exports.bankData = bankData;
+module.exports.permissions = permissions;

@@ -1,10 +1,11 @@
 const { Lookup } = require("../models/lookup");
 const { Plan } = require("../models/plan");
-const { plansData, bankData } = require("./data");
+const { plansData, bankData, permissions } = require("./data");
 
 function executeAllDataQueries(){
     insertPlanData()
     insertLookup("bankDetails",bankData)
+    insertLookup("permissions",permissions)
 }
 
 async function insertPlanData(){

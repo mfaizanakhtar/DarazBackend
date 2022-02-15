@@ -19,7 +19,8 @@ router.post('/',auth,async(req,res)=>{
             useremail:req.body.useremail.toLowerCase(),
             loginemail:req.body.useremail.toLowerCase(),
             password:req.body.password,
-            usertype:req.body.usertype
+            usertype:req.body.usertype,
+            permissions:req.body.permissions
         })
         const salt = await bcrypt.genSalt(10);
         user.password =await bcrypt.hash(user.password,salt);
@@ -38,7 +39,8 @@ router.put('/updateUser/:loginemail',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
         // console.log(req.params.useremail)
         var update = await User.updateOne({loginemail:req.params.loginemail.toLowerCase()},{
-            usertype:req.body.usertype
+            usertype:req.body.usertype,
+            permissions:req.body.permissions
         });
         res.send(update)
     }
@@ -127,13 +129,7 @@ router.post('/addSubAccount',auth,async(req,res)=>{
         username:req.body.username,
         password:"password.123",
         accountType:"sub",
-        Orders:req.body.Orders,
-        Finance:req.body.Finance,
-        DSCInventory:req.body.DSCInventory,
-        GroupedInventory:req.body.GroupedInventory,
-        Profitibility:req.body.Profitibility,
-        ReturnsDispatch:req.body.ReturnsDispatch,
-        subscriptionEndDate:req.user.subscriptionEndDate
+        permissions:req.body.permissions
 
     })
 
@@ -153,13 +149,7 @@ router.post('/addSubAccount',auth,async(req,res)=>{
 router.put('/updateSubAccount',auth,async(req,res)=>{
     updateResult = await User.updateOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.useremail.toLowerCase()},{
         username:req.body.username,
-        Orders:req.body.Orders,
-        Finance:req.body.Finance,
-        DSCInventory:req.body.DSCInventory,
-        GroupedInventory:req.body.GroupedInventory,
-        Profitibility:req.body.Profitibility,
-        ReturnsDispatch:req.body.ReturnsDispatch,
-        subscriptionEndDate:req.user.subscriptionEndDate
+        permissions:req.body.permissions
     })
 
     res.send(updateResult)
