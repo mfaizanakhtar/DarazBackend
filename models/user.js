@@ -29,7 +29,11 @@ const userSchema = new mongoose.Schema({
         type:String,
         default:"root"
     },
+    isVerified:{type:Boolean,default:false},
+    isActive:{type:Boolean,default:true},
+    verification:{type:Object,default:null},
     permissions:Object,
+    subscription:{type:mongoose.Schema.Types.ObjectId,ref:'UserSubscription'},
     subscriptionEndDate:{type:Date,default:() => Date.now() + 7*24*60*60*1000},
     subscriptionType:String
 })

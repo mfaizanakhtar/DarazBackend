@@ -1,6 +1,6 @@
 plansData  = [
     {
-        Name:"Starter",
+        Name:"Basic",
         Pricing:1000,
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-edit-box-line"
@@ -12,13 +12,13 @@ plansData  = [
         icon:"ri-medal-line "
     },
     {
-        Name:"Enterprise",
+        Name:"Professional Plus",
         Pricing:5000,
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-stack-line"
     },
     {
-        Name:"Unlimited",
+        Name:"Enterprise",
         Pricing:20000,
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-vip-crown-line"
@@ -37,9 +37,53 @@ permissions={
     DSCInventory:{value:true,label:"Returns/Dispatch"},
     GroupedInventory:{value:true,label:"DSC Inventory"},
     Profitibility:{value:true,label:"Grouped Inventory"},
-    ReturnsDispatch:{value:true,label:"Profitibility"},
+    ReturnsDispatch:{value:true,label:"Profitibility"}
+}
+
+plansPermissions={
+    Starter:{
+        Orders:{value:true,label:"Orders"},
+        Finance:{value:true,label:"Finance"},
+        DSCInventory:{value:true,label:"Returns/Dispatch"},
+        GroupedInventory:{value:true,label:"DSC Inventory"},
+        Profitibility:{value:true,label:"Grouped Inventory"},
+        ReturnsDispatch:{value:true,label:"Profitibility"}
+    },
+    Professional:{
+        Orders:{value:true,label:"Orders"},
+        Finance:{value:true,label:"Finance"},
+        DSCInventory:{value:true,label:"Returns/Dispatch"},
+        GroupedInventory:{value:true,label:"DSC Inventory"},
+        Profitibility:{value:true,label:"Grouped Inventory"},
+        ReturnsDispatch:{value:true,label:"Profitibility"}
+    },
+    ProfessionalPlus:{
+        Orders:{value:true,label:"Orders"},
+        Finance:{value:true,label:"Finance"},
+        DSCInventory:{value:true,label:"Returns/Dispatch"},
+        GroupedInventory:{value:true,label:"DSC Inventory"},
+        Profitibility:{value:true,label:"Grouped Inventory"},
+        ReturnsDispatch:{value:true,label:"Profitibility"}
+    },
+    Enterprise:{
+        Orders:{value:true,label:"Orders"},
+        Finance:{value:true,label:"Finance"},
+        DSCInventory:{value:true,label:"Returns/Dispatch"},
+        GroupedInventory:{value:true,label:"DSC Inventory"},
+        Profitibility:{value:true,label:"Grouped Inventory"},
+        ReturnsDispatch:{value:true,label:"Profitibility"}
+    }
+}
+
+mailerCredential={
+    host:"alogy.pk",
+    port:465,
+    mailUserName:"no-reply@alogy.pk",
+    mailPassword:"noreply123"
 }
 
 module.exports.plansData = plansData;
 module.exports.bankData = bankData;
 module.exports.permissions = permissions;
+module.exports.plansPermissions = plansPermissions;
+module.exports.mailerCredential=mailerCredential;

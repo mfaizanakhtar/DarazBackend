@@ -43,7 +43,7 @@ async function updateOrders(id,OrdersData){
     // console.log(result)
 
     if(!result){
-        var orderobj = OrderObj(order,id)
+        var orderobj = setOrderObj(order,id)
         var res = await orderobj.save()
         // console.log(res);
     }
@@ -109,7 +109,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
                     darazSkusArray.push('"'+item.Sku+'"')
 
                 } 
-                orderItem = OrderItemObj(item,shopid,useremail,skuresult)
+                orderItem = setOrderItemObj(item,shopid,useremail,skuresult)
                 
             }
             if(dSku!=null){
@@ -118,7 +118,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
                 var updateResult = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:useremail},{
                         $inc:{...darazSkuStockType,localQuantity:-1}
                 })
-                orderItem = OrderItemObj(item,shopid,useremail,dSku)
+                orderItem = setOrderItemObj(item,shopid,useremail,dSku)
 
                 // console.log("Sku "+updateResult.SellerSku+" After "+updateResult.fblWarehouseInventories.quantity+" local: "+updateResult.localQuantity)
             }
@@ -150,7 +150,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
 
 }
 
-function OrderItemObj(item,shopid,useremail,sku){
+function setOrderItemObj(item,shopid,useremail,sku){
     // console.log(item)
     var packagingCost
     if(item.ShippingType=="Dropshipping"){
@@ -187,7 +187,7 @@ function OrderItemObj(item,shopid,useremail,sku){
     return orderItem;
 }
 
-function OrderObj(order,id){
+function setOrderObj(order,id){
     
     var orderobj = new Order({
         OrderId:order.OrderId,
