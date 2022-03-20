@@ -13,7 +13,7 @@ router.get('/OrderStatuses',auth,async (req,res)=>{
         response.push(jsonStatus)
         
     }
-    var extraStatuses=[{label:'failed-Not Received',Status:'failed',ReturnDate:null}]
+    var extraStatuses=[{label:'failed-Not Received',Status:'failed',ReturnDate:null,ShippingType:'Dropshipping'}]
     for (var s of extraStatuses){
         jsonStatus={status:s.label}
         var query={}
