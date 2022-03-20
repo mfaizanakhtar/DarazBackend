@@ -27,6 +27,9 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
 }
 
 async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
+    try{
+        
+    
     var updateResult
     var skuUpdateArray=[]
     // console.log(status)
@@ -111,6 +114,19 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
 
     console.log("Status Loop done");
     return true
+    }catch(error){
+        console.log(error)
+
+        if(repeatTime!=undefined){
+            try {
+            setTimeout(()=>{
+                updateOrderItemStatus(user,status,repeatTime);
+            },repeatTime);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    }
 }
 
 async function fetchLabelsAndUpdate(useremail){
