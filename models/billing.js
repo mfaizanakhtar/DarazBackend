@@ -11,6 +11,7 @@ const billingSchema = new mongoose.Schema({
     invoiceAmount:Number,
     bankDetail:Object,
     transactionId:String,
+    isFutureRequest:Boolean,
     status:{type:String,default:"pending"}
 
 })
