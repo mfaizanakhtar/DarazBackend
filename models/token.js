@@ -11,6 +11,7 @@ const tokenSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    tokenType:String,
     createdAt:{
         type:Date,
         default:Date.now,

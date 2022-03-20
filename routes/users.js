@@ -187,7 +187,7 @@ router.get('/getSubAccounts',auth,async(req,res)=>{
 router.post('/addSubAccount',auth,async(req,res)=>{
     // console.log(req.body)
     if(req.user.accountType=="root"){
-    var user = await User.findOne({$or:[{loginemail:req.body.loginemail.toLowerCase()},{loginemail:req.body.loginemail.toLowerCase(),username:req.body.username.toLowerCase()}] })
+    var user = await User.findOne({$or:[{loginemail:req.body.loginemail.toLowerCase()},{useremail:req.body.loginemail.toLowerCase(),username:req.body.username.toLowerCase()}] })
     if(user) return res.status(400).send({message:"User already exists"});
 
     user = new User({
@@ -205,12 +205,56 @@ router.post('/addSubAccount',auth,async(req,res)=>{
 
     await user.save();
     res.send({message:'User Registered'});
+
+    var tokenObj = await Token.findOne({userId:user._id,tokenType:'createSubAccount'})
+    if(!tokenObj){
+        tokenString = crypto.randomBytes(32).toString("hex")
+        await new Token({
+            userId:user._id,
+            token: tokenString,
+            tokenType:'createSubAccount'
+        }).save()
+    }else tokenString = tokenObj.token
+
+    var link = config.baseUrl+"/login/verifyAndActiveAccount?token="+tokenString
+
+    sendResetEmail(req.body.loginemail,link)
+
     }
     else{
         res.send({message:'Unauthorized'})
     }
 
 
+})
+
+router.get('/getSubAccountWithToken/:token',async(req,res)=>{
+    var userToken = await Token.findOne({token:req.params.token,tokenType:"createSubAccount"})
+    var user;
+    if(userToken){
+        user = await User.findOne({_id:userToken.userId})
+        if(user) return res.status(200).send({status:"success",user:user})
+    }else {
+        res.status(200).send({status:"error",message:"Incorrect Or Expired Invitation Link"})
+    }
+})
+
+router.post('/verifySubAccountWithToken/:token',async(req,res)=>{
+    var userToken = await Token.findOne({token:req.params.token,tokenType:"createSubAccount"})
+    var user;
+    if(userToken){
+        user = await User.findOne({_id:userToken.userId,loginemail:req.body.loginEmail,username:req.body.userName})
+        if(user){
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(req.body.userPassword,salt);
+            user.isVerified=true
+            await user.save();
+            await userToken.delete()
+            return res.status(200).send({status:"success",message:"Registration Completed Successfully, You Will Be Redirected To Login Page"})
+        } 
+    }else {
+        res.status(200).send({status:"error",message:"Incorrect Or Expired Invitation Link"})
+    }
 })
 
 router.put('/updateSubAccount',auth,async(req,res)=>{
@@ -249,12 +293,13 @@ router.post('/recoverPassword',async(req,res)=>{
 
     
     let tokenString
-    var tokenObj = await Token.findOne({userId:user._id})
+    var tokenObj = await Token.findOne({userId:user._id,tokenType:'recoverPassword'})
     if(!tokenObj){
         tokenString = crypto.randomBytes(32).toString("hex")
         await new Token({
             userId:user._id,
-            token: tokenString
+            token: tokenString,
+            tokenType:'recoverPassword'
         }).save()
     }else tokenString = tokenObj.token
 
@@ -265,7 +310,7 @@ router.post('/recoverPassword',async(req,res)=>{
 })
 
 router.put('/resetPasswordWithToken/:token',async(req,res)=>{
-    var tokenObj = await Token.findOne({token:req.params.token})
+    var tokenObj = await Token.findOne({token:req.params.token,tokenType:'recoverPassword'})
     if(!tokenObj) return res.send({status:"error",message:"Invalid or Expired Link"})
 
     var user = await User.findOne({_id:tokenObj.userId})

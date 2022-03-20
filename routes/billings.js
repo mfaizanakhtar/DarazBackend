@@ -22,6 +22,7 @@ router.post('/addTransaction',auth,async(req,res)=>{
         duration:req.body.duration,
         durationType:req.body.durationType,
         pricing:req.body.pricing,
+        isFutureRequest:req.body.isFutureRequest,
         invoiceAmount:req.body.invoiceAmount,
         bankDetail:req.body.bankDetail,
         transactionId:req.body.transactionId
@@ -38,16 +39,27 @@ router.put('/confirmTransaction',auth,async(req,res)=>{
     if(req.body.status=='approved' && updateResult){
         //update subscription
         var userSubscription = await UserSubscription.findOne({userEmail:updateResult.userEmail})
-        var endDate = moment().add(updateResult.duration,'month')
-        if(userSubscription){
-            userSubscription.subscriptionType=updateResult.subscriptionType
-            userSubscription.startDate=new Date()
-            userSubscription.endDate=endDate
+        if(updateResult.isFutureRequest && userSubscription){
+                var endDate = moment(userSubscription.endDate).add(updateResult.duration,'month')
+                userSubscription.futureRequest.val=true
+                userSubscription.futureRequest.subscription=updateResult.subscriptionType
+                userSubscription.futureRequest.startDate = userSubscription.endDate
+                userSubscription.futureRequest.endDate=endDate
+            await userSubscription.save()
+            var permLookup =await Lookup.findOne({lookup_key:updateResult.subscriptionType})
+            await User.updateOne({loginemail:updateResult.userEmail},{permissions:permLookup.lookup_detail})
+        }else if(userSubscription){
+                var endDate = moment().add(updateResult.duration,'month')
+                userSubscription.subscriptionType=updateResult.subscriptionType
+                userSubscription.startDate=new Date()
+                userSubscription.endDate=endDate
+            await userSubscription.save()
+            var permLookup =await Lookup.findOne({lookup_key:updateResult.subscriptionType})
+            await User.updateOne({loginemail:updateResult.userEmail},{permissions:permLookup.lookup_detail})
         }
-        await userSubscription.save()
+
         //update permisisions
-        var permLookup =await Lookup.findOne({lookup_key:updateResult.subscriptionType})
-        var updatedUser = await User.updateOne({loginemail:updateResult.userEmail},{permissions:permLookup.lookup_detail})
+
 
     }
 
@@ -61,6 +73,18 @@ router.put('/confirmTransaction',auth,async(req,res)=>{
 router.get('/getSubscriptionDetail',auth,async(req,res)=>{
     var userSubscription = await UserSubscription.findOne({userEmail:req.user.useremail})
     res.send(userSubscription)
+})
+
+router.put('/cancelFutureRequest',auth,async(req,res)=>{
+    var userSubscription = await UserSubscription.findOne({userEmail:req.user.useremail})
+    if(userSubscription && userSubscription.futureRequest.val){
+        userSubscription.futureRequest={val:false}
+        await userSubscription.save()
+        res.status(200).send({status:'canceled'})
+    }else{
+        res.status(200).send({status:'failure'})
+    }
+
 })
 
 

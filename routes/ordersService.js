@@ -85,6 +85,9 @@ function updateQueryForStockChecklist(query){
 
 function getAdditionStatus(stockCheckList){
     
+    var claimDate = new Date();
+    claimDate.setDate(claimDate.getDate()-30);
+
     var AdditionStatus={}
     if(stockCheckList){
     AdditionStatus = {
