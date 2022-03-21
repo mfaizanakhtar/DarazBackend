@@ -202,23 +202,25 @@ router.post('/addSubAccount',auth,async(req,res)=>{
 
     const salt = await bcrypt.genSalt(10);
     user.password =await bcrypt.hash(user.password,salt);
-
+    if(req.body.bypassSubAccVerification) user.isVerified = true
+    else{
+        var tokenObj = await Token.findOne({userId:user._id,tokenType:'createSubAccount'})
+        if(!tokenObj){
+            tokenString = crypto.randomBytes(32).toString("hex")
+            await new Token({
+                userId:user._id,
+                token: tokenString,
+                tokenType:'createSubAccount'
+            }).save()
+        }else tokenString = tokenObj.token
+    
+        var link = config.baseUrl+"/login/verifyAndActiveAccount?token="+tokenString
+    
+        sendResetEmail(req.body.loginemail,link)
+    } 
+    
     await user.save();
     res.send({message:'User Registered'});
-
-    var tokenObj = await Token.findOne({userId:user._id,tokenType:'createSubAccount'})
-    if(!tokenObj){
-        tokenString = crypto.randomBytes(32).toString("hex")
-        await new Token({
-            userId:user._id,
-            token: tokenString,
-            tokenType:'createSubAccount'
-        }).save()
-    }else tokenString = tokenObj.token
-
-    var link = config.baseUrl+"/login/verifyAndActiveAccount?token="+tokenString
-
-    sendResetEmail(req.body.loginemail,link)
 
     }
     else{

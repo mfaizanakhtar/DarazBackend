@@ -32,12 +32,14 @@ bankData={
 }
 
 permissions={
-    Orders:{value:true,label:"Orders"},
-    Finance:{value:true,label:"Finance"},
-    DSCInventory:{value:true,label:"Returns/Dispatch"},
-    GroupedInventory:{value:true,label:"DSC Inventory"},
-    Profitibility:{value:true,label:"Grouped Inventory"},
-    ReturnsDispatch:{value:true,label:"Profitibility"}
+    Orders:{value:false,label:"Orders"},
+    Finance:{value:false,label:"Finance"},
+    DSCInventory:{value:false,label:"Returns/Dispatch"},
+    GroupedInventory:{value:false,label:"DSC Inventory"},
+    Profitibility:{value:false,label:"Grouped Inventory"},
+    ReturnsDispatch:{value:false,label:"Profitibility"},
+    Revenue:{value:false,label:"Revenue"},
+    bypassSubAccVerification:{value:false,label:"Bypass Sub Account Verification",isSubAccount:false}
 }
 
 plansPermissions={

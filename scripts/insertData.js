@@ -7,9 +7,9 @@ function executeAllDataQueries(){
     insertLookup("bankDetails",bankData)
     insertLookup("permissions",permissions)
     insertLookup("Starter",plansPermissions.Starter)
-    insertLookup("Professional",plansPermissions.Starter)
-    insertLookup("ProfessionalPlus",plansPermissions.Starter)
-    insertLookup("Enterprise",plansPermissions.Starter)
+    insertLookup("Professional",plansPermissions.Professional)
+    insertLookup("ProfessionalPlus",plansPermissions.ProfessionalPlus)
+    insertLookup("Enterprise",plansPermissions.Enterprise)
     insertLookup("mailerCredential",mailerCredential)
 }
 
