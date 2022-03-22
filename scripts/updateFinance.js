@@ -8,7 +8,7 @@ async function updateTransactions(){
     try{
     var shopids = await Darazid.find()
     // transactionTypes=[155]
-    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4]
+    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
     //13 - Item Price Credit
     //8 - Shipping Fee (Paid By Customer)
     //16 - Commission
@@ -109,7 +109,7 @@ catch(ex){
 try{
     setTimeout(()=>{
         updateTransactions();
-    },14*60*60*1000);
+    },1*60*60*1000);
 }
 catch(ex){
     console.log(ex)
