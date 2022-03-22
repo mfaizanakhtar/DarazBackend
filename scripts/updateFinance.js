@@ -39,6 +39,7 @@ async function updateTransactions(){
         for(var t of transactions){
             //check if transactions is in db
             // if(t["Order No."]=='132205169891061'){console.log(t)}
+            if(!t.hasOwnProperty("Transaction Type")) break;
             var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"],useremail:shopid.useremail})
             var increment
             // console.log(t)
