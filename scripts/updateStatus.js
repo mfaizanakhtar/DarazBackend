@@ -102,6 +102,10 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
     }
 
     }
+
+    }catch(error){
+        console.log(error)
+    }
     if(repeatTime!=undefined){
         try {
         setTimeout(()=>{
@@ -114,19 +118,7 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
 
     console.log("Status Loop done");
     return true
-    }catch(error){
-        console.log(error)
 
-        if(repeatTime!=undefined){
-            try {
-            setTimeout(()=>{
-                updateOrderItemStatus(user,status,repeatTime);
-            },repeatTime);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-    }
 }
 
 async function fetchLabelsAndUpdate(useremail){
