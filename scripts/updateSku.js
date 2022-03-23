@@ -9,6 +9,7 @@ const {updateOrderItemStatus} = require('../scripts/updateStatus')
 async function getSkus(darazid,update,skus){
     // console.log(skus.length)
     // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
+    try{
     shop = await Darazid.findOne({shopid:darazid})
     var Url
     if(skus!=undefined){
@@ -72,9 +73,13 @@ async function getSkus(darazid,update,skus){
 
     }
 }
+}catch(ex){
+    console.log("Error in getSkus error: "+ex)
+}
 }
 
 async function updateAllSkus(repeatTime){
+    try{
     shops = await Darazid.find()
     for(var shop of shops){
         
@@ -111,6 +116,9 @@ async function updateAllSkus(repeatTime){
             }
         }
     }
+}catch(ex){
+    console.log("Exception occured at updateAllSkus, error: "+ex)
+}
 console.log("All Skus Updated")
 if(repeatTime!=undefined){
     setTimeout(() => {

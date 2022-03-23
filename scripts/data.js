@@ -34,12 +34,15 @@ bankData={
 permissions={
     Orders:{value:false,label:"Orders"},
     Finance:{value:false,label:"Finance"},
-    DSCInventory:{value:false,label:"Returns/Dispatch"},
-    GroupedInventory:{value:false,label:"DSC Inventory"},
-    Profitibility:{value:false,label:"Grouped Inventory"},
-    ReturnsDispatch:{value:false,label:"Profitibility"},
+    SalesAnalytics:{value:false,label:"Sales Analytics"},
     Revenue:{value:false,label:"Revenue"},
-    bypassSubAccVerification:{value:false,label:"Bypass Sub Account Verification",isSubAccount:false}
+    DSCInventory:{value:false,label:"DSC Inventory"},
+    DSCInventoryCost:{value:false,label:"DSC Product Cost"},
+    GroupedInventory:{value:false,label:"Grouped Inventory"},
+    Profitibility:{value:false,label:"Profitibility"},
+    ReturnsDispatch:{value:false,label:"Returns/Dispatch"},
+    bypassSubAccVerification:{value:false,label:"Bypass Sub Account Verification",isSubAccount:false},
+    baseSkuStockChecklist:{value:false,label:"Base Sku Stock Checklist",isSubAccount:false}
 }
 
 plansPermissions={

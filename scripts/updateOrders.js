@@ -9,7 +9,7 @@ const cheerio = require('cheerio')
 const {getSkus} = require('./updateSku')
 const atob = require("atob");
 const {updateOrderItemStatus} = require('../scripts/updateStatus');
-const { previousOrder } = require('../models/previousOrder');
+const { previousDataQuery } = require('../models/previousDataQuery');
 const e = require('express');
 
 
@@ -256,15 +256,15 @@ async function updateOrdersData(){
     let url = generateOrdersUrl(id.shopid,id.secretkey,0);
     // console.log(url)
     var data = await GetData(url);
-    var previousUpdateData = await previousOrder.find({ShopId:id.shopid,OrdersData:{$all:data.Orders}})
+    var previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryData:{$all:data.Orders},queryType:"ordersData"})
     if(previousUpdateData.length<=0){
         await updateOrders(id,data.Orders)
         await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
-        previousUpdateData = await previousOrder.find({ShopId:id.shopid})
+        previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryType:"ordersData"})
 
         if(previousUpdateData.length>0){
-            await previousOrder.updateMany({ShopId:id.shopid},{OrdersData:data.Orders})
-        }else await new previousOrder({ShopId:id.shopid,OrdersData:data.Orders}).save()
+            await previousDataQuery.updateMany({ShopId:id.shopid,queryType:"ordersData"},{queryData:data.Orders})
+        }else await new previousDataQuery({ShopId:id.shopid,queryData:data.Orders,queryType:"ordersData"}).save()
         console.log("New Data Found");
     }
     else{
@@ -275,7 +275,7 @@ async function updateOrdersData(){
 }
     }
     catch(ex){
-        console.log(ex.message);
+        console.log("Exception occured, error: "+ex.message);
     }
     
     console.log("Data Loop done");
