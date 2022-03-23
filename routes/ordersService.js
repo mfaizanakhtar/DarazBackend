@@ -104,7 +104,7 @@ function getAdditionStatus(stockCheckList){
             ready_to_ship:{"OrderItems.Status":"ready_to_ship","OrderItems.WarehouseStatus":{$ne:"Dispatched"}},
             RTSDispatched : {"OrderItems.Status":"ready_to_ship","OrderItems.DispatchDate":{$ne:null}},
             DeliveryFailedReceived : {"OrderItems.Status":"failed","OrderItems.WarehouseStatus":"Received"},
-            Claimable : {CreatedAt: {$lte:claimDate},"OrderItems.WarehouseStatus":"Dispatched","Status":{$ne:"delivered"}},
+            Claimable : {CreatedAt: {$lte:claimDate},"OrderItems.WarehouseStatus":"Dispatched","OrderItems.Status":{$ne:"delivered"}},
             ClaimFiled : {$or:[{"OrderItems.WarehouseStatus":"Claim Filed"},{"OrderItems.WarehouseStatus":"Claim Approved"},{"OrderItems.WarehouseStatus":"Claim Rejected"},{"OrderItems.WarehouseStatus":"Claim POD Dispute"}]},
             ClaimReceived : {"OrderItems.WarehouseStatus":"Claim Received"}
         } 
