@@ -47,36 +47,48 @@ permissions={
 
 plansPermissions={
     Starter:{
-        Orders:{value:true,label:"Orders"},
-        Finance:{value:true,label:"Finance"},
-        DSCInventory:{value:true,label:"Returns/Dispatch"},
-        GroupedInventory:{value:true,label:"DSC Inventory"},
-        Profitibility:{value:true,label:"Grouped Inventory"},
-        ReturnsDispatch:{value:true,label:"Profitibility"}
+        Orders:{value:false,label:"Orders"},
+        Finance:{value:false,label:"Finance"},
+        SalesAnalytics:{value:false,label:"Sales Analytics"},
+        Revenue:{value:false,label:"Revenue"},
+        DSCInventory:{value:false,label:"DSC Inventory"},
+        DSCInventoryCost:{value:false,label:"DSC Product Cost"},
+        GroupedInventory:{value:false,label:"Grouped Inventory"},
+        Profitibility:{value:false,label:"Profitibility"},
+        ReturnsDispatch:{value:false,label:"Returns/Dispatch"}
     },
     Professional:{
-        Orders:{value:true,label:"Orders"},
-        Finance:{value:true,label:"Finance"},
-        DSCInventory:{value:true,label:"Returns/Dispatch"},
-        GroupedInventory:{value:true,label:"DSC Inventory"},
-        Profitibility:{value:true,label:"Grouped Inventory"},
-        ReturnsDispatch:{value:true,label:"Profitibility"}
+        Orders:{value:false,label:"Orders"},
+        Finance:{value:false,label:"Finance"},
+        SalesAnalytics:{value:false,label:"Sales Analytics"},
+        Revenue:{value:false,label:"Revenue"},
+        DSCInventory:{value:false,label:"DSC Inventory"},
+        DSCInventoryCost:{value:false,label:"DSC Product Cost"},
+        GroupedInventory:{value:false,label:"Grouped Inventory"},
+        Profitibility:{value:false,label:"Profitibility"},
+        ReturnsDispatch:{value:false,label:"Returns/Dispatch"}
     },
     ProfessionalPlus:{
-        Orders:{value:true,label:"Orders"},
-        Finance:{value:true,label:"Finance"},
-        DSCInventory:{value:true,label:"Returns/Dispatch"},
-        GroupedInventory:{value:true,label:"DSC Inventory"},
-        Profitibility:{value:true,label:"Grouped Inventory"},
-        ReturnsDispatch:{value:true,label:"Profitibility"}
+        Orders:{value:false,label:"Orders"},
+        Finance:{value:false,label:"Finance"},
+        SalesAnalytics:{value:false,label:"Sales Analytics"},
+        Revenue:{value:false,label:"Revenue"},
+        DSCInventory:{value:false,label:"DSC Inventory"},
+        DSCInventoryCost:{value:false,label:"DSC Product Cost"},
+        GroupedInventory:{value:false,label:"Grouped Inventory"},
+        Profitibility:{value:false,label:"Profitibility"},
+        ReturnsDispatch:{value:false,label:"Returns/Dispatch"}
     },
     Enterprise:{
-        Orders:{value:true,label:"Orders"},
-        Finance:{value:true,label:"Finance"},
-        DSCInventory:{value:true,label:"Returns/Dispatch"},
-        GroupedInventory:{value:true,label:"DSC Inventory"},
-        Profitibility:{value:true,label:"Grouped Inventory"},
-        ReturnsDispatch:{value:true,label:"Profitibility"}
+        Orders:{value:false,label:"Orders"},
+        Finance:{value:false,label:"Finance"},
+        SalesAnalytics:{value:false,label:"Sales Analytics"},
+        Revenue:{value:false,label:"Revenue"},
+        DSCInventory:{value:false,label:"DSC Inventory"},
+        DSCInventoryCost:{value:false,label:"DSC Product Cost"},
+        GroupedInventory:{value:false,label:"Grouped Inventory"},
+        Profitibility:{value:false,label:"Profitibility"},
+        ReturnsDispatch:{value:false,label:"Returns/Dispatch"}
     }
 }
 
