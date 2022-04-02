@@ -151,7 +151,7 @@ function getTransactionObj(t,useremail,shopid,transType){
         ShipmentType:t["Shipment Type"],
         Reference:t["Reference"],
         PaymentRefId:t["Payment Ref Id"],
-        shopid:shopid,
+        ShopId:shopid,
         useremail:useremail,
         transType:transType
     })
