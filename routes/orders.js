@@ -95,7 +95,7 @@ router.post('/setStatusToRTS',auth,async(req,res)=>{
         var shop = await Darazid.findOne({shopid:order.ShopId})
         // console.log(shop)
         for(var orderitem of order.OrderItems){
-            if(orderitem.ShippingType=='Dropshipping') {
+            if(orderitem.ShippingType=='Dropshipping' && orderitem.Status!='canceled') {
                 OrderItems=OrderItems+orderitem.OrderItemId+','
             }
         }
