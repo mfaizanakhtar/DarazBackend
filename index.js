@@ -26,6 +26,7 @@ const { plans } = require('./routes/plans');
 const { dataQueries } = require('./scripts/insertData');
 const { lookups } = require('./routes/lookups');
 const { billings } = require('./routes/billings');
+const { scheduler } = require('./scripts/scheduler');
  
 
 mongoose.connect(config.connectionstring,{useFindAndModify:false})
@@ -94,6 +95,8 @@ getAllSkus(24*60*60*1000)
 updateAllSkus(3*60*60*1000)
 
 dataQueries()
+
+scheduler();
 
 
 // updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
