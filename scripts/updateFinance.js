@@ -2,13 +2,14 @@ const {GetData} = require('./HttpReq')
 const {generateTransactionsUrl} = require('./GenerateUrl')
 const {Darazid} =require('../models/darazid');
 const {Transaction} = require('../models/transaction')
-const {OrderItems} = require('../models/orderItem')
+const {OrderItems} = require('../models/orderItem');
+const { previousDataQuery } = require('../models/previousDataQuery');
 
 async function updateTransactions(){
     try{
-    var shopids = await Darazid.find()
-    // transactionTypes=[155]
-    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4]
+    var shops = await Darazid.find()
+    // transactionTypes=[-1]
+    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
     //13 - Item Price Credit
     //8 - Shipping Fee (Paid By Customer)
     //16 - Commission
@@ -22,24 +23,32 @@ async function updateTransactions(){
     //get start and enddate for query
     var dates = getDates()
     // console.log(dates)
-    for(shopid of shopids){
+    for(shop of shops){
         for(date of dates){
         for(transType of transactionTypes){
         //get Url for transaction
-        url= generateTransactionsUrl(shopid.shopid,shopid.secretkey,date,transType)
+        url= generateTransactionsUrl(shop.shopid,shop.secretkey,date,transType)
         // console.log(url)
         //get transactions data
         var transactions = await GetData(url);
         if(transactions!=null){
         transactions = transactions.TransactionDOs.transactionDOs
-        // console.log("Shop "+shopid.shopid+" Length "+transactions.length+" date "+date+" Type "+transType)
+        var previousTransactionsData = await previousDataQuery.find({ShopId:shop.shopid,queryData:JSON.stringify(transactions),queryType:"transType"+transType+date})
+        // if(JSON.stringify(transactions) === previousTransactionsData[0].queryData) console.log("same")
+        // console.log(JSON.stringify(transactions))
+        // console.log(previousTransactionsData[0].queryData)
+        if(previousTransactionsData.length<=0){
+
+
+        // console.log("Shop "+shop.shop+" Length "+transactions.length+" date "+date+" Type "+transType)
         // console.log(date)
-        // console.log(shopid.shopid+" "+transactions.length);
+        // console.log(shop.shop+" "+transactions.length);
         // if(transactions.length>0){console.log(transactions[0]["Fee Name"]+" "+transactions[0]["Transaction Number"])}
         for(var t of transactions){
             //check if transactions is in db
             // if(t["Order No."]=='132205169891061'){console.log(t)}
-            var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"],useremail:shopid.useremail})
+            if(!t.hasOwnProperty("Transaction Type")) break;
+            var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"],useremail:shop.useremail})
             var increment
             // console.log(t)
             if(t["Fee Name"]=="Automatic Shipping Fee") increment={$inc:{TransactionsPayout:-t["VAT in Amount"]}}
@@ -73,7 +82,7 @@ async function updateTransactions(){
             }
             else if(transaction.length==0){
                 //if not found, save into db
-            var transaction = getTransactionObj(t,shopid.useremail,shopid.shopid,transType)
+            var transaction = getTransactionObj(t,shop.useremail,shop.shopid,transType)
             transactResult = await transaction.save()
             // console.log(transactResult)
             //find corresponding order and push transaction into order obj
@@ -97,6 +106,13 @@ async function updateTransactions(){
         }
             
         };
+        previousTransactionsData = await previousDataQuery.find({ShopId:shop.shopid,queryType:"transType"+transType})
+        console.log("New Transactions Found")
+        if(previousTransactionsData.length>0){
+            await previousDataQuery.updateMany({ShopId:shop.shopid,queryType:"transType"+transType+date},{queryData:JSON.stringify(transactions)})
+        }else await new previousDataQuery({ShopId:shop.shopid,queryData:JSON.stringify(transactions),queryType:"transType"+transType+date}).save()
+    }
+    // else console.log("same as old transaction")
     }
     }
     };
@@ -104,12 +120,12 @@ async function updateTransactions(){
     console.log("Transaction Loop Done")
 }
 catch(ex){
-    console.log(ex)
+    console.log("Error in updateTransactions, error:"+ex)
 }
 try{
     setTimeout(()=>{
         updateTransactions();
-    },14*60*60*1000);
+    },1*60*60*1000);
 }
 catch(ex){
     console.log(ex)

@@ -2,7 +2,12 @@ const { User } = require('../models/user');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const auth = require('../middleware/auth')
+const auth = require('../middleware/auth');
+const { UserSubscription } = require('../models/userSubscription');
+const { sendVerificationEmail,sendResetEmail } = require('../service/emailService');
+const crypto = require('crypto');
+const { Token } = require('../models/token');
+const config = require('config');
 
 router.get('/',async(req,res)=>{
     const user =await User.find({accountType:"root"},{password:0,_id:0});
@@ -14,12 +19,20 @@ router.post('/',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
         let user =await User.findOne({$or:[{useremail:req.body.useremail.toLowerCase()},{loginemail:req.body.useremail.toLowerCase()}]});
         if (user) return res.status(400).send({message:"User already exists"}); 
+            var userSubscription = new UserSubscription({
+                userEmail:req.body.useremail.toLowerCase()
+            })
+            userSubscription = await userSubscription.save();
+            console.log(userSubscription)
 
             user = new User({
             useremail:req.body.useremail.toLowerCase(),
             loginemail:req.body.useremail.toLowerCase(),
             password:req.body.password,
-            usertype:req.body.usertype
+            usertype:req.body.usertype,
+            isVerified:true,
+            permissions:req.body.permissions,
+            subscription:userSubscription._id
         })
         const salt = await bcrypt.genSalt(10);
         user.password =await bcrypt.hash(user.password,salt);
@@ -34,11 +47,67 @@ router.post('/',auth,async(req,res)=>{
 
 })
 
+router.post('/signup',async(req,res)=>{
+        let user = await User.findOne({$or:[{useremail:req.body.userEmail.toLowerCase()},{loginemail:req.body.userEmail.toLowerCase()}],isVerified:true});
+        if (user) return res.send({error:"User already exists"}); 
+
+        var verificationCode = Math.floor(Math.random() * (999999 - 99999) ) + 99999;
+        var verificationExpiry=new Date(new Date().getTime() + 10*60000);
+        var verificationObj={code:verificationCode,expiry:verificationExpiry}
+
+        user = await User.findOne({$or:[{useremail:req.body.userEmail.toLowerCase()},{loginemail:req.body.userEmail.toLowerCase()}],isVerified:false});
+        if(!user){
+
+            var userSubscription = new UserSubscription({
+                userEmail:req.body.userEmail.toLowerCase()
+            })
+            userSubscription = await userSubscription.save();
+            console.log(userSubscription)
+
+            user = new User({
+                useremail:req.body.userEmail.toLowerCase(),
+                username:req.body.userName,
+                loginemail:req.body.userEmail.toLowerCase(),
+                usertype:"user",
+                subscription:userSubscription._id
+            })
+
+        }
+        const salt = await bcrypt.genSalt(10);
+        user.password =await bcrypt.hash(req.body.userPassword,salt);
+        user.username=req.body.userName
+        user.verification = verificationObj
+
+        await user.save();
+        sendVerificationEmail(verificationCode,req.body.userEmail.toLowerCase())
+        res.status(201).send({message:'User Registered'});
+})
+
+router.put('/verifyEmail',async(req,res)=>{
+    console.log(req.body)
+    let user = await User.findOne({$or:[{useremail:req.body.userEmail.toLowerCase()},{loginemail:req.body.userEmail.toLowerCase()}],isVerified:false})
+    if(user){
+        if(user.verification!=null){
+           if(user.verification.expiry>=new Date()){
+               if(user.verification.code==req.body.verificationCode){
+                user.isVerified=true
+                user.save()
+                return res.send({status:"success",message:"Successfully Verified. Please wait, you will be directed to login page"})
+               }
+               return res.send({status:"error",message:"Incorrect Verification Code. Please Try Again"})   
+           }
+           return res.send({status:"error",message:"Verification Code Expired."})
+        }
+    }
+    return res.send({status:"error",message:"User already verified or does not exist. Please proceed to Signup"})
+})
+
 router.put('/updateUser/:loginemail',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
         // console.log(req.params.useremail)
         var update = await User.updateOne({loginemail:req.params.loginemail.toLowerCase()},{
-            usertype:req.body.usertype
+            usertype:req.body.usertype,
+            permissions:req.body.permissions
         });
         res.send(update)
     }
@@ -99,6 +168,16 @@ router.put('/addSubscription/:useremail',auth,async(req,res)=>{
 
 })
 
+router.put('/selectSubscription',auth,async(req,res)=>{
+    var result = await User.updateOne({useremail:req.user.useremail},{subscriptionType:req.body.subscriptionType})
+    res.status(201).send({successMessage:"subscription successfully updated"})
+})
+
+router.get('/currentSubscription',auth,async(req,res)=>{
+    var result = await User.findOne({useremail:req.user.useremail})
+    res.status(200).send({subscriptionType:result.subscriptionType})
+})
+
 
 router.get('/getSubAccounts',auth,async(req,res)=>{
     subusers = await User.find({useremail:req.user.useremail.toLowerCase(),accountType:"sub"},{password:0,_id:0})
@@ -108,7 +187,7 @@ router.get('/getSubAccounts',auth,async(req,res)=>{
 router.post('/addSubAccount',auth,async(req,res)=>{
     // console.log(req.body)
     if(req.user.accountType=="root"){
-    var user = await User.findOne({$or:[{loginemail:req.body.loginemail.toLowerCase()},{loginemail:req.body.loginemail.toLowerCase(),username:req.body.username.toLowerCase()}] })
+    var user = await User.findOne({$or:[{loginemail:req.body.loginemail.toLowerCase()},{useremail:req.body.loginemail.toLowerCase(),username:req.body.username.toLowerCase()}] })
     if(user) return res.status(400).send({message:"User already exists"});
 
     user = new User({
@@ -117,21 +196,32 @@ router.post('/addSubAccount',auth,async(req,res)=>{
         username:req.body.username,
         password:"password.123",
         accountType:"sub",
-        Orders:req.body.Orders,
-        Finance:req.body.Finance,
-        DSCInventory:req.body.DSCInventory,
-        GroupedInventory:req.body.GroupedInventory,
-        Profitibility:req.body.Profitibility,
-        ReturnsDispatch:req.body.ReturnsDispatch,
-        subscriptionEndDate:req.user.subscriptionEndDate
+        permissions:req.body.permissions
 
     })
 
     const salt = await bcrypt.genSalt(10);
     user.password =await bcrypt.hash(user.password,salt);
-
+    if(req.body.bypassSubAccVerification) user.isVerified = true
+    else{
+        var tokenObj = await Token.findOne({userId:user._id,tokenType:'createSubAccount'})
+        if(!tokenObj){
+            tokenString = crypto.randomBytes(32).toString("hex")
+            await new Token({
+                userId:user._id,
+                token: tokenString,
+                tokenType:'createSubAccount'
+            }).save()
+        }else tokenString = tokenObj.token
+    
+        var link = config.baseUrl+"/login/verifyAndActiveAccount?token="+tokenString
+    
+        sendResetEmail(req.body.loginemail,link)
+    } 
+    
     await user.save();
     res.send({message:'User Registered'});
+
     }
     else{
         res.send({message:'Unauthorized'})
@@ -140,16 +230,39 @@ router.post('/addSubAccount',auth,async(req,res)=>{
 
 })
 
+router.get('/getSubAccountWithToken/:token',async(req,res)=>{
+    var userToken = await Token.findOne({token:req.params.token,tokenType:"createSubAccount"})
+    var user;
+    if(userToken){
+        user = await User.findOne({_id:userToken.userId})
+        if(user) return res.status(200).send({status:"success",user:user})
+    }else {
+        res.status(200).send({status:"error",message:"Incorrect Or Expired Invitation Link"})
+    }
+})
+
+router.post('/verifySubAccountWithToken/:token',async(req,res)=>{
+    var userToken = await Token.findOne({token:req.params.token,tokenType:"createSubAccount"})
+    var user;
+    if(userToken){
+        user = await User.findOne({_id:userToken.userId,loginemail:req.body.loginEmail,username:req.body.userName})
+        if(user){
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(req.body.userPassword,salt);
+            user.isVerified=true
+            await user.save();
+            await userToken.delete()
+            return res.status(200).send({status:"success",message:"Registration Completed Successfully, You Will Be Redirected To Login Page"})
+        } 
+    }else {
+        res.status(200).send({status:"error",message:"Incorrect Or Expired Invitation Link"})
+    }
+})
+
 router.put('/updateSubAccount',auth,async(req,res)=>{
     updateResult = await User.updateOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.useremail.toLowerCase()},{
         username:req.body.username,
-        Orders:req.body.Orders,
-        Finance:req.body.Finance,
-        DSCInventory:req.body.DSCInventory,
-        GroupedInventory:req.body.GroupedInventory,
-        Profitibility:req.body.Profitibility,
-        ReturnsDispatch:req.body.ReturnsDispatch,
-        subscriptionEndDate:req.user.subscriptionEndDate
+        permissions:req.body.permissions
     })
 
     res.send(updateResult)
@@ -173,6 +286,42 @@ router.put('/resetSubPassword/:loginemail',auth,async(req,res)=>{
     else{
         res.send({Status:"Unauthorized"})
     }
+})
+
+router.post('/recoverPassword',async(req,res)=>{
+    var user = await User.findOne({loginemail:req.body.resetEmail.toLowerCase()})
+    console.log(user)
+    if(!user) return res.send({status:"error",message:"Account does not exist"})
+
+    
+    let tokenString
+    var tokenObj = await Token.findOne({userId:user._id,tokenType:'recoverPassword'})
+    if(!tokenObj){
+        tokenString = crypto.randomBytes(32).toString("hex")
+        await new Token({
+            userId:user._id,
+            token: tokenString,
+            tokenType:'recoverPassword'
+        }).save()
+    }else tokenString = tokenObj.token
+
+    var link = config.baseUrl+"/login/recoverPassword?token="+tokenString
+
+    sendResetEmail(req.body.resetEmail,link)
+    res.send({status:"success",message:"Reset Link is sent to your email"})
+})
+
+router.put('/resetPasswordWithToken/:token',async(req,res)=>{
+    var tokenObj = await Token.findOne({token:req.params.token,tokenType:'recoverPassword'})
+    if(!tokenObj) return res.send({status:"error",message:"Invalid or Expired Link"})
+
+    var user = await User.findOne({_id:tokenObj.userId})
+    const salt = await bcrypt.genSalt(10);
+    user.password =await bcrypt.hash(req.body.userPassword,salt);
+
+    await user.save()
+    await tokenObj.delete()
+    res.send({status:"sucess",message:"Password Changed Successfully, You will be redirected to Login Page"})
 })
 
 module.exports = router;

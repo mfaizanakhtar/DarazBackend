@@ -9,7 +9,7 @@ const cheerio = require('cheerio')
 const {getSkus} = require('./updateSku')
 const atob = require("atob");
 const {updateOrderItemStatus} = require('../scripts/updateStatus');
-const { previousOrder } = require('../models/previousOrder');
+const { previousDataQuery } = require('../models/previousDataQuery');
 const e = require('express');
 
 
@@ -43,7 +43,7 @@ async function updateOrders(id,OrdersData){
     // console.log(result)
 
     if(!result){
-        var orderobj = OrderObj(order,id)
+        var orderobj = setOrderObj(order,id)
         var res = await orderobj.save()
         // console.log(res);
     }
@@ -109,7 +109,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
                     darazSkusArray.push('"'+item.Sku+'"')
 
                 } 
-                orderItem = OrderItemObj(item,shopid,useremail,skuresult)
+                orderItem = setOrderItemObj(item,shopid,useremail,skuresult)
                 
             }
             if(dSku!=null){
@@ -118,7 +118,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
                 var updateResult = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:useremail},{
                         $inc:{...darazSkuStockType,localQuantity:-1}
                 })
-                orderItem = OrderItemObj(item,shopid,useremail,dSku)
+                orderItem = setOrderItemObj(item,shopid,useremail,dSku)
 
                 // console.log("Sku "+updateResult.SellerSku+" After "+updateResult.fblWarehouseInventories.quantity+" local: "+updateResult.localQuantity)
             }
@@ -150,7 +150,7 @@ async function updateOrderItems(shopid,secretkey,useremail,Orders){
 
 }
 
-function OrderItemObj(item,shopid,useremail,sku){
+function setOrderItemObj(item,shopid,useremail,sku){
     // console.log(item)
     var packagingCost
     if(item.ShippingType=="Dropshipping"){
@@ -187,7 +187,7 @@ function OrderItemObj(item,shopid,useremail,sku){
     return orderItem;
 }
 
-function OrderObj(order,id){
+function setOrderObj(order,id){
     
     var orderobj = new Order({
         OrderId:order.OrderId,
@@ -256,26 +256,26 @@ async function updateOrdersData(){
     let url = generateOrdersUrl(id.shopid,id.secretkey,0);
     // console.log(url)
     var data = await GetData(url);
-    var previousUpdateData = await previousOrder.find({ShopId:id.shopid,OrdersData:{$all:data.Orders}})
+    var previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryData:{$all:data.Orders},queryType:"ordersData"})
     if(previousUpdateData.length<=0){
         await updateOrders(id,data.Orders)
         await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
-        previousUpdateData = await previousOrder.find({ShopId:id.shopid})
+        previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryType:"ordersData"})
 
         if(previousUpdateData.length>0){
-            await previousOrder.updateMany({ShopId:id.shopid},{OrdersData:data.Orders})
-        }else await new previousOrder({ShopId:id.shopid,OrdersData:data.Orders}).save()
+            await previousDataQuery.updateMany({ShopId:id.shopid,queryType:"ordersData"},{queryData:data.Orders})
+        }else await new previousDataQuery({ShopId:id.shopid,queryData:data.Orders,queryType:"ordersData"}).save()
         console.log("New Data Found");
     }
     else{
-        console.log("data is same as previousOrder");
+        // console.log("data is same as previousOrder");
     }
 
     // console.log(data);
 }
     }
     catch(ex){
-        console.log(ex.message);
+        console.log("Exception occured, error: "+ex.message);
     }
     
     console.log("Data Loop done");

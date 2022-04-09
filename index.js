@@ -21,7 +21,12 @@ const  {generateLabelUrl} = require("./scripts/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
 const cheerio = require('cheerio')
 const atob = require("atob");
-const {getSkus, getAllSkus,updateAllSkus} = require('./scripts/updateSku')
+const {getSkus, getAllSkus,updateAllSkus} = require('./scripts/updateSku');
+const { plans } = require('./routes/plans');
+const { dataQueries } = require('./scripts/insertData');
+const { lookups } = require('./routes/lookups');
+const { billings } = require('./routes/billings');
+const { scheduler } = require('./scripts/scheduler');
  
 
 mongoose.connect(config.connectionstring,{useFindAndModify:false})
@@ -52,6 +57,9 @@ app.use('/api/skus',skus)
 app.use('/api/transactions',transactions)
 app.use('/api/darazskus',darazskus)
 app.use('/api/dashboard',dashboards)
+app.use('/api/plans',plans)
+app.use('/api/lookups',lookups)
+app.use('/api/billings',billings)
 
 // async function updateId(){
 //     const result = await OrderItems.updateMany({},{
@@ -63,11 +71,11 @@ app.use('/api/dashboard',dashboards)
 // updateId()
 // updateSingleOrder('pkgadgies@gmail.com','131329258345032')
 updateOrdersData();
-// updateOrderItemStatus();
-// updateItemPendingStatus();
-// updatePendingOrderStatus();
+// // updateOrderItemStatus();
+// // updateItemPendingStatus();
+// // updatePendingOrderStatus();
 updateTransactions();
-// getSkus('techatronixs@gmail.com','["45CM+7FT","Holder5208"]')
+// // getSkus('techatronixs@gmail.com','["45CM+7FT","Holder5208"]')
 
 updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
 ShippingType:'Own Warehouse'},8*60*60*1000);
@@ -85,6 +93,10 @@ updateOrderItemStatus({},{Status:'delivered',UpdatedAt:{$gte:startingDate}},8*60
 
 getAllSkus(24*60*60*1000)
 updateAllSkus(3*60*60*1000)
+
+dataQueries()
+
+scheduler();
 
 
 // updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
