@@ -180,7 +180,7 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     
 })
 
-router.post('/getStockChecklist',auth,async(req,res)=>{
+router.post('/getStockChecklist/:skuType',auth,async(req,res)=>{
     if(req.body.trackings!=undefined){
         var matchFilter = {$match:{TrackingCode:{$in:req.body.trackings},useremail:req.user.useremail,ReturnedStockAdded:{$ne:true}}}
     }  
@@ -193,7 +193,7 @@ router.post('/getStockChecklist',auth,async(req,res)=>{
     var result = await OrderItems.aggregate([
         matchFilter,
         {$group:{
-            _id:"$BaseSku",
+            _id:"$"+req.params.skuType,
             count:{$sum:1},
             ReturnedStockAdded:{$first:"$ReturnedStockAdded"},
             img:{$first:"$productMainImage"}

@@ -41,8 +41,9 @@ permissions={
     GroupedInventory:{value:false,label:"Grouped Inventory"},
     Profitibility:{value:false,label:"Profitibility"},
     ReturnsDispatch:{value:false,label:"Returns/Dispatch"},
+    customSellerAddress:{value:false,label:"Custom Seller Address"},
     bypassSubAccVerification:{value:false,label:"Bypass Sub Account Verification",isSubAccount:false},
-    baseSkuStockChecklist:{value:false,label:"Base Sku Stock Checklist",isSubAccount:false}
+    baseSkuStockChecklist:{value:false,label:"Base Sku Stock Checklist"}
 }
 
 plansPermissions={
