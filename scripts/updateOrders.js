@@ -268,7 +268,7 @@ async function updateOrdersData(){
         console.log("New Data Found");
     }
     else{
-        console.log("data is same as previousOrder");
+        // console.log("data is same as previousOrder");
     }
 
     // console.log(data);

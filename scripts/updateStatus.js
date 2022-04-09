@@ -116,7 +116,7 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
         }
     }
 
-    console.log("Status Loop done");
+    // console.log("Status Loop done");
     return true
 
 }
