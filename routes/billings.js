@@ -25,7 +25,8 @@ router.post('/addTransaction',auth,async(req,res)=>{
         isFutureRequest:req.body.isFutureRequest,
         invoiceAmount:req.body.invoiceAmount,
         bankDetail:req.body.bankDetail,
-        transactionId:req.body.transactionId
+        transactionId:req.body.transactionId,
+        screenShot:req.body.screenShot
     })
 
     var savedBilling = await billing.save()
