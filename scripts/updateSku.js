@@ -36,6 +36,7 @@ async function getSkus(darazid,skus){
             result = await InventoryStringToJSon(sku)
             sku.multiWarehouseInventories = result.multiWarehouseInventories
             sku.fblWarehouseInventories = result.fblWarehouseInventories
+            sku.updatedAt = new Date()
 
         //     if(!update){
         //         var GroupSku = await Sku.findOne({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 

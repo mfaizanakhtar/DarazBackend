@@ -66,7 +66,11 @@ const darazSkuSchema=new mongoose.Schema({
         GroupSku:String,
         ShopId:String,
         useremail:String,
-        BaseSku:String
+        BaseSku:String,
+        updatedAt:{
+            type:Date,
+            default:new Date()
+        }
 
 })
 
