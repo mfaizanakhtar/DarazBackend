@@ -25,7 +25,7 @@ function updateQuery(query){
 
     //removing datefilter if status = claimaible
     if(AdditionStatus[query["OrderItems.Status"]]){
-        if(query["OrderItems.Status"]=="Claimable" || query["OrderItems.Status"]=="ClaimFiled" || query["OrderItems.Status"]=="ClaimReceived") dateFilter={}
+        // if(query["OrderItems.Status"]=="Claimable" || query["OrderItems.Status"]=="ClaimFiled" || query["OrderItems.Status"]=="ClaimReceived") dateFilter={}
         //if status found from additionstatus, delete orderitems.status
         FinalFilter={...AdditionStatus[query["OrderItems.Status"]]}
         console.log(FinalFilter)

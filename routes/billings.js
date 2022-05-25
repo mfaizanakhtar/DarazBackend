@@ -25,7 +25,8 @@ router.post('/addTransaction',auth,async(req,res)=>{
         isFutureRequest:req.body.isFutureRequest,
         invoiceAmount:req.body.invoiceAmount,
         bankDetail:req.body.bankDetail,
-        transactionId:req.body.transactionId
+        transactionId:req.body.transactionId,
+        screenShot:req.body.screenShot
     })
 
     var savedBilling = await billing.save()
@@ -54,8 +55,15 @@ router.put('/confirmTransaction',auth,async(req,res)=>{
                 userSubscription.startDate=new Date()
                 userSubscription.endDate=endDate
             await userSubscription.save()
-            var permLookup =await Lookup.findOne({lookup_key:updateResult.subscriptionType})
-            await User.updateOne({loginemail:updateResult.userEmail},{permissions:permLookup.lookup_detail})
+            var {lookup_detail:newPermissions} =await Lookup.findOne({lookup_key:updateResult.subscriptionType})
+            var user = await User.findOne({loginemail:updateResult.userEmail});
+            if(user.permissions){
+                for(var perm in newPermissions){
+                    user.permissions.hasOwnProperty(perm) ? user.permissions[perm] = newPermissions[perm] : ""
+                }
+            }else user.permissions=newPermissions;
+            await user.save();
+            // await User.updateOne({loginemail:updateResult.userEmail},{permissions:permLookup.lookup_detail})
         }
 
         //update permisisions
