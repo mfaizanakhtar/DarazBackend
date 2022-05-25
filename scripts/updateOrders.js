@@ -15,17 +15,13 @@ const e = require('express');
 
 async function getOrderItemsData(userid,secretkey,data){
     //MultipleOrderIds Passed and OrderItemData Gathered
-    // console.log(data)
     //Extracting orderids only from all orders
     var orderids = getOrderIdArray(data)
-    // console.log(orderids);
 
     //creating url to get MultipleOrderItems
     url = await generateMultipleOrderItemsUrl(userid,secretkey,orderids);
-    // console.log(url);
     //Passing url to get Data using axios
     orderitemsdata = await GetData(url);
-    // console.log(orderitemsdata.Orders)
     return orderitemsdata;
    
     
@@ -37,7 +33,7 @@ function baseSku(Sku){
     return Sku.substr(0,seperator)
 }
 
-async function updateOrders(id,OrdersData){
+async function updateNewOrders(id,OrdersData){
     for (const order of OrdersData){
     var result = await Order.findOne({OrderId:order.OrderId,ShopId:id.shopid})
     // console.log(result)
@@ -52,100 +48,44 @@ async function updateOrders(id,OrdersData){
 
 }
 
-async function updateOrderItems(shopid,secretkey,useremail,Orders){
-    var darazSkusArray=[]
-    var updatedarazSkusArray=[]
-    var updateOrdersSkusArray=[]
-    // console.log(Orders)
+async function updateNewOrderItems(shopid,secretkey,useremail,Orders){
+
+    var toUpdateDarazSkus=[]
     //fetch orderItems data from daraz api
-    OrderItemsData = await getOrderItemsData(shopid,secretkey,Orders)
-    //iterate orderitems fetched data
-    for(const items of OrderItemsData.Orders){
-        for(var item of items.OrderItems){
-            // console.log(item)
-        var result = await OrderItems.findOne({OrderItemId: item.OrderItemId,ShopId:shopid})
-        // if orderitem does not exist, add to db
-        
-        if(!result){
-        var orderItem
-
-        if(item.ShippingType=="Dropshipping"){
-            var stockType={FBMstock:-1}
-            var darazSkuStockType={"FBMstock.quantity":-1}
-        }
-        else if(item.ShippingType=="Own Warehouse"){
-            var stockType={FBMstock:0}
-            var darazSkuStockType={"FBDstock.quantity":-1}
-        }
-        // console.log(stockType)
-
-        var skuresult = await Sku.findOne({name:baseSku(item.Sku),useremail:useremail})
-            if(skuresult==null){
-                //creating new sku
-                var sku = new Sku({
-                    name:baseSku(item.Sku),
-                    useremail:useremail,
-                    ...stockType
-                })
-                skuresult = await sku.save();
-            }
-            else if(skuresult!=null){
-                //reducing stock
-                await Sku.updateMany({name:baseSku(item.Sku),useremail:useremail},{
-                    $inc:stockType
-                })
-            }
-
-            // creating orderitem object
+    try{
+            OrderItemsData = await getOrderItemsData(shopid,secretkey,Orders)
+        //iterate orderitems fetched data
+        for(const items of OrderItemsData.Orders){
+            for(var item of items.OrderItems){
+                // console.log(item)
+            var result = await OrderItems.findOne({OrderItemId: item.OrderItemId,ShopId:shopid})
+            // if orderitem does not exist, add to db
             
-            
-            // console.log(result)
-            //find darazSku in db
-            var dSku = await darazSku.findOne({ShopSku:item.ShopSku,useremail:useremail})
-            if(!updateOrdersSkusArray.includes(item.Sku)) updateOrdersSkusArray.push(item.Sku)
+            if(!result){
 
-            if(dSku==null){
-                if(!darazSkusArray.includes('"'+item.Sku+'"')){
-                    darazSkusArray.push('"'+item.Sku+'"')
+                if(!toUpdateDarazSkus.includes(item.Sku)) toUpdateDarazSkus.push(item.Sku)
 
-                } 
-                orderItem = setOrderItemObj(item,shopid,useremail,skuresult)
-                
+                var orderItem = setOrderItemObj(item,shopid,useremail,dSku)
+
+                var result = await orderItem.save();
+                //pushing orderItemId._id in Order Record for reference
+                await Order.updateMany({
+                    OrderId:result.OrderId,ShopId:shopid
+                },
+                {$push:{OrderItems:result._id,Skus:result.Sku,BaseSkus:result.BaseSku}})
+
             }
-            if(dSku!=null){
-                // console.log("Sku "+dSku.SellerSku+" before "+dSku.fblWarehouseInventories.quantity+" local: "+dSku.localQuantity)
-                if(!updatedarazSkusArray.includes('"'+item.Sku+'"')) updatedarazSkusArray.push('"'+item.Sku+'"')
-                var updateResult = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:useremail},{
-                        $inc:{...darazSkuStockType,localQuantity:-1}
-                })
-                orderItem = setOrderItemObj(item,shopid,useremail,dSku)
-
-                // console.log("Sku "+updateResult.SellerSku+" After "+updateResult.fblWarehouseInventories.quantity+" local: "+updateResult.localQuantity)
-            }
-            var result = await orderItem.save();
-            //pushing orderItemId._id in Order Record for reference
-            await Order.updateMany({
-                OrderId:result.OrderId,ShopId:shopid
-            },
-            {$push:{OrderItems:result._id,Skus:result.Sku,BaseSkus:result.BaseSku}})
-
-            // console.log(result);
         }
-    }
-    };
+        };
 
-    if(updateOrdersSkusArray.length>0){ 
-        await updateOrderItemStatus({shopid:shopid},{Sku:{$in:updateOrdersSkusArray},Status:{$in:["shipped","pending"]},
-        ShippingType:"Own Warehouse"},undefined,true)
+        if(toUpdateDarazSkus.length>0){
+            await getSkus(shopid,toUpdateDarazSkus)
+
+        }
+    }catch(ex){
+        console.log("Error in updateNewOrderItems");
     }
     
-    if(darazSkusArray.length>0){
-        await getSkus(shopid,false,darazSkusArray)
-    }
-    if(updatedarazSkusArray.length>0){
-        await getSkus(shopid,true,updatedarazSkusArray)
-
-    }
     
 
 }
@@ -258,8 +198,8 @@ async function updateOrdersData(){
     var data = await GetData(url);
     var previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryData:{$all:data.Orders},queryType:"ordersData"})
     if(previousUpdateData.length<=0){
-        await updateOrders(id,data.Orders)
-        await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
+        await updateNewOrders(id,data.Orders)
+        await updateNewOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
         previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryType:"ordersData"})
 
         if(previousUpdateData.length>0){
@@ -299,8 +239,8 @@ async function updateSingleOrder(shopid,orderid){
     // console.log(url)
     var data = await GetData(url);
     // console.log(data)
-    await updateOrders(id,data.Orders)
-    await updateOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
+    await updateNewOrders(id,data.Orders)
+    await updateNewOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
     // console.log(data);
 
     }
