@@ -28,7 +28,7 @@ router.get('/getSkus',auth,async(req,res)=>{
         }
 
     }
-    var darazskus = await darazSku.find({useremail:req.user.useremail,...req.query,...StockFilter}).sort({quantity:-1})
+    var darazskus = await darazSku.find({useremail:req.user.useremail,...req.query,...StockFilter}).sort({updatedAt:-1})
     .skip(pSize*pIndex)
     .limit(pSize)
 

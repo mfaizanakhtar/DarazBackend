@@ -51,6 +51,7 @@ async function updateNewOrders(id,OrdersData){
 async function updateNewOrderItems(shopid,secretkey,useremail,Orders){
 
     var toUpdateDarazSkus=[]
+    var toFetchDarazSkus=[]
     //fetch orderItems data from daraz api
     try{
             OrderItemsData = await getOrderItemsData(shopid,secretkey,Orders)
@@ -62,9 +63,14 @@ async function updateNewOrderItems(shopid,secretkey,useremail,Orders){
             // if orderitem does not exist, add to db
             
             if(!result){
-
-                if(!toUpdateDarazSkus.includes(item.Sku)) toUpdateDarazSkus.push(item.Sku)
-
+                var dSku = await darazSku.findOne({ShopSku:item.ShopSku,useremail:useremail})
+                if(dSku==null){
+                    if(!toFetchDarazSkus.includes('"'+item.Sku+'"')) toFetchDarazSkus.push('"'+item.Sku+'"')
+                    dSku={FBMpackagingCost:0,FBDpackagingCost:0,cost:0}
+                }
+                else if(dSku!=null){
+                    if(!toUpdateDarazSkus.includes('"'+item.Sku+'"')) toUpdateDarazSkus.push('"'+item.Sku+'"')
+                }
                 var orderItem = setOrderItemObj(item,shopid,useremail,dSku)
 
                 var result = await orderItem.save();
@@ -79,8 +85,9 @@ async function updateNewOrderItems(shopid,secretkey,useremail,Orders){
         };
 
         if(toUpdateDarazSkus.length>0){
-            await getSkus(shopid,toUpdateDarazSkus)
-
+            await getSkus(shopid,toUpdateDarazSkus,"UpdateExisting")
+        }if(toFetchDarazSkus.length>0){
+            await getSkus(shopid,toFetchDarazSkus,"FetchNew")
         }
     }catch(ex){
         console.log("Error in updateNewOrderItems");
