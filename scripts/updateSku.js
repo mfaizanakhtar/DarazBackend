@@ -6,7 +6,7 @@ const {darazSku} = require('../models/darazsku')
 const {Sku} = require('../models/sku')
 const {updateOrderItemStatus} = require('../scripts/updateStatus')
 
-async function getSkus(darazid,skus){
+async function getSkus(darazid,skus,requestType){
     // console.log(skus.length)
     // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     try{
@@ -37,6 +37,11 @@ async function getSkus(darazid,skus){
             sku.multiWarehouseInventories = result.multiWarehouseInventories
             sku.fblWarehouseInventories = result.fblWarehouseInventories
             sku.updatedAt = new Date()
+            // if(requestType=='UpdateExisting'){
+
+            // }else if(requestType=='FetchNew'){
+
+            // }
 
         //     if(!update){
         //         var GroupSku = await Sku.findOne({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
