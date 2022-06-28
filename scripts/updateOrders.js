@@ -217,8 +217,6 @@ async function updateOrdersData(){
     else{
         // console.log("data is same as previousOrder");
     }
-
-    // console.log(data);
 }
     }
     catch(ex){
@@ -226,13 +224,6 @@ async function updateOrdersData(){
     }
     
     console.log("Data Loop done");
-    try {
-        setTimeout(()=>{
-            updateOrdersData();
-        },60*1000);
-    } catch (error) {
-        console.log(error);
-    }
 }
 
 async function updateSingleOrder(shopid,orderid){
