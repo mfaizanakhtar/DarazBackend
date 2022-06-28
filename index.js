@@ -28,12 +28,13 @@ const { lookups } = require('./routes/lookups');
 const { billings } = require('./routes/billings');
 const { scheduler } = require('./scripts/scheduler');
  
-
+console.log('NODE_ENV: ' + config.util.getEnv('NODE_ENV'));
 mongoose.connect(config.connectionstring,{useFindAndModify:false})
     .then(()=>{
         console.log(`Connected ${config.connectionstring}`)
     })
-    .catch(()=>{
+    .catch((ex)=>{
+        console.log(ex)
         console.log("Error");
     });
 

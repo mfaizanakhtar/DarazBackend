@@ -1,5 +1,5 @@
 {
-    "connectionstring" : "mongodb://localhost/Daraz",
+    "connectionstring" : "mongodb://localhost:27017/Daraz",
     "jwtprivatekey":"1234",
-    "baseUrl":"http://dmanage.accesology.com"
-    }
+    "baseUrl":"http://localhost:4000"
+}

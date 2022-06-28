@@ -31,7 +31,7 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
         
     
     var updateResult
-    var skuUpdateArray=[]
+    // var skuUpdateArray=[]
     // console.log(status)
 
     var darazid = await Darazid.find({...user});
@@ -70,29 +70,6 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
                 {Status:item.Status,TrackingCode:item.TrackingCode,
                     ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2),UpdatedAt:item.UpdatedAt,Reason:item.Reason})
             
-                // if(status.DispatchDate!=null){
-                //     await Sku.updateMany({name:updateResult.BaseSku,useremail:updateResult.useremail},{FBMstock:{$inc:1}})
-                // }
-                // if(updateResult==null) {
-                //     console.log(item)
-                //     dbitem = await OrderItems.find({OrderItemId:item.OrderItemId})
-                //     console.log(dbitem)
-                // }
-                if(updateResult.ShippingType=='Dropshipping' && updateResult.DispatchDate!=null && item.Status=='canceled'){
-                    await Sku.updateMany({name:updateResult.BaseSku,useremail:updateResult.useremail},{FBMstock:{$inc:1}})
-                    await darazSku.updateMany({ShopSku:updateResult.ShopSku,useremail:updateResult.useremail},{$inc:{"FBMstock.quantity":1,localQuantity:1}})
-                }
-                if(updateResult.ShippingType=='Own Warehouse' && (updateResult.Status=='shipped' || updateResult.Status=='pending' || updateResult.Status=='ready_to_ship')){
-                    if(item.Status=='canceled' || item.Status=='failed'){
-                        // console.log("updateResultStatus: "+updateResult.Status+" itemStatus: "+item.Status)
-                        var SkuUpdate = await darazSku.findOneAndUpdate({ShopSku:item.ShopSku,useremail:updateResult.useremail},{$inc:{"FBDstock.quantity":1,localQuantity:1}})
-                        // console.log(SkuUpdate.SellerSku)
-                        skuUpdateArray.push('"'+item.Sku+'"')
-                        
-                    }
-                }
-                
-                if (skuUpdateArray.length>0 && updateSkuStock==undefined) await getSkus(updateResult.ShopId,true,skuUpdateArray)
         }
         }
     }
@@ -138,15 +115,6 @@ async function fetchLabelsAndUpdate(useremail){
 async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     console.log(orderItemIds,orderItemIds.length)
     console.log("Entry Checkpoint")
-    // var portCodes=[]
-    // var trackings=[]
-    // trackingbarcodes=[]
-    // portcodebarcodes=[]
-    // // orderidbarcodes=[]
-    // qrcodes=[]
-    // deliveryPoints=[]
-    // labelPrices=[]
-    // labelOrderNumbers=[]
 
     splitCount=35
     lastCount=0
@@ -155,8 +123,6 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         var portCodes=[]
         var trackings=[]
         var trackingbarcodes=[]
-        var portcodebarcodes=[]
-        // orderidbarcodes=[]
         var qrcodes=[]
         var deliveryPoints=[]
         var labelPrices=[]
@@ -224,15 +190,11 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     //scrape qr codes
     $('div[class="box left qrcode"]').find('img').each(function(index,element){
 
-            qrcodes.push($(element).attr('src'))
+        qrcodes.push($(element).attr('src'))
 
     });
     //scrape seller address
     $("div").find('div:nth-child(15)').each(function(index,element){
-        // Address=$(element).text().substr(9)
-        // PortCode=PortCode.substr(0,PortCode.length-1)
-        // portCodes.push(PortCode)
-        // console.log(Address)
         sellerAddress.push($(element).text().substr(8))
     });
     console.log("2nd Checkpoint")
@@ -242,7 +204,6 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
     for(let i=0;i<trackings.length;i++){
         console.log("3rd Checkpoint")
 
-        // if(portCodes.length==trackingbarcodes.length){
         updateResult = await OrderItems.updateMany({TrackingCode:trackings[i].toString(),OrderId:labelOrderNumbers[i].toString()},{
             $set:{
                 PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],
@@ -252,18 +213,7 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
             }
         })
         console.log(updateResult)
-        // }
-        // else{
-        //     console.log("PortCode Length: ",portCodes.length)
-        //     console.log("trackingbarcodes Length: ",trackingbarcodes.length)
-        //     console.log("qrcodes Length: ",qrcodes.length)
-        //     console.log("labelPrices Length: ",labelPrices.length)
-        //     console.log("deliveryPoints Length: ",deliveryPoints.length)
-        //     console.log("trackings Length: ",trackings.length)
-        //     console.log("labelOrderNumbers Length: ",labelOrderNumbers.length)
 
-
-        // }
         
     }
 }catch(error){
