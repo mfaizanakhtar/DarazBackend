@@ -75,7 +75,7 @@ function scheduler(){
     })
 
     //update status request cron at every 1 hour
-    cron.schedule('*/1 * * * *',async ()=>{
+    cron.schedule('* */1 * * *',async ()=>{
         await updateAllSkus()
         console.log("updateAllSkus @ every hour")
     }, {
