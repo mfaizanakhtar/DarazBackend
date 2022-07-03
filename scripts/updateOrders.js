@@ -2,15 +2,10 @@ const {GetData} = require('./HttpReq');
 const {OrderItems} = require('../models/orderItem');
 const { Darazid } = require('../models/darazid');
 const {Order} = require('../models/order');
-const {Sku} = require('../models/sku');
 const {darazSku}=require('../models/darazsku')
 const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl,generateLabelUrl, generateSingleOrderUrl} = require('./GenerateUrl');
-const cheerio = require('cheerio')
 const {getSkus} = require('./updateSku')
-const atob = require("atob");
-const {updateOrderItemStatus} = require('../scripts/updateStatus');
 const { previousDataQuery } = require('../models/previousDataQuery');
-const e = require('express');
 
 
 async function getOrderItemsData(userid,secretkey,data){

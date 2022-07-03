@@ -28,8 +28,7 @@ const { lookups } = require('./routes/lookups');
 const { billings } = require('./routes/billings');
 const { scheduler } = require('./scripts/scheduler');
  
-console.log('NODE_ENV: ' + config.util.getEnv('NODE_ENV'));
-mongoose.connect(config.connectionstring,{useFindAndModify:false})
+mongoose.connect(config.connectionstring,{useFindAndModify:false,useNewUrlParser:true,useUnifiedTopology:true,useCreateIndex:true})
     .then(()=>{
         console.log(`Connected ${config.connectionstring}`)
     })
@@ -168,7 +167,7 @@ dataQueries()
 
 
 const port = process.env.PORT || 3000;
-const server = app.listen(port,()=> console.log(`Listening on port ${port}`));
+const server = app.listen(port,()=> console.log(`Listening on port ${port}. NODE_ENV -> ${config.util.getEnv('NODE_ENV')}`));
 
 module.exports = server;
 

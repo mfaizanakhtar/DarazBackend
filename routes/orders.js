@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const express = require('express');
 const { Order } = require('../models/order');
 const {OrderItems} = require('../models/orderItem')
@@ -8,7 +7,7 @@ const {Darazid} = require('../models/darazid')
 const {RtsURL} = require('../scripts/GenerateUrl')
 const {GetData} = require('../scripts/HttpReq')
 const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
-const {getDateFilter,getAdditionStatus,updateQuery, updateQueryForStockChecklist} = require('./ordersService')
+const {getDateFilter,updateQuery, updateQueryForStockChecklist} = require('./ordersService')
 
 router.get('/orders/',auth,async(req,res)=>{
 

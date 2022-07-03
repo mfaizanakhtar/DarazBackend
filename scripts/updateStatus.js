@@ -2,13 +2,9 @@ const {OrderItems} = require('../models/orderItem');
 const {Darazid} = require('../models/darazid');
 const {generateMultipleOrderItemsUrl,generateLabelUrl} = require('../scripts/GenerateUrl');
 const {GetData} = require('./HttpReq');
-const {Order} = require('../models/order')
-const {Sku} = require('../models/sku')
 const {getOrderIdArray} = require('../scripts/GenerateUrl')
 const cheerio = require('cheerio')
 const atob = require("atob");
-const { darazSku } = require('../models/darazsku');
-const { getSkus } = require('../scripts/updateSku')
 
 async function updateOrderItemsForRts(user,RtsOrdersResponse){
 
