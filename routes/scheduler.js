@@ -1,5 +1,8 @@
 const express = require('express');
+const { updateTransactions } = require('../scripts/updateFinance');
 const { updateOrdersData } = require('../scripts/updateOrders');
+const { getAllSkus, updateAllSkus } = require('../scripts/updateSku');
+const { updateOrderItemStatus } = require('../scripts/updateStatus');
 const router = express.Router();
 
 
