@@ -26,6 +26,7 @@ const { plans } = require('./routes/plans');
 const { dataQueries } = require('./scripts/insertData');
 const { lookups } = require('./routes/lookups');
 const { billings } = require('./routes/billings');
+const { schedulerRouter } = require('./routes/scheduler');
 const { scheduler } = require('./scripts/scheduler');
  
 mongoose.connect(config.connectionstring,{useFindAndModify:false,useNewUrlParser:true,useUnifiedTopology:true,useCreateIndex:true})
@@ -60,6 +61,7 @@ app.use('/api/dashboard',dashboards)
 app.use('/api/plans',plans)
 app.use('/api/lookups',lookups)
 app.use('/api/billings',billings)
+app.use('/api/scheduler',schedulerRouter)
 
 scheduler();
 
