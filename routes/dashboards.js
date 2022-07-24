@@ -32,7 +32,9 @@ router.get('/OrderStatuses',auth,async (req,res)=>{
 
 router.get('/OrderAnalytics',auth,async(req,res)=>{
     startdate=moment(req.query.startdate).startOf('day').tz("Asia/Karachi").toDate()
+    console.log('StartDate: '+startdate)
     enddate=moment(req.query.startdate).endOf('day').tz("Asia/Karachi").toDate()
+    console.log('EndDate: '+enddate)
     var response=[]
     var itemsResult = await OrderItems.aggregate([
         {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
@@ -68,7 +70,7 @@ router.get("/OrdersAnalyticsGraph",auth,async(req,res)=>{
     // var monthdifference = (enddate-startdate)/(1000*60*60*24*30)
     // var yeardifference = (enddate-startdate)/(1000*60*60*24*30*12)
     startdate=moment(req.query.startdate).startOf('day').tz("Asia/Karachi").toDate()
-    enddate=moment(req.query.startdate).endOf('day').tz("Asia/Karachi").toDate()
+    enddate=moment(req.query.enddate).endOf('day').tz("Asia/Karachi").toDate()
 
     storeFilter={}
     skuFilter={}
@@ -112,7 +114,7 @@ router.get("/OrdersAnalyticsGraph",auth,async(req,res)=>{
 
 router.get("/getStoreOrdersDetail",auth,async(req,res)=>{
     startdate=moment(req.query.startdate).startOf('day').tz("Asia/Karachi").toDate()
-    enddate=moment(req.query.startdate).endOf('day').tz("Asia/Karachi").toDate()
+    enddate=moment(req.query.enddate).endOf('day').tz("Asia/Karachi").toDate()
 
     var orderitems = await OrderItems.aggregate([
         {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
@@ -159,7 +161,7 @@ router.get("/getStoreOrdersDetail",auth,async(req,res)=>{
 
 router.get("/getStoreSkuDetails",auth,async(req,res)=>{
     startdate=moment(req.query.startdate).startOf('day').tz("Asia/Karachi").toDate()
-    enddate=moment(req.query.startdate).endOf('day').tz("Asia/Karachi").toDate()
+    enddate=moment(req.query.enddate).endOf('day').tz("Asia/Karachi").toDate()
 
     var SkuItems=await OrderItems.aggregate([
         {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
@@ -226,7 +228,7 @@ router.get("/getStoreSkuDetails",auth,async(req,res)=>{
 
 router.get("/getProfitAnalytics",auth,async(req,res)=>{
     startdate=moment(req.query.startdate).startOf('day').tz("Asia/Karachi").toDate()
-    enddate=moment(req.query.startdate).endOf('day').tz("Asia/Karachi").toDate()
+    enddate=moment(req.query.enddate).endOf('day').tz("Asia/Karachi").toDate()
 
     itemsProfit = await OrderItems.aggregate([
         {
@@ -262,7 +264,7 @@ router.get("/getProfitAnalyticsGraph",auth,async(req,res)=>{
     // var monthdifference = (enddate-startdate)/(1000*60*60*24*30)
     // var yeardifference = (enddate-startdate)/(1000*60*60*24*30*12)
     startdate=moment(req.query.startdate).startOf('day').tz("Asia/Karachi").toDate()
-    enddate=moment(req.query.startdate).endOf('day').tz("Asia/Karachi").toDate()
+    enddate=moment(req.query.enddate).endOf('day').tz("Asia/Karachi").toDate()
 
     storeFilter={}
     skuFilter={}
@@ -316,7 +318,7 @@ router.get("/getProfitAnalyticsGraph",auth,async(req,res)=>{
 
 router.get("/getStoresProfitStats",auth,async(req,res)=>{
     startdate=moment(req.query.startdate).startOf('day').tz("Asia/Karachi").toDate()
-    enddate=moment(req.query.startdate).endOf('day').tz("Asia/Karachi").toDate()
+    enddate=moment(req.query.enddate).endOf('day').tz("Asia/Karachi").toDate()
 
     items = await OrderItems.aggregate([
         {
@@ -358,7 +360,7 @@ router.get("/getStoresProfitStats",auth,async(req,res)=>{
 
 router.get('/getStoreSkuProfitStats',auth,async(req,res)=>{
     startdate=moment(req.query.startdate).startOf('day').tz("Asia/Karachi").toDate()
-    enddate=moment(req.query.startdate).endOf('day').tz("Asia/Karachi").toDate()
+    enddate=moment(req.query.enddate).endOf('day').tz("Asia/Karachi").toDate()
 
     Skuitems = await OrderItems.aggregate([
         {
@@ -379,7 +381,7 @@ router.get('/getStoreSkuProfitStats',auth,async(req,res)=>{
 async function getStatus(filter,useremail,query){
     // console.log(query.startdate)
     startdate=moment(query.startdate).startOf('day').tz("Asia/Karachi").toDate()
-    enddate=moment(query.startdate).endOf('day').tz("Asia/Karachi").toDate()
+    enddate=moment(query.enddate).endOf('day').tz("Asia/Karachi").toDate()
     var items = await OrderItems.aggregate([
         {
             $match:{...filter,useremail:useremail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
