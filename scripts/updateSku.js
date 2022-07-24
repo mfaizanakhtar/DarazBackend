@@ -179,6 +179,8 @@ async function getAllSkus(){
 
             }
     }
+}else{
+    console.log("Invalid user or secretkey of shop " + shop.shopName)
 }
 }
 console.log("New Skus Fetched")

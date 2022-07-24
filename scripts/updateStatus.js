@@ -65,6 +65,8 @@ async function updateOrderItemStatus(user,status){
                     
                     }
                 }
+            }else{
+                console.log("Invalid username or secretkey of shop "+ shop.shopName)
             }
         }
 

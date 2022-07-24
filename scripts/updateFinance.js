@@ -101,6 +101,8 @@ async function updateTransactions(){
             await previousDataQuery.updateMany({ShopId:shop.shopid,queryType:"transType"+transType+date},{queryData:JSON.stringify(transactions)})
         }else await new previousDataQuery({ShopId:shop.shopid,queryData:JSON.stringify(transactions),queryType:"transType"+transType+date}).save()
     }
+    }else{
+        console.log("Invalid username or secretkey of shop "+ shop.shopName)
     }
     }
     };
