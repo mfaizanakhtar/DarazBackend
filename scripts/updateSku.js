@@ -1,10 +1,8 @@
 const {GetData} = require('./HttpReq')
 const {generateSkuUrl} = require('./GenerateUrl')
 const {Darazid} = require('../models/darazid')
-const {darazProduct} = require('../models/darazproduct')
 const {darazSku} = require('../models/darazsku')
 const {Sku} = require('../models/sku')
-const {updateOrderItemStatus} = require('../scripts/updateStatus')
 
 async function getSkus(darazid,skus,requestType){
     // console.log(skus.length)
