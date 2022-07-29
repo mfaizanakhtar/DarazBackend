@@ -1,15 +1,7 @@
 function getDateFilter(query){
-    //setting timezone startdate and enddate
-    var startdate
-    var enddate
 
-    
-    startdate = new Date(query.startDate);
-    startdate.setHours(startdate.getHours()+5);
-    enddate = new Date(query.endDate);
-    enddate.setHours(enddate.getHours()+28,59,59,59);
-
-
+    var startdate=moment(query.startdate).startOf('day').tz("Asia/Karachi").toDate()
+    var enddate=moment(query.enddate).endOf('day').tz("Asia/Karachi").toDate()
 
     return {$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     
