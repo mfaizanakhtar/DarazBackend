@@ -2,8 +2,8 @@ const moment = require('moment');
 
 function getDateFilter(query){
 
-    var startdate=moment(query.startDate).tz("Asia/Karachi").startOf('day').toDate()
-    var enddate=moment(query.endDate).tz("Asia/Karachi").endOf('day').toDate()
+    var startdate=moment(query.startDate).startOf('day').toDate()
+    var enddate=moment(query.endDate).endOf('day').toDate()
     console.log(startdate)
     console.log(enddate)
 
