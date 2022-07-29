@@ -33,6 +33,8 @@ router.get('/OrderStatuses',auth,async (req,res)=>{
 router.get('/OrderAnalytics',auth,async(req,res)=>{
     startdate=moment(req.query.startdate).startOf('day').tz("Asia/Karachi").toDate()
     enddate=moment(req.query.enddate).endOf('day').tz("Asia/Karachi").toDate()
+    console.log(startdate)
+    console.log(enddate)
     var response=[]
     var itemsResult = await OrderItems.aggregate([
         {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},

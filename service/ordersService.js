@@ -2,8 +2,10 @@ const moment = require('moment');
 
 function getDateFilter(query){
 
-    var startdate=moment(query.startdate).startOf('day').tz("Asia/Karachi").toDate()
-    var enddate=moment(query.enddate).endOf('day').tz("Asia/Karachi").toDate()
+    var startdate=moment(query.startDate).tz("Asia/Karachi").startOf('day').toDate()
+    var enddate=moment(query.endDate).tz("Asia/Karachi").endOf('day').toDate()
+    console.log(startdate)
+    console.log(enddate)
 
     return {$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     
