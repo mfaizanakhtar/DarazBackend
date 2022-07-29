@@ -193,26 +193,31 @@ async function updateOrdersData(){
     try{
     var userids = await Darazid.find()
     //iterating through all fetched ips
-    for(const id of userids){
-        // console.log(id);
-    let url = generateOrdersUrl(id.shopid,id.secretkey,0);
-    // console.log(url)
-    var data = await GetData(url);
-    var previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryData:{$all:data.Orders},queryType:"ordersData"})
-    if(previousUpdateData.length<=0){
-        await updateNewOrders(id,data.Orders)
-        await updateNewOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
-        previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryType:"ordersData"})
-
-        if(previousUpdateData.length>0){
-            await previousDataQuery.updateMany({ShopId:id.shopid,queryType:"ordersData"},{queryData:data.Orders})
-        }else await new previousDataQuery({ShopId:id.shopid,queryData:data.Orders,queryType:"ordersData"}).save()
-        console.log("New Data Found");
-    }
-    else{
-        // console.log("data is same as previousOrder");
-    }
-}
+        for(const id of userids){
+            // console.log(id);
+            let url = generateOrdersUrl(id.shopid,id.secretkey,0);
+            // console.log(url)
+            var data = await GetData(url);
+            if(data!=null){
+                var previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryData:{$all:data.Orders},queryType:"ordersData"})
+                if(previousUpdateData.length<=0){
+                    await updateNewOrders(id,data.Orders)
+                    await updateNewOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
+                    previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryType:"ordersData"})
+    
+                    if(previousUpdateData.length>0){
+                        await previousDataQuery.updateMany({ShopId:id.shopid,queryType:"ordersData"},{queryData:data.Orders})
+                    }else await new previousDataQuery({ShopId:id.shopid,queryData:data.Orders,queryType:"ordersData"}).save()
+                    console.log("New Data Found");
+                }
+                else{
+                    // console.log("data is same as previousOrder");
+                }
+            }else{
+                console.log("Invalid user or secretkey of shop " + id.shopName)
+            }
+            
+        }
     }
     catch(ex){
         console.log("Exception occured, error: "+ex.message);
