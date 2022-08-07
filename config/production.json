@@ -1,5 +1,5 @@
 {
-    "connectionstring" : "mongodb://mfaizanakhtar:Faizan.123%40@localhost:27017/Daraz",
+    "connectionstring" : "mongodb://mfaizanakhtar:Faizan.123%40@localhost:27017/Daraz?authSource=admin",
     "jwtprivatekey":"1234",
     "baseUrl":"http://dmanage.accesology.com"
 }

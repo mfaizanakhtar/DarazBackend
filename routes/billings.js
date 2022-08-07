@@ -15,7 +15,7 @@ router.get('/getAllTransactions',auth,async(req,res)=>{
 
 router.post('/addTransaction',auth,async(req,res)=>{
     var billing = new Billing({
-        billingId:await Billing.find().count()+1,
+        billingId:await Billing.find().countDocuments()+1,
         createdAt:new Date(),
         userEmail:req.user.useremail,
         subscriptionType:req.body.subscriptionType,

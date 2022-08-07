@@ -26,10 +26,10 @@ const { plans } = require('./routes/plans');
 const { dataQueries } = require('./scripts/insertData');
 const { lookups } = require('./routes/lookups');
 const { billings } = require('./routes/billings');
+const { schedulerRouter } = require('./routes/scheduler');
 const { scheduler } = require('./scripts/scheduler');
  
-console.log('NODE_ENV: ' + config.util.getEnv('NODE_ENV'));
-mongoose.connect(config.connectionstring,{useFindAndModify:false})
+mongoose.connect(config.connectionstring,{useFindAndModify:false,useNewUrlParser:true,useUnifiedTopology:true,useCreateIndex:true})
     .then(()=>{
         console.log(`Connected ${config.connectionstring}`)
     })
@@ -61,6 +61,13 @@ app.use('/api/dashboard',dashboards)
 app.use('/api/plans',plans)
 app.use('/api/lookups',lookups)
 app.use('/api/billings',billings)
+app.use('/api/scheduler',schedulerRouter)
+
+scheduler();
+
+dataQueries()
+
+
 
 // async function updateId(){
 //     const result = await OrderItems.updateMany({},{
@@ -71,33 +78,12 @@ app.use('/api/billings',billings)
 // }
 // updateId()
 // updateSingleOrder('pkgadgies@gmail.com','131329258345032')
-updateOrdersData();
 // // updateOrderItemStatus();
 // // updateItemPendingStatus();
 // // updatePendingOrderStatus();
-updateTransactions();
 // // getSkus('techatronixs@gmail.com','["45CM+7FT","Holder5208"]')
 
-updateOrderItemStatus({},{$or:[{Status:'shipped'},{ Status:'ready_to_ship'},{ Status:'pending'}],
-ShippingType:'Own Warehouse'},8*60*60*1000);
 
-updateOrderItemStatus({},{Status:'shipped',
-ShippingType:'Dropshipping'},8*60*60*1000);
-
-updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
-ShippingType:'Dropshipping'},15*60*1000);
-
-var startingDate=new Date();
-startingDate=startingDate.setDate(startingDate.getDate()-20)
-
-updateOrderItemStatus({},{Status:'delivered',UpdatedAt:{$gte:startingDate}},8*60*60*1000);
-
-getAllSkus(24*60*60*1000)
-updateAllSkus(3*60*60*1000)
-
-dataQueries()
-
-scheduler();
 
 
 // updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],
@@ -183,7 +169,7 @@ scheduler();
 
 
 const port = process.env.PORT || 3000;
-const server = app.listen(port,()=> console.log(`Listening on port ${port}`));
+const server = app.listen(port,()=> console.log(`Listening on port ${port}. NODE_ENV -> ${config.util.getEnv('NODE_ENV')}`));
 
 module.exports = server;
 

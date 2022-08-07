@@ -3,6 +3,7 @@ const router = express.Router();
 const {OrderItems} = require('../models/orderItem');
 const {Order}=require('../models/order')
 const auth = require("../middleware/auth")
+const moment = require('moment')
 
 router.get('/OrderStatuses',auth,async (req,res)=>{
     var response=[]
@@ -30,10 +31,10 @@ router.get('/OrderStatuses',auth,async (req,res)=>{
 })
 
 router.get('/OrderAnalytics',auth,async(req,res)=>{
-    startdate=new Date(req.query.startdate)
-    startdate.setHours(startdate.getHours()+5)
-    enddate=new Date(req.query.enddate)
-    enddate.setHours(enddate.getHours()+28,59,59,59)
+    startdate=moment(req.query.startdate).startOf('day').toDate()
+    enddate=moment(req.query.enddate).endOf('day').toDate()
+    console.log(startdate)
+    console.log(enddate)
     var response=[]
     var itemsResult = await OrderItems.aggregate([
         {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
@@ -64,14 +65,8 @@ router.get('/OrderAnalytics',auth,async(req,res)=>{
 })
 
 router.get("/OrdersAnalyticsGraph",auth,async(req,res)=>{
-    // var aggregateTime={ $dayOfYear: "$CreatedAt"}
-    // var daydifference = (enddate-startdate)/(1000*60*60*24)
-    // var monthdifference = (enddate-startdate)/(1000*60*60*24*30)
-    // var yeardifference = (enddate-startdate)/(1000*60*60*24*30*12)
-    startdate=new Date(req.query.startdate)
-    startdate.setHours(startdate.getHours()+5)
-    enddate=new Date(req.query.enddate)
-    enddate.setHours(enddate.getHours()+28,59,59,59)
+    startdate=moment(req.query.startdate).startOf('day').toDate()
+    enddate=moment(req.query.enddate).endOf('day').toDate()
 
     storeFilter={}
     skuFilter={}
@@ -114,10 +109,8 @@ router.get("/OrdersAnalyticsGraph",auth,async(req,res)=>{
 })
 
 router.get("/getStoreOrdersDetail",auth,async(req,res)=>{
-    startdate=new Date(req.query.startdate)
-    startdate.setHours(startdate.getHours()+5)
-    enddate=new Date(req.query.enddate)
-    enddate.setHours(enddate.getHours()+28,59,59,59)
+    startdate=moment(req.query.startdate).startOf('day').toDate()
+    enddate=moment(req.query.enddate).endOf('day').toDate()
 
     var orderitems = await OrderItems.aggregate([
         {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
@@ -163,10 +156,8 @@ router.get("/getStoreOrdersDetail",auth,async(req,res)=>{
 })
 
 router.get("/getStoreSkuDetails",auth,async(req,res)=>{
-    startdate=new Date(req.query.startdate)
-    startdate.setHours(startdate.getHours()+5)
-    enddate=new Date(req.query.enddate)
-    enddate.setHours(enddate.getHours()+28,59,59,59)
+    startdate=moment(req.query.startdate).startOf('day').toDate()
+    enddate=moment(req.query.enddate).endOf('day').toDate()
 
     var SkuItems=await OrderItems.aggregate([
         {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
@@ -232,10 +223,8 @@ router.get("/getStoreSkuDetails",auth,async(req,res)=>{
 })
 
 router.get("/getProfitAnalytics",auth,async(req,res)=>{
-    startdate=new Date(req.query.startdate)
-    startdate.setHours(startdate.getHours()+5)
-    enddate=new Date(req.query.enddate)
-    enddate.setHours(enddate.getHours()+28,59,59,59)
+    startdate=moment(req.query.startdate).startOf('day').toDate()
+    enddate=moment(req.query.enddate).endOf('day').toDate()
 
     itemsProfit = await OrderItems.aggregate([
         {
@@ -266,14 +255,8 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
 })
 
 router.get("/getProfitAnalyticsGraph",auth,async(req,res)=>{
-    // var aggregateTime={ $dayOfYear: "$CreatedAt"}
-    // var daydifference = (enddate-startdate)/(1000*60*60*24)
-    // var monthdifference = (enddate-startdate)/(1000*60*60*24*30)
-    // var yeardifference = (enddate-startdate)/(1000*60*60*24*30*12)
-    startdate=new Date(req.query.startdate)
-    startdate.setHours(startdate.getHours()+5)
-    enddate=new Date(req.query.enddate)
-    enddate.setHours(enddate.getHours()+28,59,59,59)
+    startdate=moment(req.query.startdate).startOf('day').toDate()
+    enddate=moment(req.query.enddate).endOf('day').toDate()
 
     storeFilter={}
     skuFilter={}
@@ -326,10 +309,8 @@ router.get("/getProfitAnalyticsGraph",auth,async(req,res)=>{
 })
 
 router.get("/getStoresProfitStats",auth,async(req,res)=>{
-    startdate=new Date(req.query.startdate)
-    startdate.setHours(startdate.getHours()+5)
-    enddate=new Date(req.query.enddate)
-    enddate.setHours(enddate.getHours()+28,59,59,59)
+    startdate=moment(req.query.startdate).startOf('day').toDate()
+    enddate=moment(req.query.enddate).endOf('day').toDate()
 
     items = await OrderItems.aggregate([
         {
@@ -370,10 +351,8 @@ router.get("/getStoresProfitStats",auth,async(req,res)=>{
 })
 
 router.get('/getStoreSkuProfitStats',auth,async(req,res)=>{
-    startdate=new Date(req.query.startdate)
-    startdate.setHours(startdate.getHours()+5)
-    enddate=new Date(req.query.enddate)
-    enddate.setHours(enddate.getHours()+28,59,59,59)
+    startdate=moment(req.query.startdate).startOf('day').toDate()
+    enddate=moment(req.query.enddate).endOf('day').toDate()
 
     Skuitems = await OrderItems.aggregate([
         {
@@ -392,11 +371,8 @@ router.get('/getStoreSkuProfitStats',auth,async(req,res)=>{
 })
 
 async function getStatus(filter,useremail,query){
-    // console.log(query.startdate)
-    startdate=new Date(query.startdate)
-    startdate.setHours(startdate.getHours()+5)
-    enddate=new Date(query.enddate)
-    enddate.setHours(enddate.getHours()+28,59,59,59)
+    startdate=moment(query.startdate).startOf('day').toDate()
+    enddate=moment(query.enddate).endOf('day').toDate()
     var items = await OrderItems.aggregate([
         {
             $match:{...filter,useremail:useremail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}

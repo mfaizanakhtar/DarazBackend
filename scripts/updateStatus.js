@@ -2,13 +2,9 @@ const {OrderItems} = require('../models/orderItem');
 const {Darazid} = require('../models/darazid');
 const {generateMultipleOrderItemsUrl,generateLabelUrl} = require('../scripts/GenerateUrl');
 const {GetData} = require('./HttpReq');
-const {Order} = require('../models/order')
-const {Sku} = require('../models/sku')
 const {getOrderIdArray} = require('../scripts/GenerateUrl')
 const cheerio = require('cheerio')
 const atob = require("atob");
-const { darazSku } = require('../models/darazsku');
-const { getSkus } = require('../scripts/updateSku')
 
 async function updateOrderItemsForRts(user,RtsOrdersResponse){
 
@@ -26,13 +22,10 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
     
 }
 
-async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
+async function updateOrderItemStatus(user,status){
     try{
-        
-    
+
     var updateResult
-    // var skuUpdateArray=[]
-    // console.log(status)
 
     var darazid = await Darazid.find({...user});
     for(var shop of darazid){
@@ -42,58 +35,46 @@ async function updateOrderItemStatus(user,status,repeatTime,updateSkuStock){
         // console.log(orderitemscount)
         end = Math.ceil(orderitemscount/splitCount)
         // console.log(end)
-    for(let i=0;i<end;i++){
-        var orderitems = await OrderItems.find({...status,ShopId:shop.shopid})
-        .skip(i*splitCount)
-        .limit(splitCount)
-        // console.log(shop.shopid+' '+orderitems.length)
-        var orderitemsrray = getOrderIdArray(orderitems)
-        url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsrray);
-        // console.log(url)
-        orderitemsdata = await GetData(url);
-        if(orderitemsdata!=null && orderitemsdata!=undefined){
-        // console.log(orderitemsdata.Orders.length)
+        for(let i=0;i<end;i++){
+            var orderitems = await OrderItems.find({...status,ShopId:shop.shopid})
+            .skip(i*splitCount)
+            .limit(splitCount)
+            // console.log(shop.shopid+' '+orderitems.length)
+            var orderitemsrray = getOrderIdArray(orderitems)
+            url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsrray);
+            // console.log(url)
+            orderitemsdata = await GetData(url);
+            if(orderitemsdata!=null && orderitemsdata!=undefined){
+                // console.log(orderitemsdata.Orders.length)
 
-        orderitemsdata = orderitemsdata.Orders
-        //iterate all orders fetched from api
+                orderitemsdata = orderitemsdata.Orders
+                //iterate all orders fetched from api
 
-        for(var orders of orderitemsdata){
-            // console.log(orders)
-            for(item of orders.OrderItems){
-                // console.log(item)
-                // if(orders.OrderItems==undefined || orders.OrderItems==null) {console.log("null here")}
-                updateResult = await OrderItems.findOneAndUpdate(
-                {OrderId:item.OrderId,Sku:item.Sku,ShopSku:item.ShopSku,
-                ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,
-                ShippingAmount:item.ShippingAmount
-                ,Variation:item.Variation},
-                {Status:item.Status,TrackingCode:item.TrackingCode,
-                    ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2),UpdatedAt:item.UpdatedAt,Reason:item.Reason})
-            
+                for(var orders of orderitemsdata){
+                    // console.log(orders)
+                    for(item of orders.OrderItems){
+                        // console.log(item)
+                        // if(orders.OrderItems==undefined || orders.OrderItems==null) {console.log("null here")}
+                        updateResult = await OrderItems.findOneAndUpdate(
+                        {OrderId:item.OrderId,Sku:item.Sku,ShopSku:item.ShopSku,
+                        ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,
+                        ShippingAmount:item.ShippingAmount
+                        ,Variation:item.Variation},
+                        {Status:item.Status,TrackingCode:item.TrackingCode,
+                            ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2),UpdatedAt:item.UpdatedAt,Reason:item.Reason})
+                    
+                    }
+                }
+            }else{
+                console.log("Invalid username or secretkey of shop "+ shop.shopName)
+            }
         }
-        }
-    }
- 
-        
-
-    }
 
     }
 
     }catch(error){
         console.log(error)
     }
-    if(repeatTime!=undefined){
-        try {
-        setTimeout(()=>{
-            updateOrderItemStatus(user,status,repeatTime);
-        },repeatTime);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    // console.log("Status Loop done");
     return true
 
 }

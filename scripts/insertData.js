@@ -14,14 +14,14 @@ function executeAllDataQueries(){
 }
 
 async function insertPlanData(){
-    var plansCount = await Plan.find().count()
+    var plansCount = await Plan.find().countDocuments()
     if(plansCount==0){
         Plan.insertMany(plansData)
     }
 }
 
 async function insertLookup(lookup_key,lookup_detail){
-    var lookupExists = await Lookup.find({lookup_key:lookup_key}).count() == 0 ? false : true
+    var lookupExists = await Lookup.find({lookup_key:lookup_key}).countDocuments() == 0 ? false : true
     if(!lookupExists){
         
         var lookup = new Lookup({

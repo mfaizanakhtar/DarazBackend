@@ -85,7 +85,7 @@ async function getSkus(darazid,skus,requestType){
 }
 }
 
-async function updateAllSkus(repeatTime){
+async function updateAllSkus(){
     try{
     shops = await Darazid.find()
     for(var shop of shops){
@@ -100,7 +100,7 @@ async function updateAllSkus(repeatTime){
             .skip(i*splitCount)
             .limit(splitCount)
             AllShopSkusUrl = await generateSkuUrl(shop.shopid,shop.secretkey,await generateSkuStrings(AllShopSkus))
-            var ProductSku = await GetData(Url)
+            var ProductSku = await GetData(AllShopSkusUrl)
             if(ProductSku){
     
             
@@ -126,12 +126,6 @@ async function updateAllSkus(repeatTime){
 }catch(ex){
     console.log("Exception occured at updateAllSkus, error: "+ex)
 }
-console.log("All Skus Updated")
-if(repeatTime!=undefined){
-    setTimeout(() => {
-        updateAllSkus(repeatTime)
-    }, repeatTime);
-}
 }
 
 async function generateSkuStrings(AllSkus){
@@ -143,7 +137,7 @@ async function generateSkuStrings(AllSkus){
     return SkuString
 }
 
-async function getAllSkus(repeatTime){
+async function getAllSkus(){
     shops = await Darazid.find()
     for(var shop of shops){
         Url=generateSkuUrl(shop.shopid,shop.secretkey)
@@ -185,14 +179,11 @@ async function getAllSkus(repeatTime){
 
             }
     }
+}else{
+    console.log("Invalid user or secretkey of shop " + shop.shopName)
 }
 }
 console.log("New Skus Fetched")
-if(repeatTime!=undefined){
-    setTimeout(() => {
-        getAllSkus(repeatTime)
-    }, repeatTime);
-}
 }
 
 async function InventoryStringToJSon(sku){
