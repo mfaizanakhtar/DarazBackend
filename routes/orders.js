@@ -7,7 +7,7 @@ const {Darazid} = require('../models/darazid')
 const {RtsURL} = require('../scripts/GenerateUrl')
 const {GetData} = require('../scripts/HttpReq')
 const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
-const {getDateFilter,updateQuery, updateQueryForStockChecklist} = require('./ordersService')
+const {getDateFilter,updateQuery, updateQueryForStockChecklist} = require('../service/ordersService')
 
 router.get('/orders/',auth,async(req,res)=>{
 

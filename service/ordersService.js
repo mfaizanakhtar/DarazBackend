@@ -1,15 +1,11 @@
+const moment = require('moment');
+
 function getDateFilter(query){
-    //setting timezone startdate and enddate
-    var startdate
-    var enddate
 
-    
-    startdate = new Date(query.startDate);
-    startdate.setHours(startdate.getHours()+5);
-    enddate = new Date(query.endDate);
-    enddate.setHours(enddate.getHours()+28,59,59,59);
-
-
+    var startdate=moment(query.startDate).startOf('day').toDate()
+    var enddate=moment(query.endDate).endOf('day').toDate()
+    console.log(startdate)
+    console.log(enddate)
 
     return {$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     
