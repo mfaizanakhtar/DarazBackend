@@ -3,7 +3,7 @@ const { Order } = require('../models/order');
 const {OrderItems} = require('../models/orderItem')
 const auth = require('../middleware/auth')
 const router = express.Router();
-const {Darazid} = require('../models/darazid')
+const {Shop} = require('../models/shop')
 const {RtsURL} = require('../scripts/GenerateUrl')
 const {GetData} = require('../scripts/HttpReq')
 const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
@@ -91,7 +91,7 @@ router.post('/setStatusToRTS',auth,async(req,res)=>{
     for(var order of Orders){
         // console.log(order)
         var OrderItems='['
-        var shop = await Darazid.findOne({shopid:order.ShopId})
+        var shop = await Shop.findOne({shopid:order.ShopId})
         // console.log(shop)
         for(var orderitem of order.OrderItems){
             if(orderitem.ShippingType=='Dropshipping' && orderitem.Status!='canceled') {
@@ -117,14 +117,14 @@ catch(error){
     res.send({count:0})
 }
 
-    // DarazIds = Darazid.findOne({shopid:req.user.useremail})
+    // DarazIds = Shop.findOne({shopid:req.user.useremail})
 })
 
 router.post('/setItemStatusToRTS',auth,async(req,res)=>{
     // console.log(req.body.OrderItem)
     RtsOrdersResponse=[]
     OrderItem = req.body.OrderItem
-    var shop = await Darazid.findOne({shopid:OrderItem.ShopId})
+    var shop = await Shop.findOne({shopid:OrderItem.ShopId})
     try{
 
     Url = RtsURL(shop.shopid,shop.secretkey,"["+OrderItem.OrderItemId+"]")
@@ -141,7 +141,7 @@ catch(error){
     res.send({count:0})
 }
 
-    // DarazIds = Darazid.findOne({shopid:req.user.useremail})
+    // DarazIds = Shop.findOne({shopid:req.user.useremail})
 })
 
 router.post('/getLabelsData',auth,async(req,res)=>{

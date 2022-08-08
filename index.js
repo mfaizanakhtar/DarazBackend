@@ -5,7 +5,7 @@ const config = require('config');
 const darazapi = require('./routes/darazapi');
 const users = require('./routes/users')
 const auth = require('./routes/auth');
-const darazid = require('./routes/darazids');
+const shop = require('./routes/shops');
 const orderitems = require('./routes/orderItems');
 const transactions = require('./routes/transactions')
 const dashboards = require('./routes/dashboards');
@@ -28,7 +28,6 @@ const { lookups } = require('./routes/lookups');
 const { billings } = require('./routes/billings');
 const { schedulerRouter } = require('./routes/scheduler');
 const { scheduler } = require('./scripts/scheduler');
-const { ShopIntegrate } = require('./routes/shopIntegrate');
  
 mongoose.connect(config.connectionstring,{useFindAndModify:false,useNewUrlParser:true,useUnifiedTopology:true,useCreateIndex:true})
     .then(()=>{
@@ -52,7 +51,7 @@ app.use(express.json({limit: '50mb'}));
 app.use('/api/darazapi',darazapi);
 app.use('/api/users',users);
 app.use('/api/auth',auth);
-app.use('/api/darazid',darazid);
+app.use('/api/shop',shop);
 app.use('/api/orderitems',orderitems);
 app.use('/api/orders',orders)
 app.use('/api/skus',skus)
@@ -63,7 +62,6 @@ app.use('/api/plans',plans)
 app.use('/api/lookups',lookups)
 app.use('/api/billings',billings)
 app.use('/api/scheduler',schedulerRouter)
-app.use('/api/shopIntegrate',ShopIntegrate)
 
 scheduler();
 

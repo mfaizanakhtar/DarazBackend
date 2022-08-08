@@ -1,6 +1,6 @@
 plansData  = [
     {
-        Name:"Basic",
+        Name:"Starter",
         Pricing:1000,
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-edit-box-line"
@@ -100,8 +100,16 @@ mailerCredential={
     mailPassword:"noreply123"
 }
 
+darazOpenAppDetails={
+    callBackUrl:"https://dmanages.loca.lt/users/shops",
+    appKey:"500606",
+    pkUrl:"https://api.daraz.pk/oauth/authorize",
+    appSecret:"6Ob7pZ9yTjXTNrKSXMXXxFoatFsKP73D"
+}
+
 module.exports.plansData = plansData;
 module.exports.bankData = bankData;
 module.exports.permissions = permissions;
 module.exports.plansPermissions = plansPermissions;
 module.exports.mailerCredential=mailerCredential;
+module.exports.darazOpenAppDetails = darazOpenAppDetails;

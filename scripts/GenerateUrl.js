@@ -1,4 +1,44 @@
+const LazadaAPI = require('lazada-open-platform-sdk');
+const moment = require('moment');
+const { darazOpenAppDetails } = require('./data');
 const {SignParameters} = require('./signParameters');
+
+var baseUrl="https://api.daraz.pk/rest";
+
+function generateAccessTokenUrl(callBackCode){
+    var accessTokenUrl="/auth/token/create"
+    var url = baseUrl+accessTokenUrl
+    var params = {app_key:darazOpenAppDetails.appKey,code:callBackCode,timestamp:moment(),sign_method:"sha256"};
+    var formattedParams=sortAndFormatParams(params);
+    var url = baseUrl+accessTokenUrl+formattedParams.queryParams+"&sign="+SignParameters(darazOpenAppDetails.appSecret,accessTokenUrl+formattedParams.concatenatedParams);
+    
+    return url;
+}
+
+function sortAndFormatParams(params){
+    var concatenatedParams=""
+    var queryParams=""
+    var i=0;
+
+    Object.keys(params).sort().reduce((accumulator,currVal)=>{
+        accumulator[currVal] = params[currVal];
+
+        var paramsLength=Object.keys(params).length
+        concatenatedParams=concatenatedParams+currVal+params[currVal]
+        if(i!=paramsLength && i!=0){
+            queryParams=queryParams+"&"
+        }
+        if(i==0){
+            queryParams=queryParams+"?"
+        }
+        queryParams=queryParams+currVal+"="+params[currVal]
+        
+        i++
+        return accumulator;
+    },{})
+
+    return {concatenatedParams:concatenatedParams,queryParams:queryParams}
+}
 
 
 function generateTransactionsUrl(userid,secretkey,date,transType){
@@ -145,3 +185,4 @@ module.exports.getOrderIdArray = getOrderIdArray;
 module.exports.generateLabelUrl = generateLabelUrl;
 module.exports.RtsURL = RtsURL;
 module.exports.generateSkuUrl = generateSkuUrl
+module.exports.generateAccessTokenUrl = generateAccessTokenUrl;

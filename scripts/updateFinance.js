@@ -1,13 +1,13 @@
 const {GetData} = require('./HttpReq')
 const {generateTransactionsUrl} = require('./GenerateUrl')
-const {Darazid} =require('../models/darazid');
+const {Shop} =require('../models/shop');
 const {Transaction} = require('../models/transaction')
 const {OrderItems} = require('../models/orderItem');
 const { previousDataQuery } = require('../models/previousDataQuery');
 
 async function updateTransactions(){
     try{
-    var shops = await Darazid.find()
+    var shops = await Shop.find()
     // transactionTypes=[-1]
     transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
     //13 - Item Price Credit

@@ -1,6 +1,6 @@
 const {GetData} = require('./HttpReq')
 const {generateSkuUrl} = require('./GenerateUrl')
-const {Darazid} = require('../models/darazid')
+const {Shop} = require('../models/shop')
 const {darazProduct} = require('../models/darazproduct')
 const {darazSku} = require('../models/darazsku')
 const {Sku} = require('../models/sku')
@@ -10,7 +10,7 @@ async function getSkus(darazid,skus,requestType){
     // console.log(skus.length)
     // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     try{
-    shop = await Darazid.findOne({shopid:darazid})
+    shop = await Shop.findOne({shopid:darazid})
     var Url
     if(skus!=undefined){
         Url = generateSkuUrl(shop.shopid,shop.secretkey,'['+skus.toString()+']')
@@ -87,7 +87,7 @@ async function getSkus(darazid,skus,requestType){
 
 async function updateAllSkus(){
     try{
-    shops = await Darazid.find()
+    shops = await Shop.find()
     for(var shop of shops){
         
         splitCount=30
@@ -138,7 +138,7 @@ async function generateSkuStrings(AllSkus){
 }
 
 async function getAllSkus(){
-    shops = await Darazid.find()
+    shops = await Shop.find()
     for(var shop of shops){
         Url=generateSkuUrl(shop.shopid,shop.secretkey)
         var ProductSku = await GetData(Url)

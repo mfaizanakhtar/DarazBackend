@@ -1,5 +1,5 @@
 const {OrderItems} = require('../models/orderItem');
-const {Darazid} = require('../models/darazid');
+const {Shop} = require('../models/shop');
 const {generateMultipleOrderItemsUrl,generateLabelUrl} = require('../scripts/GenerateUrl');
 const {GetData} = require('./HttpReq');
 const {getOrderIdArray} = require('../scripts/GenerateUrl')
@@ -27,7 +27,7 @@ async function updateOrderItemStatus(user,status){
 
     var updateResult
 
-    var darazid = await Darazid.find({...user});
+    var darazid = await Shop.find({...user});
     for(var shop of darazid){
         //get order with statuses of this shop
         splitCount=150
@@ -81,7 +81,7 @@ async function updateOrderItemStatus(user,status){
 
 async function fetchLabelsAndUpdate(useremail){
     console.log("labels ",useremail)
-    darazid = await Darazid.find({useremail:useremail})
+    darazid = await Shop.find({useremail:useremail})
     for(shop of darazid){
         var orderitemsIds=[]
         items= await OrderItems.find({ShopId:shop.shopid,Status:'ready_to_ship',labelTracking:'',ShippingType:'Dropshipping'})

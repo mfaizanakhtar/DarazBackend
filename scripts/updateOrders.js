@@ -1,6 +1,6 @@
 const {GetData} = require('./HttpReq');
 const {OrderItems} = require('../models/orderItem');
-const { Darazid } = require('../models/darazid');
+const { Shop } = require('../models/shop');
 const {Order} = require('../models/order');
 const {darazSku}=require('../models/darazsku')
 const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl,generateLabelUrl, generateSingleOrderUrl} = require('./GenerateUrl');
@@ -191,7 +191,7 @@ function setOrderObj(order,id){
 async function updateOrdersData(){
 
     try{
-    var userids = await Darazid.find()
+    var userids = await Shop.find()
     //iterating through all fetched ips
         for(const id of userids){
             // console.log(id);
@@ -229,7 +229,7 @@ async function updateOrdersData(){
 async function updateSingleOrder(shopid,orderid){
 
     try{
-    var id = await Darazid.findOne({shopid:shopid})
+    var id = await Shop.findOne({shopid:shopid})
     
 
         // console.log(id);
