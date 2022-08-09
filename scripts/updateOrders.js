@@ -28,13 +28,13 @@ function baseSku(Sku){
     return Sku.substr(0,seperator)
 }
 
-async function updateNewOrders(id,OrdersData){
+async function updateNewOrders(shop,OrdersData){
     for (const order of OrdersData){
-    var result = await Order.findOne({OrderId:order.OrderId,ShopId:id.shopid})
+    var result = await Order.findOne({OrderId:order.order_id,ShopCode:shop.shortCode})
     // console.log(result)
 
     if(!result){
-        var orderobj = setOrderObj(order,id)
+        var orderobj = setOrderObj(order,shop)
         var res = await orderobj.save()
         // console.log(res);
     }
@@ -129,60 +129,58 @@ function setOrderItemObj(item,shopid,useremail,sku){
     return orderItem;
 }
 
-function setOrderObj(order,id){
+function setOrderObj(order,shop){
     
     var orderobj = new Order({
-        OrderId:order.OrderId,
-        CustomerFirstName:order.CustomerFirstName,
-        CustomerLastName:order.CustomerLastName,
-        PaymentMethod:order.PaymentMethod,
-        Price:parseInt(order.Price),
-        CreatedAt:order.CreatedAt,
-        UpdatedAt:order.UpdatedAt,
+        OrderId:order.order_id,
+        CustomerFirstName:order.customer_first_name,
+        CustomerLastName:order.customer_last_name,
+        PaymentMethod:order.payment_method,
+        Price:parseInt(order.price),
+        CreatedAt:order.created_at,
+        UpdatedAt:order.updated_at,
         AddressBilling:{
-            FirstName:order.AddressBilling.FirstName,
-            LastName:order.AddressBilling.LastName,
-            Phone:order.AddressBilling.Phone,
-            Address1:order.AddressBilling.Address1,
-            Address2:order.AddressBilling.Address2,
-            Address3:order.AddressBilling.Address3,
-            Address4:order.AddressBilling.Address4,
-            Address5:order.AddressBilling.Address5,
-            CustomerEmail:order.AddressBilling.CustomerEmail,
-            City:order.AddressBilling.City,
-            PostCode:order.AddressBilling.PostCode,
-            Country:order.AddressBilling.Country,
+            FirstName:order.address_billing.first_name,
+            LastName:order.address_billing.last_name,
+            Phone:order.address_billing.phone,
+            Address1:order.address_billing.address1,
+            Address2:order.address_billing.address2,
+            Address3:order.address_billing.address3,
+            Address4:order.address_billing.address4,
+            Address5:order.address_billing.address5,
+            City:order.address_billing.city,
+            PostCode:order.address_billing.post_code,
+            Country:order.address_billing.country,
     
         },
         AddressShipping:{
-            FirstName:order.AddressShipping.FirstName,
-            LastName:order.AddressShipping.LastName,
-            Phone:order.AddressShipping.Phone,
-            Address1:order.AddressShipping.Address1,
-            Address2:order.AddressShipping.Address2,
-            Address3:order.AddressShipping.Address3,
-            Address4:order.AddressShipping.Address4,
-            Address5:order.AddressShipping.Address5,
-            CustomerEmail:order.AddressShipping.CustomerEmail,
-            City:order.AddressShipping.City,
-            PostCode:order.AddressShipping.PostCode,
-            Country:order.AddressShipping.Country,
+            FirstName:order.address_shipping.first_name,
+            LastName:order.address_shipping.last_name,
+            Phone:order.address_shipping.phone,
+            Address1:order.address_shipping.address1,
+            Address2:order.address_shipping.address2,
+            Address3:order.address_shipping.address3,
+            Address4:order.address_shipping.address4,
+            Address5:order.address_shipping.address5,
+            City:order.address_shipping.city,
+            PostCode:order.address_shipping.post_code,
+            Country:order.address_shipping.country,
             
         },
-        ItemsCount:order.ItemsCount,
-        Statuses:order.Statuses,
-        Voucher:order.Voucher,
-        VoucherPlatform:order.VoucherPlatform,
-        VoucherSeller:order.VoucherPlatform,
-        ShippingFee:parseInt(order.ShippingFee),
-        ShopId:id.shopid,
-        ShopName:id.shopName,
-        ShopAddress:id.shopAddress,
-        ShopState:id.shopState,
-        ShopArea:id.shopArea,
-        ShopLocation:id.shopLocation,
-        ShopPhone:id.shopPhone,
-        useremail:id.useremail
+        ItemsCount:order.items_count,
+        Statuses:order.statuses,
+        Voucher:order.voucher,
+        VoucherPlatform:order.voucher_platform,
+        VoucherSeller:order.voucher_seller,
+        ShippingFee:order.shipping_fee,
+        ShippingFeeOriginal:order.shipping_fee_original,
+        ShippingFeeDiscountSeller:order.shipping_fee_discount_seller,
+        ShippingFeeDiscountPlatform:order.shipping_fee_discount_platform,
+        ShopShortCode:shop.shortCode,
+        ShopName:shop.name,
+        ShopEmail:shop.email,
+        ShopLocation:shop.location,
+        UserEmail:shop.userEmail
     })
     // console.log(orderobj)
     return orderobj
@@ -191,17 +189,17 @@ function setOrderObj(order,id){
 async function updateOrdersData(){
 
     try{
-    var userids = await Shop.find()
+    var shops = await Shop.find({appStatus:true})
     //iterating through all fetched ips
-        for(const id of userids){
+        for(const shop of shops){
             // console.log(id);
-            let url = generateOrdersUrl(id.shopid,id.secretkey,0);
+            let url = generateOrdersUrl(shop.accessToken,0);
             // console.log(url)
             var data = await GetData(url);
             if(data!=null){
-                var previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryData:{$all:data.Orders},queryType:"ordersData"})
+                var previousUpdateData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryData:{$all:data.orders},queryType:"ordersData"})
                 if(previousUpdateData.length<=0){
-                    await updateNewOrders(id,data.Orders)
+                    await updateNewOrders(shop,data.orders)
                     await updateNewOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
                     previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryType:"ordersData"})
     

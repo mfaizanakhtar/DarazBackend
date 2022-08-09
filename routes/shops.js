@@ -7,24 +7,6 @@ const { GetData } = require('../scripts/HttpReq')
 const moment = require('moment');
 const { authoriseAndAddShop } = require('../service/shopService');
 
-
-router.post('/',auth,async(req,res)=>{
-    const shop = new Shop({
-        shopid:req.body.shopid,
-        secretkey:req.body.secretkey,
-        useremail:req.user.userEmail,
-        shopName:req.body.shopName,
-        shopAddress:req.body.shopAddress,
-        shopState:req.body.shopState,
-        shopArea:req.body.shopArea,
-        shopLocation:req.body.shopLocation,
-        shopPhone:req.body.shopPhone
-    })
-
-    await shop.save();
-    res.send({message:"Success"});
-})
-
 router.get('/authorise',auth,async(req,res)=>{
     try{
         var result = await authoriseAndAddShop(req.query,req.user);
@@ -37,31 +19,14 @@ router.get('/authorise',auth,async(req,res)=>{
 })
 
 router.get('/getAll',auth,async(req,res)=>{
-    const shop =await Shop.find({userEmail:req.user.userEmail});
+    const shop =await Shop.find({userEmail:req.user.userEmail,appStatus:true},{accessToken:0,refreshExpiresIn:0,refreshToken:0,tokenExpiresIn:0,__v:0,_id:0});
     res.send(shop);
 })
 
-router.put('/update',auth,async(req,res)=>{
-    updateResult = await Shop.update({_id:req.body._id,useremail:req.user.userEmail},{
-        $set:{
-            shopid:req.body.shopid,
-            secretkey:req.body.secretkey,
-            shopName:req.body.shopName,
-            shopAddress:req.body.shopAddress,
-            shopState:req.body.shopState,
-            shopArea:req.body.shopArea,
-            shopLocation:req.body.shopLocation,
-            shopPhone:req.body.shopPhone
-        }
-    })
-
+router.delete('/delete/:id',auth,async(req,res)=>{
+    updateResult = await Shop.updateOne({shortCode:req.params.id,userEmail:req.user.userEmail},{appStatus:false})
+    console.log(updateResult)
     res.send(updateResult)
-})
-
-router.delete('/:id',auth,async(req,res)=>{
-    deletedResult = await Shop.remove({shopid:req.params.id,useremail:req.user.userEmail})
-    console.log(deletedResult)
-    res.send(deletedResult)
 })
 
 module.exports = router;

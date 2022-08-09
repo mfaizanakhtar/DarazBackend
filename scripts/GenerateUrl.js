@@ -7,7 +7,6 @@ var baseUrl="https://api.daraz.pk/rest";
 
 function generateAccessTokenUrl(callBackCode){
     var accessTokenUrl="/auth/token/create"
-    var url = baseUrl+accessTokenUrl
     var params = {...getStandardParams(),code:callBackCode};
     var formattedParams=sortAndFormatParams(params);
     var url = baseUrl+accessTokenUrl+formattedParams.queryParams+"&sign="+SignParameters(darazOpenAppDetails.appSecret,accessTokenUrl+formattedParams.concatenatedParams);
@@ -18,11 +17,11 @@ function generateAccessTokenUrl(callBackCode){
 function getSellerUrl(access_token){
     
     var getSellerUrl="/seller/get"
-    var url = baseUrl+getSellerUrl
     var params = {...getStandardParams(),access_token:access_token};
     var formattedParams=sortAndFormatParams(params);
+
     var url = baseUrl+getSellerUrl+formattedParams.queryParams+"&sign="+SignParameters(darazOpenAppDetails.appSecret,getSellerUrl+formattedParams.concatenatedParams);
-    console.log(url)
+   
     return url;
 }
 
@@ -92,23 +91,16 @@ function generateSkuUrl(userid,secretkey,Skus){
 }
 
 
-function generateOrdersUrl(userid,secretkey,Offset){
-    //To get multiple orders (100 latest with 0 offset)
+function generateOrdersUrl(access_token,offSet){
 
-    //base URL
-    const url="https://api.sellercenter.daraz.pk?";
-    //Created After as per daraz requirement and encoded
-    createdAfter=encodeURIComponent(new Date('02-25-2014').toISOString().substr(0,19)+'+00:00');
-    //TimeStamp as per daraz requirement and encoded    
-    Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00');
+    var getOrdersUrl="/orders/get";
+    var params = {...getStandardParams(),access_token:access_token,sort_by:"created_at",sort_direction:"DESC",limit:100,offset:offSet,created_after:moment().subtract(365,"days").toISOString()};
+    var formattedParams=sortAndFormatParams(params);
 
-    //UserId Encoded
-    let userID=encodeURIComponent(userid);
-    //Action of API
-    let Action='GetOrders';
-    //parameters created, signed and concatenated with URL and returned
-    let apiparams='Action='+Action+'&CreatedAfter='+createdAfter+'&Format=json'+'&Offset='+Offset+'&SortBy=created_at'+'&SortDirection=DESC'+'&Timestamp='+Timestamp+'&UserID='+userID+'&Version=1.0'
-    return url+apiparams+'&Signature='+SignParameters(secretkey,apiparams);
+    var url = baseUrl+getOrdersUrl+formattedParams.queryParams+"&sign="+SignParameters(darazOpenAppDetails.appSecret,getOrdersUrl+formattedParams.concatenatedParams);
+   
+    console.log(url)
+    return url;
     
 
 }

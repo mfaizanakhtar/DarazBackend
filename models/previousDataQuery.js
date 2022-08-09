@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const previousQuerySchema = new mongoose.Schema({
-    ShopId:String,
+    shopShortCode:String,
     queryData:mongoose.Schema.Types.Mixed,
     queryType:String
 })

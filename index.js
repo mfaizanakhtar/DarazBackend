@@ -67,7 +67,7 @@ scheduler();
 
 dataQueries()
 
-
+updateOrdersData();
 
 // async function updateId(){
 //     const result = await OrderItems.updateMany({},{
