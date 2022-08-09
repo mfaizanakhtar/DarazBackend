@@ -25,10 +25,10 @@ router.post('/',auth,async(req,res)=>{
     res.send({message:"Success"});
 })
 
-router.get('/authorise',auth,async(req,res,next)=>{
+router.get('/authorise',auth,async(req,res)=>{
     try{
-        await authoriseAndAddShop(req.query,req.user);
-        res.status(201).send();
+        var result = await authoriseAndAddShop(req.query,req.user);
+        res.status(201).send(result);
     }catch(ex){
         if(!ex.status) ex.status=500
         res.status(ex.status).send({message:ex.message})

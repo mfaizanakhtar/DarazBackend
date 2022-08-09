@@ -8,6 +8,7 @@ async function authoriseAndAddShop(query,user){
     console.log(url)
     var tokenResp = await GetData(url);
     var saveResult;
+    var isUpdated=false;
 
     if(tokenResp.access_token){
 
@@ -21,6 +22,7 @@ async function authoriseAndAddShop(query,user){
             shop = await Shop.findOne({userEmail:user.userEmail,shortCode:sellerResp.short_code})
             if(shop){
                 shop = updateExistingShop(shop,tokenResp,sellerResp)
+                isUpdated=true;
             }else{
                 shop = new Shop(getNewShopObj(tokenResp,sellerResp,user))
             }
@@ -32,6 +34,7 @@ async function authoriseAndAddShop(query,user){
     if(!saveResult){
         throw {message:"Invalid code",status:400}
     }
+    return {isUpdated:isUpdated,shopName:sellerResp.name};
 }
 
 function getNewShopObj(tokenResp,sellerResp,user){
