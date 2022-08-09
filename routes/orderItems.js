@@ -31,10 +31,10 @@ router.put('/Update/:Status',auth,async(req,res)=>{
 
 router.put('/return/:id',auth,async(req,res)=>{
     
-    var orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id,WarehouseStatus:{$ne:"Received"}});
+    var orderItem = await OrderItems.find({useremail:req.user.userEmail,TrackingCode:req.params.id,WarehouseStatus:{$ne:"Received"}});
     if(orderItem.length>0){
 
-    orderItem = await OrderItems.updateMany({useremail:req.user.useremail,TrackingCode:req.params.id},{
+    orderItem = await OrderItems.updateMany({useremail:req.user.userEmail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Received",
             ReturnDate:new Date(req.body.date),
@@ -53,7 +53,7 @@ router.put('/return/:id',auth,async(req,res)=>{
     // res.send([{Status:"Received"},updatedResult])
     // }
     else{
-        orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id})
+        orderItem = await OrderItems.find({useremail:req.user.userEmail,TrackingCode:req.params.id})
         if(orderItem.length>0){
             res.send({Status:"Already Received"})
         }
@@ -65,9 +65,9 @@ router.put('/return/:id',auth,async(req,res)=>{
 
 router.put('/dispatch/:id',auth,async(req,res)=>{
     console.log('Dispatch Date: ',req.body.date)
-    var orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id,Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}})
+    var orderItem = await OrderItems.find({useremail:req.user.userEmail,TrackingCode:req.params.id,Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}})
     if(orderItem.length>0){
-    orderItem = await OrderItems.updateMany({useremail:req.user.useremail,TrackingCode:req.params.id},{
+    orderItem = await OrderItems.updateMany({useremail:req.user.userEmail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Dispatched",
             DispatchDate:new Date(req.body.date),
@@ -79,12 +79,12 @@ router.put('/dispatch/:id',auth,async(req,res)=>{
     res.send({Status:"Dispatched",updatedResult:updatedResult});
 }
 else{
-  orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id,Status:"ready_to_ship"})
+  orderItem = await OrderItems.find({useremail:req.user.userEmail,TrackingCode:req.params.id,Status:"ready_to_ship"})
   if(orderItem.length>0){
     res.send({Status:"Duplicate"})
   }
   else{
-      orderItem = await OrderItems.find({useremail:req.user.useremail,TrackingCode:req.params.id})
+      orderItem = await OrderItems.find({useremail:req.user.userEmail,TrackingCode:req.params.id})
       if(orderItem.length>0){
           res.send({Status:"Order status not eligible to dispatch"})
       }
@@ -127,7 +127,7 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     orderItem = await OrderItems.aggregate([{
         $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'},...Username}
     },{
-        $match:{useremail:req.user.useremail,$and:[{Date:{$gte:startdate}},{Date:{$lte:enddate}}]}
+        $match:{useremail:req.user.userEmail,$and:[{Date:{$gte:startdate}},{Date:{$lte:enddate}}]}
     }]).sort({Date:-1})
     
     // console.log(orderItem)
@@ -152,11 +152,11 @@ router.get('/Skustats',auth,async(req,res)=>{
     await timezone();
     //aggregate result for FBD and FBM
     var FBDresult = await OrderItems.aggregate([
-        {$match: {useremail:req.user.useremail,ShopId:req.query.ShopId,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match: {useremail:req.user.userEmail,ShopId:req.query.ShopId,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group : { _id: '$Sku', FBDcount : {$sum : 1}}}
     ])
     var FBMresult = await OrderItems.aggregate([
-        {$match: {useremail:req.user.useremail,ShopId:req.query.ShopId,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match: {useremail:req.user.userEmail,ShopId:req.query.ShopId,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group : { _id: '$Sku', FBMcount : {$sum : 1}}}
     ])
     //modifying FBD aggregate result by setting default FBM as 0 and shopId supplied in args
@@ -218,21 +218,21 @@ router.get('/allstats',auth,async(req,res)=>{
     await timezone();
     //finding total count for ALLSTORES FBD AND FBM
 
-    var TotalFbd =await OrderItems.find({useremail:req.user.useremail,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).countDocuments();
-    var TotalFbm =await OrderItems.find({useremail:req.user.useremail,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).countDocuments();
+    var TotalFbd =await OrderItems.find({useremail:req.user.userEmail,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).countDocuments();
+    var TotalFbm =await OrderItems.find({useremail:req.user.userEmail,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}).countDocuments();
     //creating Total object to total both FBD and FBM
     var Total={_id:'ALL STORES', FBDcount:TotalFbd,FBMcount:TotalFbm,Total:TotalFbd+TotalFbm};
     console.log(startdate);
     console.log(enddate);
     //aggregate FBD on basis on Shops IDs
     var ShopFbd = await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match:{useremail:req.user.userEmail,ShippingType:'Own Warehouse',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group:{_id:'$ShopId',FBDcount:{$sum:1}}}
     ])
     //aggregate FBM on basis of Shops IDS
     console.log(ShopFbd);
     var ShopFbm = await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
+        {$match:{useremail:req.user.userEmail,ShippingType:'Dropshipping',$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}],Status:{$ne:'canceled'}}},
         {$group:{_id:'$ShopId',FBMcount:{$sum:1}}}
     ])
 
@@ -275,7 +275,7 @@ router.get('/allstats',auth,async(req,res)=>{
 
 router.put('/ReturnedStockAdded',auth,async (req,res)=>{
         for(var item of req.body.orderitems){
-            await OrderItems.updateMany({useremail:req.user.useremail,ShopId:item.ShopId,TrackingCode:item._id},{ReturnedStockAdded:true})
+            await OrderItems.updateMany({useremail:req.user.userEmail,ShopId:item.ShopId,TrackingCode:item._id},{ReturnedStockAdded:true})
         }
         res.send({Status:"Order Items Updated"})
 })

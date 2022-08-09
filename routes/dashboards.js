@@ -10,7 +10,7 @@ router.get('/OrderStatuses',auth,async (req,res)=>{
     var statuses=['pending','ready_to_ship','shipped','delivered','returned','failed']
     for (var status of statuses) {
         jsonStatus={status:status}
-        jsonStatus.count= await getStatus({Status:status},req.user.useremail,req.query)
+        jsonStatus.count= await getStatus({Status:status},req.user.userEmail,req.query)
         response.push(jsonStatus)
         
     }
@@ -22,7 +22,7 @@ router.get('/OrderStatuses',auth,async (req,res)=>{
             if(prop!='label')
             query[prop]=s[prop]
         }
-        jsonStatus.count= await getStatus(query,req.user.useremail,req.query)
+        jsonStatus.count= await getStatus(query,req.user.userEmail,req.query)
         response.push(jsonStatus)
     }
     console.log(response)
@@ -37,19 +37,19 @@ router.get('/OrderAnalytics',auth,async(req,res)=>{
     console.log(enddate)
     var response=[]
     var itemsResult = await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {$group:{_id:"$OrderItemId"}},
         {$count:"sum"}
     ])
 
     var ordersResult = await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {$group:{_id:"$OrderId"}},
         {$count:"sum"}
     ])
 
     var revenueResult = await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {$group:{_id:null,sum:{$sum:"$ItemPrice"}}}
     ])
     if(itemsResult.length==0){
@@ -70,7 +70,7 @@ router.get("/OrdersAnalyticsGraph",auth,async(req,res)=>{
 
     storeFilter={}
     skuFilter={}
-    matchFilter={useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+    matchFilter={useremail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     if(req.query.store!=null) matchFilter={...matchFilter,ShopId:req.query.store}
     if(req.query.sku!=null) matchFilter={...matchFilter,Sku:req.query.sku}
 
@@ -113,7 +113,7 @@ router.get("/getStoreOrdersDetail",auth,async(req,res)=>{
     enddate=moment(req.query.enddate).endOf('day').toDate()
 
     var orderitems = await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {
             $group:{_id:"$ShopId",items:{$sum:1},revenue:{$sum:"$ItemPrice"}}
         },
@@ -123,7 +123,7 @@ router.get("/getStoreOrdersDetail",auth,async(req,res)=>{
 ])
 
     // var orders = await OrderItems.aggregate([
-    //     {$match:{useremail:req.user.useremail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+    //     {$match:{useremail:req.user.userEmail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
     //     {
     //         $group:{_id:"$ShopId",orders:{$sum:1}}
     //     }
@@ -131,7 +131,7 @@ router.get("/getStoreOrdersDetail",auth,async(req,res)=>{
 
     var orders = await OrderItems.aggregate([
         {
-            $match:{useremail:req.user.useremail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:"$OrderId",ShopId:{$first:"$ShopId"}}
@@ -160,7 +160,7 @@ router.get("/getStoreSkuDetails",auth,async(req,res)=>{
     enddate=moment(req.query.enddate).endOf('day').toDate()
 
     var SkuItems=await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {
          $group:{_id:"$Sku",count:{$sum:1},revenue:{$sum:"$ItemPrice"}}   
         },
@@ -170,7 +170,7 @@ router.get("/getStoreSkuDetails",auth,async(req,res)=>{
     ])
     
     var SkuOrders=await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {
          $group:{_id:{sku:"$Sku",orders:"$OrderId"},count:{$sum:1}}   
         },
@@ -180,14 +180,14 @@ router.get("/getStoreSkuDetails",auth,async(req,res)=>{
     ])
 
     var SkuItemsFulfillment=await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {
             $group:{_id:{sku:"$Sku",Fulfillment:"$ShippingType"},count:{$sum:1}}
         }
     ])
     // console.log(SkuItemsFulfillment)
     var SkuItemsTotal=await OrderItems.aggregate([
-        {$match:{useremail:req.user.useremail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {
             $group:{_id:"$ShippingType",count:{$sum:1}}
         }
@@ -228,7 +228,7 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
 
     itemsProfit = await OrderItems.aggregate([
         {
-            $match:{useremail:req.user.useremail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{useremail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:null,items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:"$cost"},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:["$TransactionsPayout","$cost"]}}}
@@ -237,7 +237,7 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
 
     OrdersProfit = await OrderItems.aggregate([
         {
-            $match:{useremail:req.user.useremail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{useremail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:{OrderId:"$OrderId",OrderItemId:"$OrderItemId"}}
@@ -260,7 +260,7 @@ router.get("/getProfitAnalyticsGraph",auth,async(req,res)=>{
 
     storeFilter={}
     skuFilter={}
-    matchFilter={useremail:req.user.useremail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+    matchFilter={useremail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     if(req.query.store!=null) matchFilter={...matchFilter,ShopId:req.query.store}
     if(req.query.sku!=null) matchFilter={...matchFilter,Sku:req.query.sku}
 
@@ -314,7 +314,7 @@ router.get("/getStoresProfitStats",auth,async(req,res)=>{
 
     items = await OrderItems.aggregate([
         {
-            $match:{useremail:req.user.useremail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{useremail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:"$ShopId",items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:{$add:["$cost","$packagingCost"]}},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
@@ -326,7 +326,7 @@ router.get("/getStoresProfitStats",auth,async(req,res)=>{
 
     Orders = await OrderItems.aggregate([
         {
-            $match:{useremail:req.user.useremail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{useremail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:"$OrderId",ShopId:{$first:"$ShopId"}}
@@ -356,7 +356,7 @@ router.get('/getStoreSkuProfitStats',auth,async(req,res)=>{
 
     Skuitems = await OrderItems.aggregate([
         {
-            $match:{useremail:req.user.useremail,Status:"delivered",ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{useremail:req.user.userEmail,Status:"delivered",ShopId:req.query.store,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:"$Sku",items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:{$add:["$cost","$packagingCost"]}},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}

@@ -5,13 +5,14 @@ const { Shop } = require('../models/shop');
 const { generateAccessTokenUrl } = require('../scripts/GenerateUrl');
 const { GetData } = require('../scripts/HttpReq')
 const moment = require('moment');
+const { authoriseAndAddShop } = require('../service/shopService');
 
 
 router.post('/',auth,async(req,res)=>{
     const shop = new Shop({
         shopid:req.body.shopid,
         secretkey:req.body.secretkey,
-        useremail:req.user.useremail,
+        useremail:req.user.userEmail,
         shopName:req.body.shopName,
         shopAddress:req.body.shopAddress,
         shopState:req.body.shopState,
@@ -24,41 +25,24 @@ router.post('/',auth,async(req,res)=>{
     res.send({message:"Success"});
 })
 
-router.get('/authorise',auth,async(req,res)=>{
-    console.log(req.query)
-    var url = generateAccessTokenUrl(req.query.code)
-    console.log(url)
-    var response = await GetData(url);
-    var saveResult;
-    if(response.access_token){
-        const shop = new Shop({
-            userEmail:req.user.userEmail,
-            accessToken:response.access_token,
-            tokenExpiresIn:moment().add(response.expires_in,'seconds'),
-            refreshToken:response.refresh_token,
-            refreshExpiresIn:moment().add(response.refresh_expires_in,'seconds'),
-            country:response.country,
-            account:response.account,
-            accountPlatform:response.account_platform,
-            sellerId:response.user_info.seller_id
-    
-        })
-        saveResult=await shop.save()
-    }
-    if(saveResult){
+router.get('/authorise',auth,async(req,res,next)=>{
+    try{
+        await authoriseAndAddShop(req.query,req.user);
         res.status(201).send();
-    }else{
-        res.status(400).send();
+    }catch(ex){
+        if(!ex.status) ex.status=500
+        res.status(ex.status).send({message:ex.message})
     }
+    
 })
 
-router.get('/',auth,async(req,res)=>{
-    const shop =await Shop.find({useremail:req.user.useremail});
+router.get('/getAll',auth,async(req,res)=>{
+    const shop =await Shop.find({userEmail:req.user.userEmail});
     res.send(shop);
 })
 
 router.put('/update',auth,async(req,res)=>{
-    updateResult = await Shop.update({_id:req.body._id,useremail:req.user.useremail},{
+    updateResult = await Shop.update({_id:req.body._id,useremail:req.user.userEmail},{
         $set:{
             shopid:req.body.shopid,
             secretkey:req.body.secretkey,
@@ -75,7 +59,7 @@ router.put('/update',auth,async(req,res)=>{
 })
 
 router.delete('/:id',auth,async(req,res)=>{
-    deletedResult = await Shop.remove({shopid:req.params.id,useremail:req.user.useremail})
+    deletedResult = await Shop.remove({shopid:req.params.id,useremail:req.user.userEmail})
     console.log(deletedResult)
     res.send(deletedResult)
 })

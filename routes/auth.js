@@ -7,21 +7,21 @@ const bcrypt = require('bcrypt');
 router.post('/',async(req,res)=>{
     // console.log(req.body)
     
-    const user = await User.findOne({ loginemail:req.body.loginemail.toLowerCase() })
+    const user = await User.findOne({ loginEmail:req.body.loginEmail.toLowerCase() })
     if(!user) {
-        if(req.body.loginemail=='admin'){
+        if(req.body.loginEmail=='admin'){
             admin = new User({
-                useremail:'admin',
-                loginemail:'admin',
+                userEmail:'admin',
+                loginEmail:'admin',
                 password:'admin',
-                usertype:'admin'
+                userType:'admin'
             })
             const salt = await bcrypt.genSalt(10);
             admin.password =await bcrypt.hash(admin.password,salt);
         
             await admin.save();
             let token = admin.generateAuthToken();
-            res.send({"token":token});
+            return res.send({"token":token});
         }
         else return res.send({message:'User not found'});
     }

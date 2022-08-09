@@ -5,15 +5,15 @@ const { mongo } = require('mongoose');
 
 
 const userSchema = new mongoose.Schema({
-    loginemail:{
+    loginEmail:{
         type:String,
         required:true
     },
-    username:{
+    userName:{
         type:String,
         default:'admin'
     },
-    useremail:{
+    userEmail:{
         type:String,
         required:true
     },
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    usertype:{
+    userType:{
         type:String,
         default:"user"
     },
@@ -39,10 +39,8 @@ const userSchema = new mongoose.Schema({
 })
 
 userSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({_id:this._id,useremail:this.useremail,username:this.username,loginemail:this.loginemail,
-        usertype:this.usertype,accountType:this.accountType,permissions:this.permissions,
-        Orders:this.Orders,Finance:this.Finance,DSCInventory:this.DSCInventory,GroupedInventory:this.GroupedInventory,
-        Profitibility:this.Profitibility,ReturnsDispatch:this.ReturnsDispatch,
+    const token = jwt.sign({_id:this._id,userEmail:this.userEmail,userName:this.userName,loginEmail:this.loginEmail,
+        userType:this.userType,accountType:this.accountType,permissions:this.permissions,
         subscriptionEndDate:this.subscriptionEndDate,subscriptionType:this.subscriptionType},config.get("jwtprivatekey"),{expiresIn:"1d"});
     return token;
 }

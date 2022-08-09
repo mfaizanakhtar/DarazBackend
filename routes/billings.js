@@ -8,7 +8,7 @@ const { UserSubscription } = require('../models/userSubscription');
 const moment = require('moment')
 
 router.get('/getAllTransactions',auth,async(req,res)=>{
-    filter = req.user.usertype=='admin' ? {} : {userEmail:req.user.useremail}
+    filter = req.user.usertype=='admin' ? {} : {userEmail:req.user.userEmail}
     var billings = await Billing.find(filter).skip(req.query.pNum*req.query.pSize).limit(req.query.pSize)
     res.status(200).send(billings);
 })
@@ -17,7 +17,7 @@ router.post('/addTransaction',auth,async(req,res)=>{
     var billing = new Billing({
         billingId:await Billing.find().countDocuments()+1,
         createdAt:new Date(),
-        userEmail:req.user.useremail,
+        userEmail:req.user.userEmail,
         subscriptionType:req.body.subscriptionType,
         duration:req.body.duration,
         durationType:req.body.durationType,
@@ -79,12 +79,12 @@ router.put('/confirmTransaction',auth,async(req,res)=>{
 })
 
 router.get('/getSubscriptionDetail',auth,async(req,res)=>{
-    var userSubscription = await UserSubscription.findOne({userEmail:req.user.useremail})
+    var userSubscription = await UserSubscription.findOne({userEmail:req.user.userEmail})
     res.send(userSubscription)
 })
 
 router.put('/cancelFutureRequest',auth,async(req,res)=>{
-    var userSubscription = await UserSubscription.findOne({userEmail:req.user.useremail})
+    var userSubscription = await UserSubscription.findOne({userEmail:req.user.userEmail})
     if(userSubscription && userSubscription.futureRequest.val){
         userSubscription.futureRequest={val:false}
         await userSubscription.save()

@@ -9,7 +9,17 @@ const ShopSchema = new mongoose.Schema({
     country:String,
     account:String,
     accountPlatform:String,
-    sellerId:String
+    sellerId:String,
+    nameCompany:String,
+    logoUrl:String,
+    verified:Boolean,
+    name:String,
+    location:String,
+    email:String,
+    status:String,
+    shortCode:String,
+    appStatus:{type:Boolean,default:true}
+
 })
 
 const Shop = mongoose.model('Shop',ShopSchema);

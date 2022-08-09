@@ -101,7 +101,7 @@ mailerCredential={
 }
 
 darazOpenAppDetails={
-    callBackUrl:"https://dmanages.loca.lt/users/shops",
+    callBackUrl:"https://dmanage.loca.lt/users/shops",
     appKey:"500606",
     pkUrl:"https://api.daraz.pk/oauth/authorize",
     appSecret:"6Ob7pZ9yTjXTNrKSXMXXxFoatFsKP73D"

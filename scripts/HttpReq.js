@@ -6,10 +6,11 @@ async function GetData(url){
         const response = await axios.get(url);
         // const data = response.data.SuccessResponse.Body.Orders;
         if(response.status==200 || response.status==201){
-        const data = response.data;
-        // console.log(response);
-
-        return data
+        var resp = response.data;
+        if(resp.data){
+            return resp.data
+        }
+        return resp
         }
         else return null
         

@@ -12,7 +12,7 @@ const {getDateFilter,updateQuery, updateQueryForStockChecklist} = require('../se
 router.get('/orders/',auth,async(req,res)=>{
 
     var response = await FindQuery(req.query,req.user)
-    var stores = await Order.aggregate([{$match:{useremail:req.user.useremail}},
+    var stores = await Order.aggregate([{$match:{useremail:req.user.userEmail}},
         {$group:{_id:"$ShopId"}}
     ])
 
@@ -106,7 +106,7 @@ router.post('/setStatusToRTS',auth,async(req,res)=>{
     // console.log(RtsOrdersResponse.length)
     var updateResult = false
     if(Orders.length==RtsOrdersResponse.length){
-    updateResult = await updateOrderItemsForRts(req.user.useremail,RtsOrdersResponse.length)
+    updateResult = await updateOrderItemsForRts(req.user.userEmail,RtsOrdersResponse.length)
     console.log(updateResult)
     }
     res.send({count:RtsOrdersResponse.length,updateResult:updateResult})
@@ -117,7 +117,7 @@ catch(error){
     res.send({count:0})
 }
 
-    // DarazIds = Shop.findOne({shopid:req.user.useremail})
+    // DarazIds = Shop.findOne({shopid:req.user.userEmail})
 })
 
 router.post('/setItemStatusToRTS',auth,async(req,res)=>{
@@ -131,7 +131,7 @@ router.post('/setItemStatusToRTS',auth,async(req,res)=>{
     var result = await GetData(Url)
     RtsOrdersResponse.push(result)
     console.log(RtsOrdersResponse.length)
-    updateResult = await updateOrderItemsForRts(req.user.useremail,RtsOrdersResponse.length)
+    updateResult = await updateOrderItemsForRts(req.user.userEmail,RtsOrdersResponse.length)
     await OrderItems.updateMany({OrderItemId:OrderItem.OrderItemId},{SeperateRts:true})
     res.send({count:RtsOrdersResponse.length,updateResult:updateResult})
 
@@ -141,7 +141,7 @@ catch(error){
     res.send({count:0})
 }
 
-    // DarazIds = Shop.findOne({shopid:req.user.useremail})
+    // DarazIds = Shop.findOne({shopid:req.user.userEmail})
 })
 
 router.post('/getLabelsData',auth,async(req,res)=>{
@@ -160,8 +160,8 @@ router.post('/getLabelsData',auth,async(req,res)=>{
     console.log("shopSort",shopSort)
     // console.log(sort)
     // var updateResult=true
-    var updateResult = await updateOrderItemStatus({useremail:req.user.useremail,},{Status:'ready_to_ship',ShippingType:'Dropshipping'})
-    if(updateResult==true) await fetchLabelsAndUpdate(req.user.useremail)
+    var updateResult = await updateOrderItemStatus({useremail:req.user.userEmail,},{Status:'ready_to_ship',ShippingType:'Dropshipping'})
+    if(updateResult==true) await fetchLabelsAndUpdate(req.user.userEmail)
     await Order.updateMany({OrderId:{$in:req.body.Orders}},{$set:{isPrinted:true}})
     trackingCount = await OrderItems.aggregate([{$match:{OrderId:{$in:req.body.Orders},ShippingType:'Dropshipping'}},{$group:{_id:'$TrackingCode',Count:{$sum:1}}}])
 
@@ -181,13 +181,13 @@ router.post('/getLabelsData',auth,async(req,res)=>{
 
 router.post('/getStockChecklist/:skuType',auth,async(req,res)=>{
     if(req.body.trackings!=undefined){
-        var matchFilter = {$match:{TrackingCode:{$in:req.body.trackings},useremail:req.user.useremail,ReturnedStockAdded:{$ne:true}}}
+        var matchFilter = {$match:{TrackingCode:{$in:req.body.trackings},useremail:req.user.userEmail,ReturnedStockAdded:{$ne:true}}}
     }  
     else if(req.body.orders!=undefined && req.body.orders.length>0){
-    var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping",useremail:req.user.useremail}}
+    var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping",useremail:req.user.userEmail}}
     }
     else{
-    var matchFilter = {$match:{Status:"ready_to_ship",DispatchDate:null,ShippingType:"Dropshipping",useremail:req.user.useremail}}
+    var matchFilter = {$match:{Status:"ready_to_ship",DispatchDate:null,ShippingType:"Dropshipping",useremail:req.user.userEmail}}
     }
     var result = await OrderItems.aggregate([
         matchFilter,

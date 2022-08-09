@@ -28,15 +28,15 @@ router.get('/getSkus',auth,async(req,res)=>{
         }
 
     }
-    var darazskus = await darazSku.find({useremail:req.user.useremail,...req.query,...StockFilter}).sort({updatedAt:-1})
+    var darazskus = await darazSku.find({useremail:req.user.userEmail,...req.query,...StockFilter}).sort({updatedAt:-1})
     .skip(pSize*pIndex)
     .limit(pSize)
 
-    var darazskusCount=await darazSku.countDocuments({useremail:req.user.useremail,...req.query,...StockFilter})
+    var darazskusCount=await darazSku.countDocuments({useremail:req.user.userEmail,...req.query,...StockFilter})
  
     var darazStores=await darazSku.aggregate([
         {
-            $match:{useremail:req.user.useremail}
+            $match:{useremail:req.user.userEmail}
         },
         {
             $group:{_id:"$ShopId"}
@@ -50,14 +50,14 @@ router.get('/getSkus',auth,async(req,res)=>{
 })
 
 router.delete('/:id',auth,async(req,res)=>{
-    var deleteResult = await darazSku.deleteMany({_id:req.params.id,useremail:req.user.useremail})
+    var deleteResult = await darazSku.deleteMany({_id:req.params.id,useremail:req.user.userEmail})
     res.send({DeleteResult:deleteResult})
 })
 
 router.put('/:id',auth,async(req,res)=>{
     // console.log(req.body)
     var result = await darazSku.findOneAndUpdate(
-        {_id:req.params.id,useremail:req.user.useremail},
+        {_id:req.params.id,useremail:req.user.userEmail},
         // {
             
         //     $inc:{"FBMstock.quantity":req.body.FBMchange,"FBDstock.quantity":req.body.FBDchange},
@@ -78,7 +78,7 @@ router.put('/:id',auth,async(req,res)=>{
 
         // if(req.body.GroupSkuChangeStock!=0){
         //     console.log("BaseSku: "+result.BaseSku)
-        //     var updateResult = await Sku.findOneAndUpdate({useremail:req.user.useremail,name:result.BaseSku},
+        //     var updateResult = await Sku.findOneAndUpdate({useremail:req.user.userEmail,name:result.BaseSku},
         //         {$inc:{FBMstock:req.body.GroupSkuChangeStock}})
         //     console.log(updateResult)
         // }

@@ -15,21 +15,22 @@ router.get('/',async(req,res)=>{
 }
 )
 
-router.post('/',auth,async(req,res)=>{
-    if(req.user.usertype=="admin"){
-        let user =await User.findOne({$or:[{useremail:req.body.useremail.toLowerCase()},{loginemail:req.body.useremail.toLowerCase()}]});
+router.post('/addUser',auth,async(req,res)=>{
+    if(req.user.userType=="admin"){
+        let user =await User.findOne({$or:[{userEmail:req.body.userEmail.toLowerCase()},{loginEmail:req.body.userEmail.toLowerCase()}]});
         if (user) return res.status(400).send({message:"User already exists"}); 
             var userSubscription = new UserSubscription({
-                userEmail:req.body.useremail.toLowerCase()
+                userEmail:req.body.userEmail.toLowerCase()
             })
             userSubscription = await userSubscription.save();
             console.log(userSubscription)
 
             user = new User({
-            useremail:req.body.useremail.toLowerCase(),
-            loginemail:req.body.useremail.toLowerCase(),
+            userEmail:req.body.userEmail.toLowerCase(),
+            userName:req.body.userName,
+            loginEmail:req.body.userEmail.toLowerCase(),
             password:req.body.password,
-            usertype:req.body.usertype,
+            userType:req.body.userType,
             isVerified:true,
             permissions:req.body.permissions,
             subscription:userSubscription._id
@@ -169,18 +170,18 @@ router.put('/addSubscription/:useremail',auth,async(req,res)=>{
 })
 
 router.put('/selectSubscription',auth,async(req,res)=>{
-    var result = await User.updateOne({useremail:req.user.useremail},{subscriptionType:req.body.subscriptionType})
+    var result = await User.updateOne({useremail:req.user.userEmail},{subscriptionType:req.body.subscriptionType})
     res.status(201).send({successMessage:"subscription successfully updated"})
 })
 
 router.get('/currentSubscription',auth,async(req,res)=>{
-    var result = await User.findOne({useremail:req.user.useremail})
+    var result = await User.findOne({useremail:req.user.userEmail})
     res.status(200).send({subscriptionType:result.subscriptionType})
 })
 
 
 router.get('/getSubAccounts',auth,async(req,res)=>{
-    subusers = await User.find({useremail:req.user.useremail.toLowerCase(),accountType:"sub"},{password:0,_id:0})
+    subusers = await User.find({useremail:req.user.userEmail.toLowerCase(),accountType:"sub"},{password:0,_id:0})
     res.send(subusers)
 })
 
@@ -191,7 +192,7 @@ router.post('/addSubAccount',auth,async(req,res)=>{
     if(user) return res.status(400).send({message:"User already exists"});
 
     user = new User({
-        useremail:req.user.useremail,
+        useremail:req.user.userEmail,
         loginemail:req.body.loginemail,
         username:req.body.username,
         password:"password.123",
@@ -260,7 +261,7 @@ router.post('/verifySubAccountWithToken/:token',async(req,res)=>{
 })
 
 router.put('/updateSubAccount',auth,async(req,res)=>{
-    updateResult = await User.updateOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.useremail.toLowerCase()},{
+    updateResult = await User.updateOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.userEmail.toLowerCase()},{
         username:req.body.username,
         permissions:req.body.permissions
     })
@@ -269,7 +270,7 @@ router.put('/updateSubAccount',auth,async(req,res)=>{
 })
 
 router.post('/deleteSubAccount',auth,async(req,res)=>{
-    deleteResult = await User.deleteOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.useremail.toLowerCase()})
+    deleteResult = await User.deleteOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.userEmail.toLowerCase()})
     res.send(deleteResult)
 })
 

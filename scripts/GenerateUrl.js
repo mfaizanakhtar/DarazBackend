@@ -8,10 +8,21 @@ var baseUrl="https://api.daraz.pk/rest";
 function generateAccessTokenUrl(callBackCode){
     var accessTokenUrl="/auth/token/create"
     var url = baseUrl+accessTokenUrl
-    var params = {app_key:darazOpenAppDetails.appKey,code:callBackCode,timestamp:moment(),sign_method:"sha256"};
+    var params = {...getStandardParams(),code:callBackCode};
     var formattedParams=sortAndFormatParams(params);
     var url = baseUrl+accessTokenUrl+formattedParams.queryParams+"&sign="+SignParameters(darazOpenAppDetails.appSecret,accessTokenUrl+formattedParams.concatenatedParams);
     
+    return url;
+}
+
+function getSellerUrl(access_token){
+    
+    var getSellerUrl="/seller/get"
+    var url = baseUrl+getSellerUrl
+    var params = {...getStandardParams(),access_token:access_token};
+    var formattedParams=sortAndFormatParams(params);
+    var url = baseUrl+getSellerUrl+formattedParams.queryParams+"&sign="+SignParameters(darazOpenAppDetails.appSecret,getSellerUrl+formattedParams.concatenatedParams);
+    console.log(url)
     return url;
 }
 
@@ -38,6 +49,10 @@ function sortAndFormatParams(params){
     },{})
 
     return {concatenatedParams:concatenatedParams,queryParams:queryParams}
+}
+
+function getStandardParams(){
+    return {app_key:darazOpenAppDetails.appKey,timestamp:moment(),sign_method:"sha256"};
 }
 
 
@@ -186,3 +201,4 @@ module.exports.generateLabelUrl = generateLabelUrl;
 module.exports.RtsURL = RtsURL;
 module.exports.generateSkuUrl = generateSkuUrl
 module.exports.generateAccessTokenUrl = generateAccessTokenUrl;
+module.exports.getSellerUrl = getSellerUrl;
