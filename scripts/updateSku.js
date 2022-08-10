@@ -5,81 +5,60 @@ const {darazProduct} = require('../models/darazproduct')
 const {darazSku} = require('../models/darazsku')
 const {Sku} = require('../models/sku')
 const {updateOrderItemStatus} = require('../scripts/updateStatus')
+const LazadaAPI = require('lazada-open-platform-sdk')
+const {darazOpenAppDetails} = require('../scripts/data')
 
-async function getSkus(darazid,skus,requestType){
+async function getSkus(shop,skus){
     // console.log(skus.length)
     // console.log("darazid: "+darazid+" skus: "+skus+" update: "+update)
     try{
-    shop = await Shop.findOne({shopid:darazid})
-    var Url
-    if(skus!=undefined){
-        Url = generateSkuUrl(shop.shopid,shop.secretkey,'['+skus.toString()+']')
-    }
-    else if(skus==undefined){
-        Url = generateSkuUrl(shop.shopid,shop.secretkey)
-    }
-    
-    // console.log(Url)
-    var ProductSku = await GetData(Url)
-    if(ProductSku!=null){
-    var Products = ProductSku.Products
-    for(product of Products){
-        var skuIdArray=[]
-        for(const [i,sku] of product.Skus.entries()){
-            
-            sku.ShopId=shop.shopid
-            sku.useremail=shop.useremail
-            
-            // sku.FBMstock=0
-            // sku.FBDstock=0
-            var result = null
-            result = await InventoryStringToJSon(sku)
-            sku.multiWarehouseInventories = result.multiWarehouseInventories
-            sku.fblWarehouseInventories = result.fblWarehouseInventories
-            sku.updatedAt = new Date()
-            // if(requestType=='UpdateExisting'){
+        // const aLazadaAPIWithToken = new LazadaAPI(darazOpenAppDetails.appKey, darazOpenAppDetails.appSecret, 'SINGAPORE', shop.accessToken)
+        // aLazadaAPIWithToken.getProducts(darazOpenAppDetails.appKey, darazOpenAppDetails.appSecret,'https://api.daraz.pk/rest',shop.accessToken,{filter:"all",sku_seller_list:'['+skus.toString()+']'})
+        // .then(response => {
+        //     console.log(response)
+        //   })
 
-            // }else if(requestType=='FetchNew'){
-
-            // }
-
-        //     if(!update){
-        //         var GroupSku = await Sku.findOne({useremail:shop.useremail,name:baseSku(sku.SellerSku)}) 
-
-        //         if(GroupSku==null) GroupSku={cost:0,FBMpackagingCost:0,FBDpackagingCost:0}
-        //         sku.FBMstock=result.multiWarehouseInventories
-        //         sku.FBDstock=result.fblWarehouseInventories
-        //         sku.localQuantity=sku.quantity
-        //         sku.cost = GroupSku.cost
-        //         sku.FBMpackagingCost=GroupSku.FBMpackagingCost
-        //         sku.FBDpackagingCost=GroupSku.FBDpackagingCost
-        //         sku.BaseSku=GroupSku.name
-
-
-        //         // if(skuResult.upserted!=undefined) skuIdArray.push(skuResult.upserted[0]._id)
-
-        //         // product.Skus=skuIdArray
-        //         // product.ShopId=shop.shopid
-        //         // product.useremail=shop.useremail
-        //         // productResult = await darazProduct.updateMany({ItemId:product.ItemId,ShopId:product.ShopId,useremail:product.useremail},product,{upsert:true})
-        //     }
-        //     else if(update){
-        //     skuResult = await darazSku.updateMany(
-        //         {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
-        //         {$set:sku}
-        //     )
-        //  }
-         skuResult = await darazSku.updateMany(
-            {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
-            {$set:sku},
-            {upsert:true}
-        )
-        }
+        var Url
+        splitCount=50
+        var skuitemscount = skus.length
         
+        var end = Math.ceil(skuitemscount/splitCount)
+    
+        for(let i=0;i<end;i++){
+            if(skus!=undefined){
+                Url = generateSkuUrl(shop.accessToken,"all",splitCount,splitCount*i,'['+skus.slice(i*splitCount,(i*splitCount)+splitCount).toString()+']')
+            }
+            
+            // console.log(Url)
+            var ProductSku = await GetData(Url)
+            if(ProductSku!=null){
+            var Products = ProductSku.Products
+            for(product of Products){
+                for(const [i,sku] of product.Skus.entries()){
+                    
+                    sku.ShopId=shop.shopid
+                    sku.useremail=shop.useremail
+                    
+                    // sku.FBMstock=0
+                    // sku.FBDstock=0
+                    var result = null
+                    result = await InventoryStringToJSon(sku)
+                    sku.multiWarehouseInventories = result.multiWarehouseInventories
+                    sku.fblWarehouseInventories = result.fblWarehouseInventories
+                    sku.updatedAt = new Date()
+
+                skuResult = await darazSku.updateMany(
+                    {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopId:shop.shopid,useremail:shop.useremail},
+                    {$set:sku},
+                    {upsert:true}
+                )
+                }
+                
 
 
+            }
+        }
     }
-}
 }catch(ex){
     console.log("Error in getSkus error: "+ex)
 }
