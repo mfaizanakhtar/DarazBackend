@@ -5,18 +5,15 @@ const auth = require('../middleware/auth')
 const router = express.Router();
 const {Shop} = require('../models/shop')
 const {RtsURL} = require('../scripts/GenerateUrl')
-const {GetData} = require('../scripts/HttpReq')
+const {GetData,PostData} = require('../scripts/HttpReq')
 const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
 const {getDateFilter,updateQuery, updateQueryForStockChecklist} = require('../service/ordersService')
 
 router.get('/orders/',auth,async(req,res)=>{
 
     var response = await FindQuery(req.query,req.user)
-    var stores = await Order.aggregate([{$match:{useremail:req.user.userEmail}},
-        {$group:{_id:"$ShopId"}}
-    ])
-
-    res.send([...response,stores]);
+    var stores = await Shop.find({userEmail:req.user.userEmail},{name:1,shortCode:1,_id:0}).sort({name:1})
+    res.send({...response,stores:stores});
 })
 
 
@@ -78,8 +75,8 @@ async function FindQuery(query,user){
         {$match:FinalFilter},
         {$count:"count"}
     ])
-    if(length[0]) return [orders,length[0].count]
-    return [orders,0]
+    if(length[0]) return {orders:orders,count:length[0].count}
+    return {orders:orders,count:0}
 }
 
 router.post('/setStatusToRTS',auth,async(req,res)=>{
@@ -90,20 +87,15 @@ router.post('/setStatusToRTS',auth,async(req,res)=>{
     try{
     for(var order of Orders){
         // console.log(order)
-        var OrderItems='['
-        var shop = await Shop.findOne({shopid:order.ShopId})
+        var shop = await Shop.findOne({shortCode:order.ShopShortCode})
         // console.log(shop)
-        for(var orderitem of order.OrderItems){
-            if(orderitem.ShippingType=='Dropshipping' && orderitem.Status!='canceled') {
-                OrderItems=OrderItems+orderitem.OrderItemId+','
-            }
-        }
-        OrderItems=OrderItems+']'
-        Url = RtsURL(shop.shopid,shop.secretkey,OrderItems)
-        var result = await GetData(Url)
+        var OrderItems=order.OrderItems.map(item=>{if(item.ShippingType=='Dropshipping' && item.Status!='canceled'){return item.OrderItemId}})
+        var OrderItems="["+OrderItems.toString()+"]"
+        Url = RtsURL(shop.accessToken,OrderItems)
+        var result = await PostData(Url)
         RtsOrdersResponse.push(result)
     }
-    // console.log(RtsOrdersResponse.length)
+    console.log(RtsOrdersResponse.length)
     var updateResult = false
     if(Orders.length==RtsOrdersResponse.length){
     updateResult = await updateOrderItemsForRts(req.user.userEmail,RtsOrdersResponse.length)

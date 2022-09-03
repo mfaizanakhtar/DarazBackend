@@ -31,29 +31,21 @@ router.put('/Update/:Status',auth,async(req,res)=>{
 
 router.put('/return/:id',auth,async(req,res)=>{
     
-    var orderItem = await OrderItems.find({useremail:req.user.userEmail,TrackingCode:req.params.id,WarehouseStatus:{$ne:"Received"}});
+    var orderItem = await OrderItems.find({userEmail:req.user.userEmail,TrackingCode:req.params.id,WarehouseStatus:{$ne:"Received"}});
     if(orderItem.length>0){
 
-    orderItem = await OrderItems.updateMany({useremail:req.user.userEmail,TrackingCode:req.params.id},{
+    orderItem = await OrderItems.updateMany({userEmail:req.user.userEmail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Received",
             ReturnDate:new Date(req.body.date),
-            ReceiveBy:req.user.username
+            ReceiveBy:req.user.userName
         }
     })
-    updatedResult = await OrderItems.find({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1,BaseSku:1,Sku:1,ReceiveBy:1})
-    // for(var item of updatedResult){
-    //     console.log(item.Sku)
-    //     var update = await Sku.updateMany({name:item.BaseSku},{$inc:{FBMstock:1}})
-    //     console.log(update)
-    // }
-    res.send({Status:"Received",updatedResult:updatedResult[0]})
+    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopName:1,ReceiveBy:1})
+    res.send({Status:"Received",updatedResult:updatedResult})
     }
-    // updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{ReturnDate:1,OrderId:1,TrackingCode:1,ShopId:1})
-    // res.send([{Status:"Received"},updatedResult])
-    // }
     else{
-        orderItem = await OrderItems.find({useremail:req.user.userEmail,TrackingCode:req.params.id})
+        orderItem = await OrderItems.find({userEmail:req.user.userEmail,TrackingCode:req.params.id})
         if(orderItem.length>0){
             res.send({Status:"Already Received"})
         }
@@ -65,17 +57,17 @@ router.put('/return/:id',auth,async(req,res)=>{
 
 router.put('/dispatch/:id',auth,async(req,res)=>{
     console.log('Dispatch Date: ',req.body.date)
-    var orderItem = await OrderItems.find({useremail:req.user.userEmail,TrackingCode:req.params.id,Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}})
+    var orderItem = await OrderItems.find({userEmail:req.user.userEmail,TrackingCode:req.params.id,Status:"ready_to_ship",WarehouseStatus:{$ne:"Dispatched"}})
     if(orderItem.length>0){
-    orderItem = await OrderItems.updateMany({useremail:req.user.userEmail,TrackingCode:req.params.id},{
+    orderItem = await OrderItems.updateMany({userEmail:req.user.userEmail,TrackingCode:req.params.id},{
         $set:{
             WarehouseStatus:"Dispatched",
             DispatchDate:new Date(req.body.date),
-            DispatchBy:req.user.username
+            DispatchBy:req.user.userName
 
         }
     })
-    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{DispatchDate:1,OrderId:1,TrackingCode:1,ShopId:1,DispatchBy:1})
+    updatedResult = await OrderItems.findOne({TrackingCode:req.params.id},{DispatchDate:1,OrderId:1,TrackingCode:1,ShopName:1,DispatchBy:1})
     res.send({Status:"Dispatched",updatedResult:updatedResult});
 }
 else{
@@ -125,9 +117,9 @@ router.get('/ordermovement/:filter',auth,async(req,res)=>{
     }
 
     orderItem = await OrderItems.aggregate([{
-        $group:{_id:'$TrackingCode',useremail:{$first:'$useremail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopId:{$first:'$ShopId'},WarehouseStatus:{$first:'$WarehouseStatus'},...Username}
+        $group:{_id:'$TrackingCode',userEmail:{$first:'$userEmail'},OrderId:{$first:'$OrderId'},Date:{$first:sortBy},ShopName:{$first:'$ShopName'},WarehouseStatus:{$first:'$WarehouseStatus'},...Username}
     },{
-        $match:{useremail:req.user.userEmail,$and:[{Date:{$gte:startdate}},{Date:{$lte:enddate}}]}
+        $match:{userEmail:req.user.userEmail,$and:[{Date:{$gte:startdate}},{Date:{$lte:enddate}}]}
     }]).sort({Date:-1})
     
     // console.log(orderItem)

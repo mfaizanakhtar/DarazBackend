@@ -33,9 +33,34 @@ function generateMultipleOrderItemsUrl(accessToken,orderIds){
     
 }
 
+function generateTransactionsUrl(accessToken,transType,startTime,endTime,limit,offSet){
+    var getTransactionDetailsUrl="/finance/transaction/detail/get"
+    var params = {access_token:accessToken,trans_type:transType,start_time:startTime,end_time:endTime,limit:limit,offset:offSet};
+
+    return createGetUrl(getTransactionDetailsUrl,params)
+}
+
+function RtsURL(accessToken,OrderItemIds){
+    var setRtsUrl="/order/rts"
+    var params = {access_token:accessToken,order_item_ids:OrderItemIds,delivery_type:"dropship",shipment_provider:"daraz",tracking_number:"daraz"};
+
+    return createGetUrl(setRtsUrl,params)
+}
+
+function generateLabelUrl(accessToken,OrderItemIds,docType){
+    var getDocumentUrl="/order/document/get"
+    var params = {access_token:accessToken,order_item_ids:OrderItemIds,doc_type:docType};
+
+    return createGetUrl(getDocumentUrl,params)
+
+}
+
 function generateSkuUrl(accessToken,filter,limit,offset,Skus){
     var getSkuUrl="/products/get";
-    var params={access_token:accessToken,filter:filter,limit:limit,options:1,offset:offset}
+    var params={access_token:accessToken,filter:filter,options:1,offset:offset}
+    if(limit && limit>0){
+        params={...params,limit:limit}
+    }
     if(Skus!=null){
         params={...params,sku_seller_list:Skus}
     }
@@ -71,7 +96,7 @@ function sortAndFormatParams(params){
         if(i==0){
             queryParams=queryParams+"?"
         }
-        queryParams=queryParams+currVal+"="+(currVal=="sku_seller_list" ? encodeURIComponent(params[currVal]) : params[currVal])
+        queryParams=queryParams+currVal+"="+((currVal=="sku_seller_list" || currVal=="order_item_ids") ? encodeURIComponent(params[currVal]) : params[currVal])
         
         i++
         return accumulator;
@@ -85,88 +110,10 @@ function getStandardParams(){
 }
 
 
-function generateTransactionsUrl(userid,secretkey,date,transType){
-    var url="https://api.sellercenter.daraz.pk?"
-    Action="Action=GetTransactionDetails"
-    Timestamp=getTimeStamp();
-
-    let userID=encodeURIComponent(userid);
-    apiparams=Action+"&Format=json"+"&Timestamp="+Timestamp+"&UserID="+userID+
-    "&Version=1.0"+"&endTime="+date+"&startTime="+date+"&transType="+transType
-    url=url+apiparams+"&"+"Signature="+SignParameters(secretkey,apiparams)
-    // console.log(url)
-    return url
-
-}
-
-
-
-
-function generateSingleOrderUrl(shopid,secretkey,Orderid){
-    //To get Single Order Detail with Order ID argument
-
-    //base URL
-    const url="https://api.sellercenter.daraz.pk?";
-    //TimeStamp as per daraz
-    Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00');
-
-    //encode userid(email)
-    let userID=encodeURIComponent(shopid);
-    //Action of API
-    let Action='GetOrder';
-    //Api paramaters formation
-    let apiparams='Action='+Action+'&Format=json'+'&OrderId='+Orderid+'&Timestamp='+Timestamp+'&UserID='+userID+'&Version=1.0'
-    //Sign parameters and concatenate with base URL
-    return url+apiparams+'&Signature='+SignParameters(secretkey,apiparams);
-    
-
-}
-
-function generateLabelUrl(userid,secretkey,OrderItemIds){
-    const url="https://api.sellercenter.daraz.pk?";
-    Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00');
-    let Action = 'GetDocument';
-    OrderItemIds=encodeURIComponent(OrderItemIds)
-
-    let userID=encodeURIComponent(userid);
-
-    let apiparams='Action='+Action+'&DocumentType=shippingLabel'+'&Format=json'+'&OrderItemIds='+OrderItemIds+'&Timestamp='+Timestamp+'&UserID='+userID+'&Version=1.0'
-    return url+apiparams+'&Signature='+SignParameters(secretkey,apiparams);
-
-}
-
-function RtsURL(userid,secretkey,OrderItemIds){
-    const url="https://api.sellercenter.daraz.pk?";
-    Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00');
-    let Action = 'SetStatusToReadyToShip';
-    OrderItemIds=encodeURIComponent(OrderItemIds)
-
-    let userID=encodeURIComponent(userid);
-
-    let apiparams='Action='+Action+'&DeliveryType=dropship'+'&Format=json'+'&OrderItemIds='+OrderItemIds+'&Timestamp='+Timestamp+'&UserID='+userID+'&Version=1.0'
-    return url+apiparams+'&Signature='+SignParameters(secretkey,apiparams);
-}
-
-function getTimeStamp(){
-    Timestamp=encodeURIComponent(new Date().toISOString().substr(0,19)+'+00:00')
-    return Timestamp;
-}
-function getOrderIdArray(data){
-
-var orderids='['
-for(var element of data){
-    orderids+=element.order_id+',';
-    
-};
-orderids+=']'
-return orderids;
-}
 
 module.exports.generateTransactionsUrl = generateTransactionsUrl;
 module.exports.generateOrdersUrl = generateOrdersUrl;
-module.exports.generateSingleOrderUrl = generateSingleOrderUrl;
 module.exports.generateMultipleOrderItemsUrl = generateMultipleOrderItemsUrl;
-module.exports.getOrderIdArray = getOrderIdArray;
 module.exports.generateLabelUrl = generateLabelUrl;
 module.exports.RtsURL = RtsURL;
 module.exports.generateSkuUrl = generateSkuUrl

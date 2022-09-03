@@ -5,6 +5,7 @@ const OrderItemsSchema = new mongoose.Schema({
     OrderId:String,
     OrderItemId:String,
     ShopShortCode:String,
+    ShopName:String,
     Name:String,
     Sku:String,
     ShopSku:String,
@@ -29,7 +30,7 @@ const OrderItemsSchema = new mongoose.Schema({
     Variation:String,
     DispatchDate:{type:Date,default:''},
     ReturnDate:Date,
-    useremail:String,
+    userEmail:String,
     Transactions:[{
         _id:{ type:mongoose.Schema.Types.ObjectId,ref:'Transaction' },
         TransactionType:String,

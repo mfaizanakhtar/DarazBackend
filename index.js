@@ -69,6 +69,14 @@ dataQueries()
 
 updateOrdersData();
 
+// getAllSkus();
+
+// updateAllSkus();
+
+// updateOrderItemStatus({})
+
+// updateTransactions()
+
 // async function updateId(){
 //     const result = await OrderItems.updateMany({},{
 //         $set:{useremail:'accesology@gmail.com'}

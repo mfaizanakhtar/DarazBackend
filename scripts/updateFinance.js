@@ -4,12 +4,13 @@ const {Shop} =require('../models/shop');
 const {Transaction} = require('../models/transaction')
 const {OrderItems} = require('../models/orderItem');
 const { previousDataQuery } = require('../models/previousDataQuery');
+const moment = require('moment');
 
 async function updateTransactions(){
     try{
     var shops = await Shop.find()
-    // transactionTypes=[-1]
-    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
+    transactionTypes=[-1]
+    // transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
     //13 - Item Price Credit
     //8 - Shipping Fee (Paid By Customer)
     //16 - Commission
@@ -21,91 +22,91 @@ async function updateTransactions(){
     //145 - Other Debits (Returns)
     //104 - Adjustments Others
     //get start and enddate for query
-    var dates = getDates()
+    var limit = 500
     // console.log(dates)
     for(shop of shops){
-        for(date of dates){
         for(transType of transactionTypes){
-        //get Url for transaction
-        url= generateTransactionsUrl(shop.shopid,shop.secretkey,date,transType)
-        // console.log(url)
-        //get transactions data
-        var transactions = await GetData(url);
-        if(transactions!=null){
-        transactions = transactions.TransactionDOs.transactionDOs
-        var previousTransactionsData = await previousDataQuery.find({ShopId:shop.shopid,queryData:JSON.stringify(transactions),queryType:"transType"+transType+date})
+            transactionsLength=0
+            while(transactionsLength!=500){
+                var offSet=0;
+                //get Url for transaction
+                url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract('2','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
+                // console.log(url)
+                //get transactions data
+                var transactions = await GetData(url);
+                transactionsLength = transactions.length
+                if(transactions!=null){
+                var previousTransactionsData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryData:JSON.stringify(transactions),queryType:"transType"+transType+"offSet="+offSet})
 
-        if(previousTransactionsData.length<=0){
+                if(previousTransactionsData.length<=0){
 
-        for(var t of transactions){
-            //check if transactions is in db
-            if(!t.hasOwnProperty("Transaction Type")) break;
-            var transaction = await Transaction.find({TransactionNumber:t["Transaction Number"],useremail:shop.useremail})
-            var increment
-            // console.log(t)
-            if(t["Fee Name"]=="Automatic Shipping Fee") increment={$inc:{TransactionsPayout:-t["VAT in Amount"]}}
-            else if(t["Fee Name"]=="Shipping Fee (Paid By Customer)") increment={$inc:{TransactionsPayout:0}}
-            else increment={$inc:{TransactionsPayout:t["Amount"]}}
-            if(transaction.length>0){
-                if(transaction.OrderItemUpdated==false){
+                for(var t of transactions){
+                    //check if transactions is in db
+                    var transaction = await Transaction.find({TransactionNumber:t.transaction_number,ShopShortCode:shop.shortCode,userEmail:shop.userEmail})
+                    var increment
+                    // console.log(t)
+                    increment={$inc:{TransactionsPayout:parseInt(t.amount)}}
+                    if(transaction.length>0){
+                        if(transaction.OrderItemUpdated==false){
 
-                    var updateResult = await OrderItems.updateMany({OrderItemId:transaction.OrderItemNo},{
+                            var updateResult = await OrderItems.updateMany({OrderItemId:transaction.OrderItemNo,ShopShortCode:shop.shortCode},{
+                                $push:{Transactions:
+                                        {
+                                        _id:transaction._id,
+                                        TransactionType:transaction.TransactionType,
+                                        FeeName:transaction.FeeName,
+                                        Amount:transaction.Amount,
+                                        VATinAmount:transaction.VATinAmount,
+                                        Statement:transaction.Statement
+                                        }
+                                    },
+                                ...increment,
+                                PayoutCycle:transaction.Statement
+                            })
+                        
+                        if(updateResult.n>0){
+                            await Transaction.updateMany({_id:transactResult._id},{OrderItemUpdated:true})
+                        }
+
+                        }
+                    }
+                    else if(transaction.length==0){
+                        //if not found, save into db
+                    var transaction = getTransactionObj(t,shop,transType)
+                    transactResult = await transaction.save()
+                    //find corresponding order and push transaction into order obj
+                    var updateResult = await OrderItems.updateMany({OrderItemId:transactResult.OrderItemNo,ShopShortCode:shop.shortCode},{
                         $push:{Transactions:
                                 {
-                                _id:transaction._id,
-                                TransactionType:transaction.TransactionType,
-                                FeeName:transaction.FeeName,
-                                Amount:transaction.Amount,
-                                VATinAmount:transaction.VATinAmount,
-                                Statement:transaction.Statement
+                                _id:transactResult._id,
+                                TransactionType:transactResult.TransactionType,
+                                FeeName:transactResult.FeeName,
+                                Amount:transactResult.Amount,
+                                VATinAmount:transactResult.VATinAmount,
+                                Statement:transactResult.Statement
                                 }
                             },
                         ...increment,
                         PayoutCycle:transaction.Statement
                     })
-                
-                if(updateResult.n>0){
-                    await Transaction.updateMany({_id:transactResult._id},{OrderItemUpdated:true})
+                    if(updateResult.n>0){
+                        await Transaction.updateMany({_id:transactResult._id},{OrderItemUpdated:true})
+                    }
                 }
-
-                }
+                    
+                };
+                previousTransactionsData = await previousDataQuery.find({ShopId:shop.shopid,queryType:"transType"+transType})
+                console.log("New Transactions Found")
+                if(previousTransactionsData.length>0){
+                    await previousDataQuery.updateMany({shopShortCode:shop.shortCode,queryType:"transType"+transType+"offSet="+offSet},{queryData:JSON.stringify(transactions)})
+                }else await new previousDataQuery({shopShortCode:shop.shortCode,queryData:JSON.stringify(transactions),queryType:"transType"+"offSet="+offSet}).save()
             }
-            else if(transaction.length==0){
-                //if not found, save into db
-            var transaction = getTransactionObj(t,shop.useremail,shop.shopid,transType)
-            transactResult = await transaction.save()
-            //find corresponding order and push transaction into order obj
-            var updateResult = await OrderItems.updateMany({OrderItemId:transactResult.OrderItemNo},{
-                $push:{Transactions:
-                        {
-                        _id:transactResult._id,
-                        TransactionType:transactResult.TransactionType,
-                        FeeName:transactResult.FeeName,
-                        Amount:transactResult.Amount,
-                        VATinAmount:transactResult.VATinAmount,
-                        Statement:transactResult.Statement
-                        }
-                    },
-                ...increment,
-                PayoutCycle:transaction.Statement
-            })
-            if(updateResult.n>0){
-                await Transaction.updateMany({_id:transactResult._id},{OrderItemUpdated:true})
+            }else{
+                console.log("Invalid username or secretkey of shop "+ shop.name)
             }
-        }
-            
-        };
-        previousTransactionsData = await previousDataQuery.find({ShopId:shop.shopid,queryType:"transType"+transType})
-        console.log("New Transactions Found")
-        if(previousTransactionsData.length>0){
-            await previousDataQuery.updateMany({ShopId:shop.shopid,queryType:"transType"+transType+date},{queryData:JSON.stringify(transactions)})
-        }else await new previousDataQuery({ShopId:shop.shopid,queryData:JSON.stringify(transactions),queryType:"transType"+transType+date}).save()
-    }
-    }else{
-        console.log("Invalid username or secretkey of shop "+ shop.shopName)
+        offSet++
     }
     }
-    };
 }
     console.log("Transaction Loop Done")
 }
@@ -114,67 +115,32 @@ catch(ex){
 }
 }
 
-function getTransactionObj(t,useremail,shopid,transType){
+function getTransactionObj(t,shop,transType){
     var transaction = new Transaction({
-        TransactionDate:t["Transaction Date"],
-        TransactionType:t["Transaction Type"],
-        FeeName:t["Fee Name"],
-        TransactionNumber:t["Transaction Number"],
-        Details:t["Details"],
-        SellerSku:t["Seller SKU"],
-        LazadaSku:t["Lazada SKU"],
-        Amount:t["Amount"],
-        VATinAmount:t["VAT in Amount"],
-        Statement:t["Statement"],
-        PaidStatus:t["Paid Status"],
-        OrderNo:t["Order No."],
-        OrderItemNo:t["Order Item No."],
-        OrderItemStatus:t["Order Item Status"],
-        ShippingSpeed:t["Shipping Speed"],
-        ShipmentType:t["Shipment Type"],
-        Reference:t["Reference"],
-        PaymentRefId:t["Payment Ref Id"],
-        ShopId:shopid,
-        useremail:useremail,
+        TransactionDate:t.transaction_date,
+        TransactionType:t.transaction_type,
+        FeeName:t.fee_name,
+        TransactionNumber:t.transaction_number,
+        Details:t.details,
+        SellerSku:t.seller_sku,
+        LazadaSku:t.lazada_sku,
+        Amount:t.amount,
+        VATinAmount:t.VAT_in_amount,
+        Statement:t.statement,
+        PaidStatus:t.paid_status,
+        OrderNo:t.orderItem_no,
+        OrderItemNo:t.orderItem_no,
+        OrderItemStatus:t.orderItem_status,
+        ShippingSpeed:t.shipping_speed,
+        ShipmentType:t.shipment_type,
+        Reference:t.reference,
+        PaymentRefId:t.reference,
+        ShopShortCode:shop.shortCode,
+        userEmail:shop.userEmail,
         transType:transType
     })
 
     return transaction
-}
-
-function getDates(){
-    date = new Date();
-    var dd = String(date.getDate()).padStart(2,'0');
-    var mm = String(date.getMonth()+1).padStart(2,'0');
-    var yyyy = date.getFullYear();
-    var startdate = dd
-    var startmonth = mm
-    var startyear = yyyy
-
-    if(startdate=='01'){
-        if(startmonth=='01'){
-            startdate='31'
-            startmonth='12'
-            startyear=startyear-1
-        }
-        else if(startmonth=='03'){
-            startdate='28'
-            startmonth='02'
-        }
-        else if(startmonth=="02"||startmonth=="06"||startmonth=="08"||startmonth=="09"||startmonth=="11"){
-            startdate='31'
-            startmonth=startmonth-1
-        }
-        else{
-            startdate='30'
-            startmonth=startmonth-1
-        }
-    }
-    else{
-        startdate=startdate-1
-        startdate = String(startdate).padStart(2,0)
-    }
-    return [startyear+"-"+startmonth+"-"+startdate,yyyy+"-"+mm+"-"+dd]
 }
 
 module.exports.updateTransactions = updateTransactions

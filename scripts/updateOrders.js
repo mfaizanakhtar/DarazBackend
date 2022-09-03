@@ -6,15 +6,16 @@ const {darazSku}=require('../models/darazsku')
 const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl,generateLabelUrl, generateSingleOrderUrl} = require('./GenerateUrl');
 const {getSkus} = require('./updateSku')
 const { previousDataQuery } = require('../models/previousDataQuery');
+const moment = require('moment');
 
 
 async function getOrderItemsData(accessToken,data){
     //MultipleOrderIds Passed and OrderItemData Gathered
     //Extracting orderids only from all orders
-    var orderids = getOrderIdArray(data)
+    var orderids = data.map(order=>'"'+order.order_id+'"')
 
     //creating url to get MultipleOrderItems
-    url = await generateMultipleOrderItemsUrl(accessToken,orderids);
+    url = await generateMultipleOrderItemsUrl(accessToken,'['+orderids+']');
     //Passing url to get Data using axios
     orderitemsdata = await GetData(url);
     return orderitemsdata;
@@ -61,9 +62,9 @@ async function updateNewOrderItems(shop,orders){
 				if(dSku==null){
                     dSku={FBMpackagingCost:0,FBDpackagingCost:0,cost:0}
                 }
-                if(!toFetchUpdateDarazSkus.includes('"'+item.sku+'"')) toFetchUpdateDarazSkus.push('"'+item.sku+'"')
+                if(!toFetchUpdateDarazSkus.includes(item.sku)) toFetchUpdateDarazSkus.push(item.sku)
 
-                var orderItem = setOrderItemObj(item,shop.shortCode,shop.userEmail,dSku)
+                var orderItem = setOrderItemObj(item,shop.shortCode,shop.userEmail,dSku,shop.name)
 
                 var result = await orderItem.save();
                 //pushing orderItemId._id in Order Record for reference
@@ -80,12 +81,12 @@ async function updateNewOrderItems(shop,orders){
             await getSkus(shop,toFetchUpdateDarazSkus)
         }
     }catch(ex){
-        console.log("Error in updateNewOrderItems");
+        console.log("Error in updateNewOrderItems: "+ex);
     }
 
 }
 
-function setOrderItemObj(item,shortCode,userEmail,sku){
+function setOrderItemObj(item,shortCode,userEmail,sku,shopName){
     // console.log(item)
     var packagingCost
     if(item.shipping_type=="Dropshipping"){
@@ -98,6 +99,7 @@ function setOrderItemObj(item,shortCode,userEmail,sku){
         OrderId:item.order_id,
         OrderItemId:item.order_item_id,
         ShopShortCode:shortCode,
+        ShopName:shopName,
         Name:item.name,
         Sku:item.sku,
         BaseSku:baseSku(item.sku),
@@ -109,6 +111,8 @@ function setOrderItemObj(item,shortCode,userEmail,sku){
         TrackingCode:item.tracking_code,
         ShippingProviderType:item.shipping_provider_type,
         ShipmentProvider:item.shipment_provider.substr(item.shipment_provider.indexOf(',')+2),
+        // CreatedAt:moment(new Date(item.created_at)).add('5','hours').toDate(),
+        // UpdatedAt:moment(new Date(item.updated_at)).add('5','hours').toDate(),
         CreatedAt:item.created_at,
         UpdatedAt:item.updated_at,
         SlaTimeStamp:item.sla_time_stamp,
@@ -116,7 +120,7 @@ function setOrderItemObj(item,shortCode,userEmail,sku){
         productDetailUrl:item.product_detail_url,
         productMainImage:item.product_main_image,
         Variation:item.variation,
-        useremail:userEmail,
+        userEmail:userEmail,
         cost:sku.cost,
         Reason:item.reason,
         ...packagingCost
@@ -134,7 +138,7 @@ function setOrderObj(order,shop){
         PaymentMethod:order.payment_method,
         Price:parseInt(order.price),
         CreatedAt:order.created_at,
-        UpdatedAt:order.updated_at,
+        UpdatedAt:order.created_at,
         AddressBilling:{
             FirstName:order.address_billing.first_name,
             LastName:order.address_billing.last_name,
@@ -197,18 +201,18 @@ async function updateOrdersData(){
                 if(previousUpdateData.length<=0){
                     await updateNewOrders(shop,data.orders)
                     await updateNewOrderItems(shop,data.orders)
-                    previousUpdateData = await previousDataQuery.find({ShopId:id.shopid,queryType:"ordersData"})
+                    previousUpdateData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryType:"ordersData"})
     
                     if(previousUpdateData.length>0){
-                        await previousDataQuery.updateMany({ShopId:id.shopid,queryType:"ordersData"},{queryData:data.Orders})
-                    }else await new previousDataQuery({ShopId:id.shopid,queryData:data.Orders,queryType:"ordersData"}).save()
+                        await previousDataQuery.updateMany({shopShortCode:shop.shortCode,queryType:"ordersData"},{queryData:data.orders})
+                    }else await new previousDataQuery({shopShortCode:shop.shortCode,queryData:data.orders,queryType:"ordersData"}).save()
                     console.log("New Data Found");
                 }
                 else{
                     // console.log("data is same as previousOrder");
                 }
             }else{
-                console.log("Invalid user or secretkey of shop " + id.shopName)
+                console.log("Invalid user or secretkey of shop " + shop.name)
             }
             
         }
@@ -220,26 +224,5 @@ async function updateOrdersData(){
     console.log("Data Loop done");
 }
 
-async function updateSingleOrder(shopid,orderid){
-
-    try{
-    var id = await Shop.findOne({shopid:shopid})
-    
-
-        // console.log(id);
-    let url = generateSingleOrderUrl(id.shopid,id.secretkey,orderid);
-    // console.log(url)
-    var data = await GetData(url);
-    // console.log(data)
-    await updateNewOrders(id,data.Orders)
-    await updateNewOrderItems(id.shopid,id.secretkey,id.useremail,data.Orders)
-    // console.log(data);
-
-    }
-    catch(ex){
-        console.log(ex.message);
-    }
-}
 
 module.exports.updateOrdersData = updateOrdersData
-module.exports.updateSingleOrder = updateSingleOrder

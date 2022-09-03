@@ -74,4 +74,10 @@ function updateExistingShop(shop,tokenResp,sellerResp){
     return shop
 }
 
+async function getShopsWithUserEmail(userEmail){
+    var shops = await Shop.find({userEmail:userEmail},{shortCode:1,name:1}).sort({name:1})
+    return shops
+}
+
 module.exports.authoriseAndAddShop = authoriseAndAddShop;
+module.exports.getShopsWithUserEmail = getShopsWithUserEmail;
