@@ -4,11 +4,20 @@ const { updateTransactions } = require('./updateFinance');
 const { updateOrdersData } = require('./updateOrders');
 const { getAllSkus, updateAllSkus } = require('./updateSku');
 const { updateOrderItemStatus } = require('./updateStatus');
+const { refreshAccessToken } = require('../service/shopService');
 
 function scheduler(){
     //future request cron at 12:01 every day
     cron.schedule('1 0 * * *',async ()=>{
         await upgradeFuturePackage();
+    }, {
+        scheduled: true,
+        timezone: "Asia/Karachi"
+    })
+
+    //token refresh request cron at 12:01 every day
+    cron.schedule('1 0 * * *',async ()=>{
+        await refreshAccessToken()
     }, {
         scheduled: true,
         timezone: "Asia/Karachi"

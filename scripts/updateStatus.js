@@ -1,8 +1,8 @@
 const {OrderItems} = require('../models/orderItem');
 const {Shop} = require('../models/shop');
-const {generateMultipleOrderItemsUrl,generateLabelUrl} = require('../scripts/GenerateUrl');
+const {generateMultipleOrderItemsUrl,generateLabelUrl} = require('../service/GenerateUrl');
 const {GetData} = require('./HttpReq');
-const {getOrderIdArray} = require('../scripts/GenerateUrl')
+const {getOrderIdArray} = require('../service/GenerateUrl')
 const cheerio = require('cheerio')
 const atob = require("atob");
 

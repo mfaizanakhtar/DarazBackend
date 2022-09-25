@@ -1,6 +1,6 @@
 const { Lookup } = require("../models/lookup");
 const { Plan } = require("../models/plan");
-const { plansData, bankData, permissions, plansPermissions, mailerCredential, darazOpenAppDetails } = require("./data");
+const { plansData, bankData, permissions, plansPermissions, mailerCredential, darazOpenAppDetails } = require("../data/data");
 
 function executeAllDataQueries(){
     insertPlanData()

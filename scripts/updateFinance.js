@@ -1,5 +1,5 @@
 const {GetData} = require('./HttpReq')
-const {generateTransactionsUrl} = require('./GenerateUrl')
+const {generateTransactionsUrl} = require('../service/GenerateUrl')
 const {Shop} =require('../models/shop');
 const {Transaction} = require('../models/transaction')
 const {OrderItems} = require('../models/orderItem');
@@ -136,6 +136,7 @@ function getTransactionObj(t,shop,transType){
         Reference:t.reference,
         PaymentRefId:t.reference,
         ShopShortCode:shop.shortCode,
+        ShopName:shop.name,
         userEmail:shop.userEmail,
         transType:transType
     })

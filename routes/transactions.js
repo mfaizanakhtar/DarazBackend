@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router()
 const {Transaction} = require('../models/transaction');
 const auth = require('../middleware/auth');
+const {getDateFilterTransactions} = require('../service/utils');
 
 router.get('/',auth,async(req,res)=>{
     var query = req.query
@@ -9,23 +10,21 @@ router.get('/',auth,async(req,res)=>{
     var pageSize = req.query.pSize
     var pageIndex = req.query.Pindex
 
-    startdate = new Date(query.startDate);
-    startdate.setHours(startdate.getHours()-5);
-    enddate = new Date(query.endDate);
-    enddate.setHours(enddate.getHours()+18,59,59,59);
+    // startdate = new Date(query.startDate);
+    // startdate.setHours(startdate.getHours()-5);
+    // enddate = new Date(query.endDate);
+    // enddate.setHours(enddate.getHours()+18,59,59,59);
+    var dateFilter = getDateFilterTransactions(query)
     
     for(var propName in query){
         if(query[propName]=="null" || propName=="startDate" || propName=="endDate" || propName=="pSize" || propName=="pIndex"){
             delete query[propName]
         }
     }
-    console.log(startdate)
-    console.log(enddate)
-    console.log(req.query)
 
     var Filter =    {
-        useremail:req.user.userEmail,
-        $and:[{TransactionDate:{$gte:startdate}},{TransactionDate:{$lte:enddate}}],
+        userEmail:req.user.userEmail,
+        $and:[{TransactionDate:{$gte:dateFilter.startDate}},{TransactionDate:{$lte:dateFilter.endDate}}],
         ...query
     }
 
@@ -34,7 +33,6 @@ router.get('/',auth,async(req,res)=>{
     .limit(parseInt(pageSize))
 
     var DropDownVal = await getAggregatedValues(req,Filter)
-    // console.log(DropDownVal)
 
     res.send({Transactions:Transactions,...DropDownVal})
 })
@@ -49,7 +47,7 @@ router.get('/Statement',auth,async(req,res)=>{
 
     var Statement = await Transaction.aggregate([
         {
-            $match:{useremail:req.user.userEmail,...query}
+            $match:{userEmail:req.user.userEmail,...query}
         },
         {
             $group:{_id:"$FeeName",Amount:{$sum:"$Amount"},Vat:{$sum:"$VATinAmount"}}
@@ -62,7 +60,7 @@ router.get('/Statement',auth,async(req,res)=>{
 router.get('/ViewStatementFilters',auth,async(req,res)=>{
     var Statements = await Transaction.aggregate([
         {
-            $match:{useremail:req.user.userEmail}
+            $match:{userEmail:req.user.userEmail}
         },
         {
             $group:{_id:"$Statement",Date:{$first:"$TransactionDate"}}
@@ -74,10 +72,10 @@ router.get('/ViewStatementFilters',auth,async(req,res)=>{
 
     var Stores = await Transaction.aggregate([
         {
-            $match:{useremail:req.user.userEmail,ShopId:{$ne:null}}
+            $match:{userEmail:req.user.userEmail,ShopName:{$ne:null}}
         },
         {
-            $group:{_id:"$ShopId"}
+            $group:{_id:"$ShopName"}
         },
         {
             $sort:{_id:1}
@@ -92,7 +90,7 @@ async function getAggregatedValues(req,Filter){
 
     var TransactionType = await Transaction.aggregate([
         {
-            $match:{useremail:req.user.userEmail}
+            $match:{userEmail:req.user.userEmail}
         },
         {
             $group:{_id:"$TransactionType"}
@@ -100,7 +98,7 @@ async function getAggregatedValues(req,Filter){
     
         var FeeName = await Transaction.aggregate([
             {
-                $match:{useremail:req.user.userEmail,TransactionType:req.query.TransactionType}
+                $match:{userEmail:req.user.userEmail,TransactionType:req.query.TransactionType}
             },
             {
                 $group:{_id:"$FeeName"}
@@ -108,15 +106,15 @@ async function getAggregatedValues(req,Filter){
     
         var Stores = await Transaction.aggregate([
             {
-                $match:{useremail:req.user.userEmail}
+                $match:{userEmail:req.user.userEmail}
             },
             {
-                $group:{_id:"$ShopId"}
+                $group:{_id:"$ShopName"}
             }])
         
         var Statements = await Transaction.aggregate([
             {
-                $match:{useremail:req.user.userEmail}
+                $match:{userEmail:req.user.userEmail}
             },
             {
                 $group:{_id:"$Statement",Date:{$first:"$TransactionDate"}}
@@ -134,7 +132,7 @@ async function getAggregatedValues(req,Filter){
                 $sort:{TransactionDate:-1}
             },
             {
-                $group:{_id:"$useremail",Sum:{$sum:"$Amount"}}
+                $group:{_id:"$userEmail",Sum:{$sum:"$Amount"}}
             }
         ])
         console.log(Sum)

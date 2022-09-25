@@ -4,10 +4,11 @@ const {OrderItems} = require('../models/orderItem')
 const auth = require('../middleware/auth')
 const router = express.Router();
 const {Shop} = require('../models/shop')
-const {RtsURL} = require('../scripts/GenerateUrl')
+const {RtsURL} = require('../service/GenerateUrl')
 const {GetData,PostData} = require('../scripts/HttpReq')
 const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
-const {getDateFilter,updateQuery, updateQueryForStockChecklist} = require('../service/ordersService')
+const {updateQuery, updateQueryForStockChecklist} = require('../service/ordersService')
+const {getDateFilter} = require('../service/utils');
 
 router.get('/orders/',auth,async(req,res)=>{
 

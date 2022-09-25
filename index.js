@@ -15,9 +15,9 @@ const skus = require('./routes/skus');
 const darazskus=require('./routes/darazskus')
 const {updateOrdersData,updateSingleOrder} = require('./scripts/updateOrders');
 const {updateOrderItemStatus} = require('./scripts/updateStatus')
-const {generateSingleOrderUrl,RtsURL, generateMultipleOrderItemsUrl, getSeller} = require('./scripts/GenerateUrl');
+const {generateSingleOrderUrl,RtsURL, generateMultipleOrderItemsUrl, getSeller} = require('./service/GenerateUrl');
 const {updateTransactions} = require("./scripts/updateFinance");
-const  {generateLabelUrl} = require("./scripts/GenerateUrl");
+const  {generateLabelUrl} = require("./service/GenerateUrl");
 const {GetData} = require('./scripts/HttpReq')
 const cheerio = require('cheerio')
 const atob = require("atob");
@@ -28,6 +28,7 @@ const { lookups } = require('./routes/lookups');
 const { billings } = require('./routes/billings');
 const { schedulerRouter } = require('./routes/scheduler');
 const { scheduler } = require('./scripts/scheduler');
+const { refreshAccessToken } = require('./service/shopService');
  
 mongoose.connect(config.connectionstring,{useFindAndModify:false,useNewUrlParser:true,useUnifiedTopology:true,useCreateIndex:true})
     .then(()=>{
@@ -63,11 +64,13 @@ app.use('/api/lookups',lookups)
 app.use('/api/billings',billings)
 app.use('/api/scheduler',schedulerRouter)
 
-scheduler();
+// scheduler();
 
 dataQueries()
 
-updateOrdersData();
+updateTransactions();
+
+// updateOrdersData();
 
 // getAllSkus();
 

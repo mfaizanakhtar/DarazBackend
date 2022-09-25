@@ -1,7 +1,7 @@
 const LazadaAPI = require('lazada-open-platform-sdk');
 const moment = require('moment');
-const { darazOpenAppDetails } = require('./data');
-const {SignParameters} = require('./signParameters');
+const { darazOpenAppDetails } = require('../data/data');
+const {SignParameters} = require('./utils');
 
 var baseUrl="https://api.daraz.pk/rest";
 
@@ -9,6 +9,13 @@ function generateAccessTokenUrl(callBackCode){
     var accessTokenUrl="/auth/token/create"
     var params = {code:callBackCode};    
     return createGetUrl(accessTokenUrl,params)
+}
+
+function getRefreshAccessTokenUrl(refresh_token){
+    
+    var getRefreshAccessTokenUrl="/auth/token/refresh"
+    var params = {refresh_token:refresh_token};   
+    return createGetUrl(getRefreshAccessTokenUrl,params)
 }
 
 function getSellerUrl(access_token){
@@ -119,3 +126,4 @@ module.exports.RtsURL = RtsURL;
 module.exports.generateSkuUrl = generateSkuUrl
 module.exports.generateAccessTokenUrl = generateAccessTokenUrl;
 module.exports.getSellerUrl = getSellerUrl;
+module.exports.getRefreshAccessTokenUrl = getRefreshAccessTokenUrl;

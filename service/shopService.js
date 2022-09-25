@@ -1,6 +1,6 @@
 const { Shop } = require("../models/shop");
-const { generateAccessTokenUrl, getSellerUrl } = require("../scripts/GenerateUrl");
-const { GetData } = require("../scripts/HttpReq");
+const { generateAccessTokenUrl, getSellerUrl,getRefreshAccessTokenUrl } = require("./GenerateUrl");
+const { GetData, PostData } = require("../scripts/HttpReq");
 const moment = require('moment');
 
 async function authoriseAndAddShop(query,user){
@@ -79,5 +79,23 @@ async function getShopsWithUserEmail(userEmail){
     return shops
 }
 
+async function refreshAccessToken(){
+    try{
+        var shops = await Shop.find({});
+        for(var shop of shops){
+            var generateRefreshAccessUrl=getRefreshAccessTokenUrl(shop.refreshToken);
+            var refreshTokenResp = await PostData(generateRefreshAccessUrl);
+            if(refreshTokenResp.access_token){
+                await Shop.updateOne({account:refreshTokenResp.account},
+                    {access_token:refreshTokenResp.access_token,tokenExpiresIn:moment().add(refreshTokenResp.expires_in,'seconds'),
+                refreshToken:refreshTokenResp.refresh_token,refreshExpiresIn:moment().add(refreshTokenResp.refresh_expires_in,'seconds')})
+            }
+        }
+    }catch(ex){
+        console.log("Exception in refreshing access token: "+ex.message)
+    }
+}
+
 module.exports.authoriseAndAddShop = authoriseAndAddShop;
 module.exports.getShopsWithUserEmail = getShopsWithUserEmail;
+module.exports.refreshAccessToken = refreshAccessToken;

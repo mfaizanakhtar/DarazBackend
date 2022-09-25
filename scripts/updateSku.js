@@ -1,12 +1,12 @@
 const {GetData} = require('./HttpReq')
-const {generateSkuUrl} = require('./GenerateUrl')
+const {generateSkuUrl} = require('../service/GenerateUrl')
 const {Shop} = require('../models/shop')
 const {darazProduct} = require('../models/darazproduct')
 const {darazSku} = require('../models/darazsku')
 const {Sku} = require('../models/sku')
 const {updateOrderItemStatus} = require('../scripts/updateStatus')
 const LazadaAPI = require('lazada-open-platform-sdk')
-const {darazOpenAppDetails} = require('../scripts/data')
+const {darazOpenAppDetails} = require('../data/data')
 const moment = require('moment')
 
 async function getSkus(shop,skus){

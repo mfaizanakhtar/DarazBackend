@@ -8,7 +8,7 @@ const { UserSubscription } = require('../models/userSubscription');
 const moment = require('moment')
 
 router.get('/getAllTransactions',auth,async(req,res)=>{
-    filter = req.user.usertype=='admin' ? {} : {userEmail:req.user.userEmail}
+    filter = req.user.userType=='admin' ? {} : {userEmail:req.user.userEmail}
     var billings = await Billing.find(filter).skip(req.query.pNum*req.query.pSize).limit(req.query.pSize)
     res.status(200).send(billings);
 })
@@ -56,7 +56,7 @@ router.put('/confirmTransaction',auth,async(req,res)=>{
                 userSubscription.endDate=endDate
             await userSubscription.save()
             var {lookup_detail:newPermissions} =await Lookup.findOne({lookup_key:updateResult.subscriptionType})
-            var user = await User.findOne({loginemail:updateResult.userEmail});
+            var user = await User.findOne({loginEmail:updateResult.userEmail});
             if(user.permissions){
                 for(var perm in newPermissions){
                     user.permissions.hasOwnProperty(perm) ? user.permissions[perm] = newPermissions[perm] : ""
