@@ -68,7 +68,7 @@ app.use('/api/scheduler',schedulerRouter)
 
 dataQueries()
 
-updateTransactions();
+// updateTransactions();
 
 // updateOrdersData();
 
