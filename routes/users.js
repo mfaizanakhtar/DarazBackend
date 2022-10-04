@@ -4,7 +4,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
 const { UserSubscription } = require('../models/userSubscription');
-const { sendVerificationEmail,sendResetEmail } = require('../service/emailService');
+const { sendVerificationEmail,sendResetEmail, sendInvitationVerification } = require('../service/emailService');
 const crypto = require('crypto');
 const { Token } = require('../models/token');
 const config = require('config');
@@ -199,8 +199,9 @@ router.get('/getSubAccounts',auth,async(req,res)=>{
 router.post('/addSubAccount',auth,async(req,res)=>{
     // console.log(req.body)
     if(req.user.accountType=="root"){
-    var user = await User.findOne({$or:[{loginEmail:req.body.loginEmail.toLowerCase()},{userEmail:req.body.loginEmail.toLowerCase(),userName:req.body.userName.toLowerCase()}] })
+    var user = await User.findOne({$or:[{loginEmail:req.body.loginEmail.toLowerCase()},{userEmail:req.body.loginEmail.toLowerCase()}] })
     if(user) return res.status(400).send({message:"User already exists"});
+    var rootUser = await User.findOne({$and:[{loginEmail:req.user.userEmail.toLowerCase()},{userEmail:req.user.userEmail.toLowerCase()}],accountType:'root'})
 
     user = new User({
         userEmail:req.user.userEmail,
@@ -208,7 +209,8 @@ router.post('/addSubAccount',auth,async(req,res)=>{
         userName:req.body.userName,
         password:"password.123",
         accountType:"sub",
-        permissions:req.body.permissions
+        permissions:req.body.permissions,
+        subscription:rootUser.subscription
 
     })
 
@@ -228,7 +230,7 @@ router.post('/addSubAccount',auth,async(req,res)=>{
     
         var link = config.baseUrl+"/login/verifyAndActiveAccount?token="+tokenString
     
-        sendResetEmail(req.body.loginEmail,link)
+        sendInvitationVerification(req.body.loginEmail,link,rootUser.userName)
     } 
     
     await user.save();
@@ -254,14 +256,16 @@ router.get('/getSubAccountWithToken/:token',async(req,res)=>{
 })
 
 router.post('/verifySubAccountWithToken/:token',async(req,res)=>{
+    console.log(req.params.token)
     var userToken = await Token.findOne({token:req.params.token,tokenType:"createSubAccount"})
     var user;
     if(userToken){
-        user = await User.findOne({_id:userToken.userId,loginEmail:req.body.loginEmail,userName:req.body.userName})
+        user = await User.findOne({_id:userToken.userId,loginEmail:req.body.loginEmail})
         if(user){
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(req.body.userPassword,salt);
             user.isVerified=true
+            user.userName=req.body.userName;
             await user.save();
             await userToken.delete()
             return res.status(200).send({status:"success",message:"Registration Completed Successfully, You Will Be Redirected To Login Page"})
@@ -333,7 +337,7 @@ router.put('/resetPasswordWithToken/:token',async(req,res)=>{
 
     await user.save()
     await tokenObj.delete()
-    res.send({status:"sucess",message:"Password Changed Successfully, You will be redirected to Login Page"})
+    res.send({status:"success",message:"Password Changed Successfully, You will be redirected to Login Page"})
 })
 
 module.exports = router;

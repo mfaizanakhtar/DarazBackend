@@ -55,3 +55,4 @@ function sendEmail(credential,subject,body,recipent){
 
 module.exports.sendVerificationEmail = sendVerificationEmail
 module.exports.sendResetEmail = sendResetEmail
+module.exports.sendInvitationVerification = sendInvitationVerification
