@@ -1,9 +1,10 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const constants = require('../data/constants');
 
 
 const userSubscriptionSchema = new mongoose.Schema({
     userEmail:String,
-    subscriptionType:{type:String,default:null},
+    subscriptionType:{type:String,default:constants.trialPermisLookup},
     startDate:Date,
     endDate:Date,
     futureRequest:{

@@ -34,8 +34,6 @@ const userSchema = new mongoose.Schema({
     verification:{type:Object,default:null},
     permissions:Object,
     subscription:{type:mongoose.Schema.Types.ObjectId,ref:'UserSubscription'},
-    subscriptionEndDate:{type:Date,default:() => Date.now() + 7*24*60*60*1000},
-    subscriptionType:String
 })
 
 userSchema.methods.generateAuthToken = function () {

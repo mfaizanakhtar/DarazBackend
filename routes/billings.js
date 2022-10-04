@@ -8,6 +8,7 @@ const { UserSubscription } = require('../models/userSubscription');
 const moment = require('moment')
 
 router.get('/getAllTransactions',auth,async(req,res)=>{
+    console.log(req.user)
     filter = req.user.userType=='admin' ? {} : {userEmail:req.user.userEmail}
     var billings = await Billing.find(filter).skip(req.query.pNum*req.query.pSize).limit(req.query.pSize)
     res.status(200).send(billings);

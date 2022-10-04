@@ -8,6 +8,9 @@ const { sendVerificationEmail,sendResetEmail } = require('../service/emailServic
 const crypto = require('crypto');
 const { Token } = require('../models/token');
 const config = require('config');
+const constants = require('../data/constants');
+const moment = require('moment');
+const { Lookup } = require('../models/lookup');
 
 router.get('/',async(req,res)=>{
     const user =await User.find({accountType:"root"},{password:0,_id:0});
@@ -49,65 +52,73 @@ router.post('/addUser',auth,async(req,res)=>{
 })
 
 router.post('/signup',async(req,res)=>{
-        let user = await User.findOne({$or:[{useremail:req.body.userEmail.toLowerCase()},{loginemail:req.body.userEmail.toLowerCase()}],isVerified:true});
+        let user = await User.findOne({$or:[{userEmail:req.body.userEmail.toLowerCase()},{loginEmail:req.body.userEmail.toLowerCase()}],isVerified:true});
         if (user) return res.send({error:"User already exists"}); 
 
-        var verificationCode = Math.floor(Math.random() * (999999 - 99999) ) + 99999;
-        var verificationExpiry=new Date(new Date().getTime() + 10*60000);
-        var verificationObj={code:verificationCode,expiry:verificationExpiry}
-
-        user = await User.findOne({$or:[{useremail:req.body.userEmail.toLowerCase()},{loginemail:req.body.userEmail.toLowerCase()}],isVerified:false});
+        user = await User.findOne({$or:[{userEmail:req.body.userEmail.toLowerCase()},{loginEmail:req.body.userEmail.toLowerCase()}],isVerified:false});
         if(!user){
+            var {lookup_detail:trialPermissions} =await Lookup.findOne({lookup_key:constants.trialPermisLookup})
 
             var userSubscription = new UserSubscription({
-                userEmail:req.body.userEmail.toLowerCase()
+                userEmail:req.body.userEmail.toLowerCase(),
+                startDate:moment(),
+                endDate:moment().add(1,'month')
             })
             userSubscription = await userSubscription.save();
             console.log(userSubscription)
 
             user = new User({
-                useremail:req.body.userEmail.toLowerCase(),
-                username:req.body.userName,
-                loginemail:req.body.userEmail.toLowerCase(),
-                usertype:"user",
+                userEmail:req.body.userEmail.toLowerCase(),
+                userName:req.body.userName,
+                loginEmail:req.body.userEmail.toLowerCase(),
+                userType:"user",
+                permissions:trialPermissions,
                 subscription:userSubscription._id
             })
 
         }
         const salt = await bcrypt.genSalt(10);
         user.password =await bcrypt.hash(req.body.userPassword,salt);
-        user.username=req.body.userName
-        user.verification = verificationObj
+        user.userName=req.body.userName
 
-        await user.save();
-        sendVerificationEmail(verificationCode,req.body.userEmail.toLowerCase())
+        var savedUser = await user.save();
+
+        let tokenString
+        var tokenObj = await Token.findOne({userId:savedUser._id,tokenType:'signUp'})
+        if(!tokenObj){
+            tokenString = crypto.randomBytes(32).toString("hex")
+            await new Token({
+                userId:savedUser._id,
+                token: tokenString,
+                tokenType:'signUp'
+            }).save()
+        }else tokenString = tokenObj.token
+    
+        var link = config.baseUrl+"/login/register?token="+tokenString
+
+        sendVerificationEmail(link,req.body.userEmail.toLowerCase())
         res.status(201).send({message:'User Registered'});
 })
 
 router.put('/verifyEmail',async(req,res)=>{
-    console.log(req.body)
-    let user = await User.findOne({$or:[{useremail:req.body.userEmail.toLowerCase()},{loginemail:req.body.userEmail.toLowerCase()}],isVerified:false})
-    if(user){
-        if(user.verification!=null){
-           if(user.verification.expiry>=new Date()){
-               if(user.verification.code==req.body.verificationCode){
-                user.isVerified=true
-                user.save()
-                return res.send({status:"success",message:"Successfully Verified. Please wait, you will be directed to login page"})
-               }
-               return res.send({status:"error",message:"Incorrect Verification Code. Please Try Again"})   
-           }
-           return res.send({status:"error",message:"Verification Code Expired."})
-        }
-    }
-    return res.send({status:"error",message:"User already verified or does not exist. Please proceed to Signup"})
+    console.log(req.body.token)
+    var tokenObj = await Token.findOne({token:req.body.token,tokenType:'signUp'})
+    if(!tokenObj) return res.send({status:"error",message:"Invalid or Expired Link"})
+
+    var user = await User.findOne({_id:tokenObj.userId})
+    user.isVerified = true
+
+    await user.save()
+    await tokenObj.delete()
+    res.send({status:"success",message:"Verified. Please wait, you will be redirected to login page"})
+
 })
 
-router.put('/updateUser/:loginemail',auth,async(req,res)=>{
+router.put('/updateUser/:loginEmail',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
-        // console.log(req.params.useremail)
-        var update = await User.updateOne({loginemail:req.params.loginemail.toLowerCase()},{
-            usertype:req.body.usertype,
+        // console.log(req.params.userEmail)
+        var update = await User.updateOne({loginEmail:req.params.loginEmail.toLowerCase()},{
+            userType:req.body.usertype,
             permissions:req.body.permissions
         });
         res.send(update)
@@ -117,12 +128,12 @@ router.put('/updateUser/:loginemail',auth,async(req,res)=>{
     }
 })
 
-router.put('/resetPassword/:loginemail',auth,async(req,res)=>{
+router.put('/resetPassword/:loginEmail',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
         const salt = await bcrypt.genSalt(10);
         var password=await bcrypt.hash('password.123',salt)
 
-        var update = await User.updateOne({loginemail:req.params.loginemail.toLowerCase()},{
+        var update = await User.updateOne({loginEmail:req.params.loginEmail.toLowerCase()},{
             password:password
         });
         res.send(update)
@@ -133,8 +144,8 @@ router.put('/resetPassword/:loginemail',auth,async(req,res)=>{
 })
 
 router.post('/deleteUser',auth,async(req,res)=>{
-    if(req.user.usertype=="admin"){
-        var del = await User.deleteMany({useremail:req.body.useremail.toLowerCase()})
+    if(req.user.userType=="admin"){
+        var del = await User.deleteMany({userEmail:req.body.userEmail.toLowerCase()})
         res.send(del)
     }
     else{
@@ -144,7 +155,7 @@ router.post('/deleteUser',auth,async(req,res)=>{
 
 router.put('/updatePassword',auth,async(req,res)=>{
     // console.log(req.body)
-    let user = await User.findOne({loginemail:req.user.loginemail.toLowerCase()})
+    let user = await User.findOne({loginEmail:req.user.loginEmail.toLowerCase()})
     const password = await bcrypt.compare(req.body.oldPassword,user.password)
     // console.log(password)
     if(password==true){
@@ -157,10 +168,10 @@ router.put('/updatePassword',auth,async(req,res)=>{
     else res.send({message:'Incorrect Old Password'})
 })
 
-router.put('/addSubscription/:useremail',auth,async(req,res)=>{
+router.put('/addSubscription/:userEmail',auth,async(req,res)=>{
     if(req.user.usertype=="admin"){
         var addSubscription=new Date(req.body.subscriptionEndDate)
-        result = await User.updateMany({useremail:req.params.useremail.toLowerCase()},{subscriptionEndDate:addSubscription})
+        result = await User.updateMany({userEmail:req.params.userEmail.toLowerCase()},{subscriptionEndDate:addSubscription})
         res.send(result)
     }
     else{
@@ -170,31 +181,31 @@ router.put('/addSubscription/:useremail',auth,async(req,res)=>{
 })
 
 router.put('/selectSubscription',auth,async(req,res)=>{
-    var result = await User.updateOne({useremail:req.user.userEmail},{subscriptionType:req.body.subscriptionType})
+    var result = await User.updateOne({userEmail:req.user.userEmail},{subscriptionType:req.body.subscriptionType})
     res.status(201).send({successMessage:"subscription successfully updated"})
 })
 
 router.get('/currentSubscription',auth,async(req,res)=>{
-    var result = await User.findOne({useremail:req.user.userEmail})
+    var result = await User.findOne({userEmail:req.user.userEmail})
     res.status(200).send({subscriptionType:result.subscriptionType})
 })
 
 
 router.get('/getSubAccounts',auth,async(req,res)=>{
-    subusers = await User.find({useremail:req.user.userEmail.toLowerCase(),accountType:"sub"},{password:0,_id:0})
+    subusers = await User.find({userEmail:req.user.userEmail.toLowerCase(),accountType:"sub"},{password:0,_id:0})
     res.send(subusers)
 })
 
 router.post('/addSubAccount',auth,async(req,res)=>{
     // console.log(req.body)
     if(req.user.accountType=="root"){
-    var user = await User.findOne({$or:[{loginemail:req.body.loginemail.toLowerCase()},{useremail:req.body.loginemail.toLowerCase(),username:req.body.username.toLowerCase()}] })
+    var user = await User.findOne({$or:[{loginEmail:req.body.loginEmail.toLowerCase()},{userEmail:req.body.loginEmail.toLowerCase(),userName:req.body.userName.toLowerCase()}] })
     if(user) return res.status(400).send({message:"User already exists"});
 
     user = new User({
-        useremail:req.user.userEmail,
-        loginemail:req.body.loginemail,
-        username:req.body.username,
+        userEmail:req.user.userEmail,
+        loginEmail:req.body.loginEmail,
+        userName:req.body.userName,
         password:"password.123",
         accountType:"sub",
         permissions:req.body.permissions
@@ -217,7 +228,7 @@ router.post('/addSubAccount',auth,async(req,res)=>{
     
         var link = config.baseUrl+"/login/verifyAndActiveAccount?token="+tokenString
     
-        sendResetEmail(req.body.loginemail,link)
+        sendResetEmail(req.body.loginEmail,link)
     } 
     
     await user.save();
@@ -246,7 +257,7 @@ router.post('/verifySubAccountWithToken/:token',async(req,res)=>{
     var userToken = await Token.findOne({token:req.params.token,tokenType:"createSubAccount"})
     var user;
     if(userToken){
-        user = await User.findOne({_id:userToken.userId,loginemail:req.body.loginEmail,username:req.body.userName})
+        user = await User.findOne({_id:userToken.userId,loginEmail:req.body.loginEmail,userName:req.body.userName})
         if(user){
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(req.body.userPassword,salt);
@@ -261,8 +272,8 @@ router.post('/verifySubAccountWithToken/:token',async(req,res)=>{
 })
 
 router.put('/updateSubAccount',auth,async(req,res)=>{
-    updateResult = await User.updateOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.userEmail.toLowerCase()},{
-        username:req.body.username,
+    updateResult = await User.updateOne({loginEmail:req.body.loginEmail.toLowerCase(),userEmail:req.user.userEmail.toLowerCase()},{
+        userName:req.body.userName,
         permissions:req.body.permissions
     })
 
@@ -270,16 +281,16 @@ router.put('/updateSubAccount',auth,async(req,res)=>{
 })
 
 router.post('/deleteSubAccount',auth,async(req,res)=>{
-    deleteResult = await User.deleteOne({loginemail:req.body.loginemail.toLowerCase(),useremail:req.user.userEmail.toLowerCase()})
+    deleteResult = await User.deleteOne({loginEmail:req.body.loginEmail.toLowerCase(),userEmail:req.user.userEmail.toLowerCase()})
     res.send(deleteResult)
 })
 
-router.put('/resetSubPassword/:loginemail',auth,async(req,res)=>{
+router.put('/resetSubPassword/:loginEmail',auth,async(req,res)=>{
     if(req.user.accountType=="root"){
         const salt = await bcrypt.genSalt(10);
         var password=await bcrypt.hash('password.123',salt)
 
-        var update = await User.updateOne({loginemail:req.params.loginemail.toLowerCase()},{
+        var update = await User.updateOne({loginEmail:req.params.loginEmail.toLowerCase()},{
             password:password
         });
         res.send(update)
@@ -290,7 +301,7 @@ router.put('/resetSubPassword/:loginemail',auth,async(req,res)=>{
 })
 
 router.post('/recoverPassword',async(req,res)=>{
-    var user = await User.findOne({loginemail:req.body.resetEmail.toLowerCase()})
+    var user = await User.findOne({loginEmail:req.body.resetEmail.toLowerCase()})
     console.log(user)
     if(!user) return res.send({status:"error",message:"Account does not exist"})
 
