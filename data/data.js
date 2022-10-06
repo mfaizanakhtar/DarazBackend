@@ -2,24 +2,28 @@ plansData  = [
     {
         Name:"Starter",
         Pricing:1000,
+        DiscountPercent:{"1":0.9,"3":0.8,"6":0.7,"12":0.5},
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-edit-box-line"
     },
     {
         Name:"Professional",
         Pricing:2000,
+        DiscountPercent:{"1":0.9,"3":0.8,"6":0.7,"12":0.5},
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-medal-line "
     },
     {
         Name:"ProfessionalPlus",
         Pricing:5000,
+        DiscountPercent:{"1":0.9,"3":0.8,"6":0.7,"12":0.5},
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-stack-line"
     },
     {
         Name:"Enterprise",
         Pricing:20000,
+        DiscountPercent:{"1":0.9,"3":0.8,"6":0.7,"12":0.5},
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-vip-crown-line"
     }

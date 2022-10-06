@@ -26,9 +26,10 @@ async function updateTransactions(){
     // console.log(dates)
     for(shop of shops){
         for(transType of transactionTypes){
-            transactionsLength=0
-            while(transactionsLength!=500){
-                var offSet=0;
+            transactionsLength=500
+            var offSet=0;
+            while(transactionsLength==500){
+                var alreadyInDbcount=0;
                 //get Url for transaction
                 url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract('2','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
                 // console.log(url)
@@ -36,7 +37,7 @@ async function updateTransactions(){
                 var transactions = await GetData(url);
                 transactionsLength = transactions.length
                 if(transactions!=null){
-                var previousTransactionsData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryData:JSON.stringify(transactions),queryType:"transType"+transType+"offSet="+offSet})
+                var previousTransactionsData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryData:JSON.stringify(transactions),queryType:"transType="+transType+"offSet="+offSet})
 
                 if(previousTransactionsData.length<=0){
 
@@ -74,6 +75,7 @@ async function updateTransactions(){
                         //if not found, save into db
                     var transaction = getTransactionObj(t,shop,transType)
                     transactResult = await transaction.save()
+                    alreadyInDbcount++
                     //find corresponding order and push transaction into order obj
                     var updateResult = await OrderItems.updateMany({OrderItemId:transactResult.OrderItemNo,ShopShortCode:shop.shortCode},{
                         $push:{Transactions:
@@ -95,16 +97,17 @@ async function updateTransactions(){
                 }
                     
                 };
-                previousTransactionsData = await previousDataQuery.find({ShopId:shop.shopid,queryType:"transType"+transType})
+                previousTransactionsData = await previousDataQuery.find({ShopId:shop.shopid,queryType:"transType="+transType})
                 console.log("New Transactions Found")
                 if(previousTransactionsData.length>0){
-                    await previousDataQuery.updateMany({shopShortCode:shop.shortCode,queryType:"transType"+transType+"offSet="+offSet},{queryData:JSON.stringify(transactions)})
-                }else await new previousDataQuery({shopShortCode:shop.shortCode,queryData:JSON.stringify(transactions),queryType:"transType"+"offSet="+offSet}).save()
+                    await previousDataQuery.updateMany({shopShortCode:shop.shortCode,queryType:"transType="+transType+"offSet="+offSet},{queryData:JSON.stringify(transactions)})
+                }else await new previousDataQuery({shopShortCode:shop.shortCode,queryData:JSON.stringify(transactions),queryType:"transType="+transType+"offSet="+offSet}).save()
             }
             }else{
                 console.log("Invalid username or secretkey of shop "+ shop.name)
             }
         offSet++
+        if((alreadyInDbcount/transactionsLength)>=0.8) break;
     }
     }
 }
