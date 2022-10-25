@@ -65,7 +65,7 @@ async function FindQuery(query,user){
     // console.log("here",orders)
     const length = await Order.aggregate([
         {
-            $match:{useremail:user.useremail,...dateFilter}
+            $match:{UserEmail:user.userEmail,...dateFilter}
         },
         {$lookup:{
             from:'orderitems',
