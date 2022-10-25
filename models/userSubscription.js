@@ -4,7 +4,7 @@ const constants = require('../data/constants');
 
 const userSubscriptionSchema = new mongoose.Schema({
     userEmail:String,
-    subscriptionType:{type:String,default:constants.trialPermisLookup},
+    subscriptionType:{type:String,default:constants.TRIAL_PERMISSIONS_LOOKUP},
     startDate:Date,
     endDate:Date,
     futureRequest:{

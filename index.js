@@ -9,6 +9,7 @@ const shop = require('./routes/shops');
 const orderitems = require('./routes/orderItems');
 const transactions = require('./routes/transactions')
 const dashboards = require('./routes/dashboards');
+const coupons =require('./routes/coupons');
 const { OrderItems } = require('./models/orderItem');
 const orders = require('./routes/orders');
 const skus = require('./routes/skus');
@@ -63,14 +64,15 @@ app.use('/api/plans',plans)
 app.use('/api/lookups',lookups)
 app.use('/api/billings',billings)
 app.use('/api/scheduler',schedulerRouter)
+app.use('/api/coupon',coupons)
 
 // scheduler();
 
-dataQueries()
+// dataQueries()
 
 // updateTransactions();
 
-// updateOrdersData();
+updateOrdersData();
 
 // getAllSkus();
 

@@ -5,7 +5,8 @@ const { Billing } = require('../models/billing');
 const { Lookup } = require('../models/lookup');
 const { User } = require('../models/user');
 const { UserSubscription } = require('../models/userSubscription');
-const moment = require('moment')
+const moment = require('moment');
+const constants = require('../data/constants');
 
 router.get('/getAllTransactions',auth,async(req,res)=>{
     console.log(req.user)
@@ -15,30 +16,36 @@ router.get('/getAllTransactions',auth,async(req,res)=>{
 })
 
 router.post('/addTransaction',auth,async(req,res)=>{
-    var billing = new Billing({
+    const billing = new Billing({
         billingId:await Billing.find().countDocuments()+1,
         createdAt:new Date(),
         userEmail:req.user.userEmail,
         subscriptionType:req.body.subscriptionType,
         duration:req.body.duration,
         durationType:req.body.durationType,
-        pricing:req.body.pricing,
+        billingMethod:req.body.billingMethod,
         isFutureRequest:req.body.isFutureRequest,
         invoiceAmount:req.body.invoiceAmount,
         bankDetail:req.body.bankDetail,
         transactionId:req.body.transactionId,
         screenShot:req.body.screenShot
     })
+    if(req.body.billingMethod=='1'){
+        billing.paymentUrl=constants.BANK_TRANSFER_URL;
+    }else if(req.body.billingMethod=='2'){
+        billing.paymentUrl=constants.EASYPAISA_URL;
+    }
 
-    var savedBilling = await billing.save()
-    res.status(201).send({billingId:savedBilling.billingId})
+    const savedBilling = await billing.save();
+
+    res.status(201).send({billingId:savedBilling.billingId,redirectUrl:billing.paymentUrl})
 })
 
 router.put('/confirmTransaction',auth,async(req,res)=>{
     //update transaction
     console.log(req.body)
     var updateResult = await Billing.findOneAndUpdate({_id:req.body.transactionId},{status:req.body.status})
-    if(req.body.status=='approved' && updateResult){
+    if(req.body.status=='completed' && updateResult){
         //update subscription
         var userSubscription = await UserSubscription.findOne({userEmail:updateResult.userEmail})
         if(updateResult.isFutureRequest && userSubscription){
@@ -94,6 +101,14 @@ router.put('/cancelFutureRequest',auth,async(req,res)=>{
         res.status(200).send({status:'failure'})
     }
 
+})
+
+router.put('/updateBTBillingTransaction/:billingId',auth,async(req,res)=>{
+    var updateStatus = await Billing.updateOne({billingId:req.params.billingId},
+        {bankDetail:req.body.bankDetail,transactionId:req.body.transactionId,screenShot:req.body.screenShot,status:req.body.status})
+
+    if(updateStatus.nModified>0) return res.status(200).send({message:"submitted successfully"})
+    else return res.status(500).send({message:"internal error occured"})
 })
 
 

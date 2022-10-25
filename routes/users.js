@@ -57,7 +57,7 @@ router.post('/signup',async(req,res)=>{
 
         user = await User.findOne({$or:[{userEmail:req.body.userEmail.toLowerCase()},{loginEmail:req.body.userEmail.toLowerCase()}],isVerified:false});
         if(!user){
-            var {lookup_detail:trialPermissions} =await Lookup.findOne({lookup_key:constants.trialPermisLookup})
+            var {lookup_detail:trialPermissions} =await Lookup.findOne({lookup_key:constants.TRIAL_PERMISSIONS_LOOKUP})
 
             var userSubscription = new UserSubscription({
                 userEmail:req.body.userEmail.toLowerCase(),

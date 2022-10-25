@@ -11,7 +11,7 @@ function executeAllDataQueries(){
     insertLookup("Professional",plansPermissions.Professional)
     insertLookup("ProfessionalPlus",plansPermissions.ProfessionalPlus)
     insertLookup("Enterprise",plansPermissions.Enterprise)
-    insertLookup(constants.trialPermisLookup,plansPermissions.Enterprise)
+    insertLookup(constants.TRIAL_PERMISSIONS_LOOKUP,plansPermissions.Enterprise)
     insertLookup("mailerCredential",mailerCredential)
     insertLookup("darazOpenAppDetails",darazOpenAppDetails)
 }
