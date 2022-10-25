@@ -31,7 +31,7 @@ function baseSku(Sku){
 
 async function updateNewOrders(shop,OrdersData){
     for (const order of OrdersData){
-    var result = await Order.findOne({OrderId:order.order_id,ShopCode:shop.shortCode})
+    var result = await Order.findOne({OrderId:order.order_id,ShopShortCode:shop.shortCode})
     // console.log(result)
 
     if(!result){
