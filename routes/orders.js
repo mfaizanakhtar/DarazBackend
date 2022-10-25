@@ -40,7 +40,7 @@ async function FindQuery(query,user){
     // if(query.shopSort=="true") shopSort=[{$sort:{"ShopId":1}}]
 
     //spread the finalfilter,query,date and assign it to final filter
-    FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail,...isPrinted}
+    FinalFilter = {...FinalFilter,...query,...dateFilter,userEmail:user.userEmail,...isPrinted}
     console.log(FinalFilter)
     //query generated
     const orders = await Order.aggregate([
