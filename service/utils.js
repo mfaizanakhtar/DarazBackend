@@ -11,8 +11,8 @@ function SignParameters(secretkey,param){
 
 function getDateFilter(query){
 
-    var startdate=moment(query.startDate).startOf('day').toDate()
-    var enddate=moment(query.endDate).endOf('day').toDate()
+    let startdate=query.startDate
+    let enddate=query.startDate
     console.log(startdate)
     console.log(enddate)
 
@@ -22,8 +22,8 @@ function getDateFilter(query){
 
 function getDateFilterTransactions(query){
 
-    var startdate=moment(query.startDate).startOf('day').toDate()
-    var enddate=moment(query.endDate).endOf('day').toDate()
+    let startdate=moment(query.startDate).startOf('day').toDate()
+    let enddate=moment(query.endDate).endOf('day').toDate()
     console.log(startdate)
     console.log(enddate)
 
