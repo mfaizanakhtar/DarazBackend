@@ -105,7 +105,7 @@ mailerCredential={
 }
 
 darazOpenAppDetails={
-    callBackUrl:"https://dpage.accesology.com/users/shops",
+    callBackUrl:"https://app.edashlytic.com/users/shops",
     appKey:"500606",
     pkUrl:"https://api.daraz.pk/oauth/authorize",
     appSecret:"6Ob7pZ9yTjXTNrKSXMXXxFoatFsKP73D"
