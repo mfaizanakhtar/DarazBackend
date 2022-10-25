@@ -68,11 +68,11 @@ app.use('/api/coupon',coupons)
 
 // scheduler();
 
-// dataQueries()
+dataQueries()
 
 // updateTransactions();
 
-updateOrdersData();
+// updateOrdersData();
 
 // getAllSkus();
 
