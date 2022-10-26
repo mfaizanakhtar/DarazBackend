@@ -4,7 +4,7 @@ const transactionSchema = new mongoose.Schema({
     TransactionDate:Date,
     TransactionType:String,
     FeeName:String,
-    TransactionNumber:String,
+    TransactionNumber:{type:String,unique:true},
     Details:String,
     SellerSku:String,
     LazadaSku:String,

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const OrderItemsSchema = new mongoose.Schema({
     OrderId:String,
-    OrderItemId:String,
+    OrderItemId:{type:String,unique:true},
     ShopShortCode:String,
     ShopName:String,
     Name:String,

@@ -17,7 +17,7 @@ const ShopSchema = new mongoose.Schema({
     location:String,
     email:String,
     status:String,
-    shortCode:String,
+    shortCode:{type:String,unique:true},
     appStatus:{type:Boolean,default:true}
 
 })

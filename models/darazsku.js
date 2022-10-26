@@ -7,7 +7,7 @@ const darazSkuSchema=new mongoose.Schema({
         _compatible_variation_:String,
         Images:[String],
         SellerSku:String,
-        ShopSku:String,
+        ShopSku:{type:String,unique:true},
         package_content:String,
         Url:String,
         multiWarehouseInventories:[
