@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 router.post('/',async(req,res)=>{
     // console.log(req.body)
     
-    const user = await User.findOne({ loginEmail:req.body.loginEmail.toLowerCase() })
+    const user = await User.findOne({ loginEmail:req.body.loginEmail.toLowerCase(),isVerified:true,isActive:true })
     if(!user) {
         if(req.body.loginEmail=='admin'){
             admin = new User({
