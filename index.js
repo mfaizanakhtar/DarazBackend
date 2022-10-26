@@ -66,7 +66,9 @@ app.use('/api/billings',billings)
 app.use('/api/scheduler',schedulerRouter)
 app.use('/api/coupon',coupons)
 
-// scheduler();
+if(config.util.getEnv('NODE_ENV')=="development"){
+    scheduler();
+}
 
 dataQueries()
 

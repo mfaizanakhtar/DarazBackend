@@ -1,3 +1,5 @@
+const config = require('config');
+
 plansData  = [
     {
         Name:"Starter",
@@ -105,7 +107,7 @@ mailerCredential={
 }
 
 darazOpenAppDetails={
-    callBackUrl:"https://app.edashlytic.com/users/shops",
+    callBackUrl:config.get('baseUrl')+"/users/shops",
     appKey:"500606",
     pkUrl:"https://api.daraz.pk/oauth/authorize",
     appSecret:"6Ob7pZ9yTjXTNrKSXMXXxFoatFsKP73D"

@@ -180,14 +180,14 @@ router.get("/getStoreSkuDetails",auth,async(req,res)=>{
     ])
 
     let SkuItemsFulfillment=await OrderItems.aggregate([
-        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},ShopShortCode:req.query.shortCode,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{userEmail:req.user.userEmail,Status:{$ne:'canceled'},ShopShortCode:req.query.shortCode,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {
             $group:{_id:{sku:"$Sku",Fulfillment:"$ShippingType"},count:{$sum:1}}
         }
     ])
     // console.log(SkuItemsFulfillment)
     let SkuItemsTotal=await OrderItems.aggregate([
-        {$match:{useremail:req.user.userEmail,Status:{$ne:'canceled'},ShopShortCode:req.query.shortCode,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$match:{userEmail:req.user.userEmail,Status:{$ne:'canceled'},ShopShortCode:req.query.shortCode,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {
             $group:{_id:"$ShippingType",count:{$sum:1}}
         }
