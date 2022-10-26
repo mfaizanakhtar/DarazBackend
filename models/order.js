@@ -68,7 +68,7 @@ const orderSchema = new mongoose.Schema({
     ClaimNumber:String
 
 })
-
 const Order = mongoose.model('Order',orderSchema);
+
 
 module.exports.Order = Order;

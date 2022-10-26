@@ -23,41 +23,39 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
 async function updateOrderItemStatus(user,status){
     try{
 
-    var updateResult
-
-    var darazid = await Shop.find({...user});
-    for(var shop of darazid){
+        let darazid = await Shop.find({...user});
+    for(let shop of darazid){
         //get order with statuses of this shop
         splitCount=100
-        var orderitemscount = await OrderItems.countDocuments({...status,ShopShortCode:shop.shortCode})
+        let orderitemscount = await OrderItems.countDocuments({...status,ShopShortCode:shop.shortCode})
         // console.log(orderitemscount)
-        end = Math.ceil(orderitemscount/splitCount)
+        let end = Math.ceil(orderitemscount/splitCount)
         // console.log(end)
         for(let i=0;i<end;i++){
-            var orderitems = await OrderItems.find({...status,ShopShortCode:shop.shortCode})
+            let orderitems = await OrderItems.find({...status,ShopShortCode:shop.shortCode})
             .skip(i*splitCount)
             .limit(splitCount)
             // console.log(shop.shopid+' '+orderitems.length)
-            var orderitemsrray = orderitems.map((order)=>'"'+order.OrderId+'"')
-            url = await generateMultipleOrderItemsUrl(shop.accessToken,'['+orderitemsrray+']');
+            let orderitemsrray = orderitems.map((order)=>'"'+order.OrderId+'"')
+            let url = await generateMultipleOrderItemsUrl(shop.accessToken,'['+orderitemsrray+']');
             // console.log(url)
-            orderitemsdata = await GetData(url);
-            if(orderitemsdata!=null && orderitemsdata!=undefined){
+            let orderitemsdata = await GetData(url);
+            if(orderitemsdata && orderitemsdata.length>0){
                 // console.log(orderitemsdata.Orders.length)
 
-                for(var orders of orderitemsdata){
-                    // console.log(orders)
-                    for(item of orders.order_items){
-                        // console.log(item)
-                        // if(orders.OrderItems==undefined || orders.OrderItems==null) {console.log("null here")}
-                        updateResult = await OrderItems.findOneAndUpdate(
-                        {OrderId:item.order_id,Sku:item.sku,ShopSku:item.shop_sku,
-                        ShippingType:item.shipping_type,OrderItemId:item.order_item_id,ItemPrice:item.item_price,
-                        ShippingAmount:item.shipping_amount
-                        ,Variation:item.variation},
-                        {Status:item.status,TrackingCode:item.tracking_code,
-                            ShipmentProvider:item.shipment_provider.substr(item.shipment_provider.indexOf(',')+2),UpdatedAt:item.updated_at,Reason:item.reason})
-                    
+                for(let orders of orderitemsdata){
+                    if(orders.order_items && orders.order_items.length>0){
+                        for(item of orders.order_items){
+
+                            updateResult = await OrderItems.findOneAndUpdate(
+                            {OrderId:item.order_id,Sku:item.sku,ShopSku:item.shop_sku,
+                            ShippingType:item.shipping_type,OrderItemId:item.order_item_id,ItemPrice:item.item_price,
+                            ShippingAmount:item.shipping_amount
+                            ,Variation:item.variation},
+                            {Status:item.status,TrackingCode:item.tracking_code,
+                                ShipmentProvider:item.shipment_provider.substr(item.shipment_provider.indexOf(',')+2),UpdatedAt:item.updated_at,Reason:item.reason})
+                        
+                        }
                     }
                 }
             }else{
@@ -66,7 +64,6 @@ async function updateOrderItemStatus(user,status){
         }
 
     }
-
     }catch(error){
         console.log(error)
     }

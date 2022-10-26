@@ -72,6 +72,9 @@ if(config.util.getEnv('NODE_ENV')=="development"){
 
 dataQueries()
 
+updateOrderItemStatus({},{$or:[{Status:'pending'},{ Status:'ready_to_ship'}],ShippingType:'Dropshipping'});
+
+
 // updateTransactions();
 
 // updateOrdersData();
