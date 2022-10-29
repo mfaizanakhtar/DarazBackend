@@ -4,16 +4,16 @@ const auth = require('../middleware/auth')
 const {darazSku} = require('../models/darazsku')
 const { OrderItems } = require('../models/orderItem')
 const { Sku } = require('../models/sku');
+const { updatePriceQuantity } = require('../service/darazSkuService');
 const { getShopsWithUserEmail } = require('../service/shopService');
 
 
 router.get('/getSkus',auth,async(req,res)=>{
-    var pSize=parseInt(req.query.pSize)
-    var pIndex=parseInt(req.query.pIndex)
-    var StockFilter={}
-    // console.log(req.query)
+    let pSize=parseInt(req.query.pSize)
+    let pIndex=parseInt(req.query.pIndex)
+    let StockFilter={}
 
-    for(var key in req.query){
+    for(let key in req.query){
         if(key=='Stock'){
             if(req.query.Stock=='InStock'){
                 StockFilter={quantity:{$gte:0}}
@@ -29,13 +29,13 @@ router.get('/getSkus',auth,async(req,res)=>{
         }
 
     }
-    var darazskus = await darazSku.find({userEmail:req.user.userEmail,...req.query,...StockFilter}).sort({updatedAt:-1})
+    let darazskus = await darazSku.find({userEmail:req.user.userEmail,...req.query,...StockFilter}).sort({updatedAt:-1})
     .skip(pSize*pIndex)
     .limit(pSize)
 
-    var darazskusCount=await darazSku.countDocuments({userEmail:req.user.userEmail,...req.query,...StockFilter})
+    let darazskusCount=await darazSku.countDocuments({userEmail:req.user.userEmail,...req.query,...StockFilter})
  
-    var darazStores=await getShopsWithUserEmail(req.user.userEmail);
+    let darazStores=await getShopsWithUserEmail(req.user.userEmail);
 
 
     res.send({darazskus:darazskus,darazskusCount:darazskusCount,darazStores:darazStores})
@@ -44,21 +44,14 @@ router.get('/getSkus',auth,async(req,res)=>{
 })
 
 router.delete('/:id',auth,async(req,res)=>{
-    var deleteResult = await darazSku.deleteMany({_id:req.params.id,userEmail:req.user.userEmail})
+    let deleteResult = await darazSku.deleteMany({_id:req.params.id,userEmail:req.user.userEmail})
     res.send({DeleteResult:deleteResult})
 })
 
 router.put('/:id',auth,async(req,res)=>{
-    // console.log(req.body)
-    var result = await darazSku.findOneAndUpdate(
+    let result = await darazSku.findOneAndUpdate(
         {_id:req.params.id,userEmail:req.user.userEmail},
-        // {
-            
-        //     $inc:{"FBMstock.quantity":req.body.FBMchange,"FBDstock.quantity":req.body.FBDchange},
-        //     cost:req.body.cost,
-        //     FBDpackagingCost:req.body.FBDpackagingCost,FBMpackagingCost:req.body.FBMpackagingCost
-                
-        // }
+
         {
             cost:req.body.cost,
             FBDpackagingCost:req.body.FBDpackagingCost,FBMpackagingCost:req.body.FBMpackagingCost  
@@ -70,14 +63,16 @@ router.put('/:id',auth,async(req,res)=>{
         await OrderItems.updateMany({ShopSku:result.ShopSku,cost:0,ShippingType:"Dropshipping"},
             {cost:req.body.cost,packagingCost:req.body.FBMpackagingCost})
 
-        // if(req.body.GroupSkuChangeStock!=0){
-        //     console.log("BaseSku: "+result.BaseSku)
-        //     var updateResult = await Sku.findOneAndUpdate({useremail:req.user.userEmail,name:result.BaseSku},
-        //         {$inc:{FBMstock:req.body.GroupSkuChangeStock}})
-        //     console.log(updateResult)
-        // }
-
     res.send({updatedResult:result})
+})
+
+router.put('/updatePriceQuantity/:id',auth,async(req,res)=>{
+    try{
+        let response = await updatePriceQuantity(req.params.id,req.user.userEmail,req.body)
+        res.status(200).send(response)
+    }catch(ex){
+        return res.status(400).send(ex)
+    }
 })
 
 module.exports = router
