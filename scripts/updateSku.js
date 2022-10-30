@@ -8,7 +8,7 @@ const moment = require('moment')
 async function updateSkuPriceQuantity(skuId,updatedFields){
     try{
         return new Promise(async(resolve,reject)=>{
-            fieldsToUpdate={}
+            let fieldsToUpdate={}
             if(updatedFields.Price) fieldsToUpdate={...fieldsToUpdate,price:updatedFields.Price}
             if(updatedFields.SalePrice) fieldsToUpdate={...fieldsToUpdate,special_price:updatedFields.SalePrice}
             if(updatedFields.SaleStartDate) fieldsToUpdate={...fieldsToUpdate,special_from_date:updatedFields.SaleStartDate}

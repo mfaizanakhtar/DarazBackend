@@ -17,8 +17,8 @@ function getRefreshAccessTokenUrl(refresh_token){
     var params = {refresh_token:refresh_token};   
     return createGetUrl(getRefreshAccessTokenUrl,params)
 }
-
 function postUpdatePriceQuantity(access_token,payload){
+
     
     var postUpdatePriceQuantityUrl="/product/price_quantity/update"
     var params = {access_token:access_token,payload:payload};   
