@@ -3,7 +3,7 @@ const constants = require('../data/constants');
 
 
 const userSubscriptionSchema = new mongoose.Schema({
-    userEmail:String,
+    userEmail:{type:String,unique:true},
     subscriptionType:{type:String,default:constants.TRIAL_PERMISSIONS_LOOKUP},
     startDate:Date,
     endDate:Date,

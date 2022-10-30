@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const lookupSchema = new mongoose.Schema({
-    lookup_key:String,
+    lookup_key:{type:String,unique:true},
     lookup_detail:Object
 })
 
