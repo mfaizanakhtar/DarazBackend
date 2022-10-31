@@ -10,11 +10,8 @@ router.get('/',auth,async(req,res)=>{
     var pageSize = req.query.pSize
     var pageIndex = req.query.Pindex
 
-    // startdate = new Date(query.startDate);
-    // startdate.setHours(startdate.getHours()-5);
-    // enddate = new Date(query.endDate);
-    // enddate.setHours(enddate.getHours()+18,59,59,59);
-    var dateFilter = getDateFilterTransactions(query)
+    let startdate = new Date(query.startDate);
+    let enddate = new Date(query.endDate);
     
     for(var propName in query){
         if(query[propName]=="null" || propName=="startDate" || propName=="endDate" || propName=="pSize" || propName=="pIndex"){
@@ -24,7 +21,7 @@ router.get('/',auth,async(req,res)=>{
 
     var Filter =    {
         userEmail:req.user.userEmail,
-        $and:[{TransactionDate:{$gte:dateFilter.startDate}},{TransactionDate:{$lte:dateFilter.endDate}}],
+        $and:[{TransactionDate:{$gte:startdate}},{TransactionDate:{$lte:enddate}}],
         ...query
     }
 
@@ -109,7 +106,7 @@ async function getAggregatedValues(req,Filter){
                 $match:{userEmail:req.user.userEmail}
             },
             {
-                $group:{_id:"$ShopName"}
+                $group:{_id:"$ShopName",ShopShortCode:{$first:"$ShopShortCode"}}
             }])
         
         var Statements = await Transaction.aggregate([
