@@ -20,17 +20,5 @@ function getDateFilter(query){
     
 }
 
-function getDateFilterTransactions(query){
-
-    let startdate=moment(query.startDate).startOf('day').toDate()
-    let enddate=moment(query.endDate).endOf('day').toDate()
-    console.log(startdate)
-    console.log(enddate)
-
-    return {startDate:startdate,endDate:enddate}
-    
-}
-
 module.exports.SignParameters = SignParameters;
 module.exports.getDateFilter = getDateFilter;
-module.exports.getDateFilterTransactions = getDateFilterTransactions;

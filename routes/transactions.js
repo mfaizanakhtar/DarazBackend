@@ -72,7 +72,7 @@ router.get('/ViewStatementFilters',auth,async(req,res)=>{
             $match:{userEmail:req.user.userEmail,ShopName:{$ne:null}}
         },
         {
-            $group:{_id:"$ShopName"}
+            $group:{_id:"$ShopName",ShopShortCode:{$first:"$ShopShortCode"}}
         },
         {
             $sort:{_id:1}
