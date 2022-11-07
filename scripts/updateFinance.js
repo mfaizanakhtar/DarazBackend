@@ -26,19 +26,21 @@ async function updateTransactions(){
     // console.log(dates)
     for(shop of shops){
         for(transType of transactionTypes){
-            transactionsLength=500
+            lastIteration=false
             let offSet=0;
-            while(transactionsLength==500){
+            while(!lastIteration){
                 // let alreadyInDbcount=0;
                 //get Url for transaction
                 url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract('2','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
                 // console.log(url)
                 //get transactions data
                 let transactions = await GetData(url);
-                transactionsLength = transactions.length
                 if(transactions!=null){
                 let previousTransactionsData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryData:JSON.stringify(transactions),queryType:"transType="+transType+"offSet="+offSet})
-
+                if(transactions.length<500){
+                    console.log("Last Iteration Length: "+transactions.length)
+                    lastIteration=true
+                }
                 if(previousTransactionsData.length<=0){
 
                 for(let t of transactions){
