@@ -68,8 +68,6 @@ router.get("/OrdersAnalyticsGraph",auth,async(req,res)=>{
     let startdate=moment(req.query.startdate).toDate()
     let enddate=moment(req.query.enddate).toDate()
     
-    let storeFilter={}
-    let skuFilter={}
     let matchFilter={userEmail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
     if(req.query.shopShortCode!=null) matchFilter={...matchFilter,ShopShortCode:req.query.shopShortCode}
     if(req.query.sku!=null) matchFilter={...matchFilter,Sku:req.query.sku}
@@ -308,7 +306,7 @@ router.get("/getStoresProfitStats",auth,async(req,res)=>{
             $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
-            $group:{_id:"$ShopShortCode",items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:{$add:["$cost","$packagingCost"]}},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
+            $group:{_id:"$ShopShortCode",ShopName:{$first:"$ShopName"},items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:{$add:["$cost","$packagingCost"]}},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
         },
         {
             $sort:{"profit":-1}
@@ -323,7 +321,7 @@ router.get("/getStoresProfitStats",auth,async(req,res)=>{
             $group:{_id:"$OrderId",ShopShortCode:{$first:"$ShopShortCode"}}
         },
         {
-            $group:{_id:"$ShopShortCode",orders:{$sum:1}}
+            $group:{_id:"$ShopShortCode",ShopName:{$first:"$ShopName"},orders:{$sum:1}}
         }
     ])
 
@@ -347,7 +345,7 @@ router.get('/getStoreSkuProfitStats',auth,async(req,res)=>{
 
     let Skuitems = await OrderItems.aggregate([
         {
-            $match:{useremail:req.user.userEmail,Status:"delivered",ShopShortCode:req.query.shortCode,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{userEmail:req.user.userEmail,Status:"delivered",ShopShortCode:req.query.shortCode,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:"$Sku",items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:{$add:["$cost","$packagingCost"]}},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
