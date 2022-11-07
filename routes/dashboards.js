@@ -231,10 +231,7 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
             $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
-            $group:{_id:{OrderId:"$OrderId",OrderItemId:"$OrderItemId"}}
-        },
-        {
-            $group:{_id:"$_id.OrderId"}
+            $group:{_id:"$OrderId"}
         },
         {
             $count:"orders"
