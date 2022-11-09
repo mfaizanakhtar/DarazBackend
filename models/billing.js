@@ -1,4 +1,5 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const constants = require('../data/constants');
 
 const billingSchema = new mongoose.Schema({
     billingId:Number,
@@ -7,13 +8,14 @@ const billingSchema = new mongoose.Schema({
     subscriptionType:String,
     duration:Number,
     durationType:String,
-    pricing:Number,
+    billingMethod:String,
     invoiceAmount:Number,
     bankDetail:Object,
+    paymentUrl:String,
     transactionId:String,
     isFutureRequest:Boolean,
     screenShot:String,
-    status:{type:String,default:"pending"}
+    status:{type:String,default:constants.PENDING_PAYMENT}
 
 })
 

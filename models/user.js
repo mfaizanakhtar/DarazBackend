@@ -5,15 +5,16 @@ const { mongo } = require('mongoose');
 
 
 const userSchema = new mongoose.Schema({
-    loginemail:{
+    loginEmail:{
         type:String,
-        required:true
+        required:true,
+        unique:true
     },
-    username:{
+    userName:{
         type:String,
         default:'admin'
     },
-    useremail:{
+    userEmail:{
         type:String,
         required:true
     },
@@ -21,7 +22,7 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    usertype:{
+    userType:{
         type:String,
         default:"user"
     },
@@ -34,16 +35,12 @@ const userSchema = new mongoose.Schema({
     verification:{type:Object,default:null},
     permissions:Object,
     subscription:{type:mongoose.Schema.Types.ObjectId,ref:'UserSubscription'},
-    subscriptionEndDate:{type:Date,default:() => Date.now() + 7*24*60*60*1000},
-    subscriptionType:String
 })
 
 userSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({_id:this._id,useremail:this.useremail,username:this.username,loginemail:this.loginemail,
-        usertype:this.usertype,accountType:this.accountType,permissions:this.permissions,
-        Orders:this.Orders,Finance:this.Finance,DSCInventory:this.DSCInventory,GroupedInventory:this.GroupedInventory,
-        Profitibility:this.Profitibility,ReturnsDispatch:this.ReturnsDispatch,
-        subscriptionEndDate:this.subscriptionEndDate,subscriptionType:this.subscriptionType},config.get("jwtprivatekey"),{expiresIn:"1d"});
+    const token = jwt.sign({_id:this._id,userEmail:this.userEmail,userName:this.userName,loginEmail:this.loginEmail,
+        userType:this.userType,accountType:this.accountType,permissions:this.permissions,
+        subscription:this.subscription},config.get("jwtprivatekey"),{expiresIn:"1d"});
     return token;
 }
 

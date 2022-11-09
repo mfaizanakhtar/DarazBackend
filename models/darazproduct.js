@@ -3,22 +3,15 @@ const mongoose = require('mongoose')
 const darazProductSchema = new mongoose.Schema({
     PrimaryCategory:Number,
     ItemId:Number,
-    Attributes:{
-    name:String,
-    short_description:String,
-    description:String,
-    brand:String,
-    description_en:String,
-    short_description_en:String,
-    name_en:String,
-    source:String
-    },
+    Attributes:mongoose.Schema.Types.Mixed,
     Skus:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'darazSku'
     }],
-    ShopId:String,
-    useremail:String
+    createdTime:Date,
+    updatedTime:Date,
+    ShopShortCode:String,
+    userEmail:String
 
 }
 )

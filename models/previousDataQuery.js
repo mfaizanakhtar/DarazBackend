@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
 
 const previousQuerySchema = new mongoose.Schema({
-    ShopId:String,
+    shopShortCode:String,
     queryData:mongoose.Schema.Types.Mixed,
-    queryType:String
+    queryType:String,
+    createdAt:{
+        type:Date,
+        default:Date.now,
+        expires:2*24*60*60
+    }
 })
 
 

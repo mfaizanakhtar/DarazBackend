@@ -4,33 +4,34 @@ const mongoose = require('mongoose')
 const darazSkuSchema=new mongoose.Schema({
         Status:String,
         quantity:Number,
-        localQuantity:Number,
         _compatible_variation_:String,
         Images:[String],
         SellerSku:String,
-        ShopSku:String,
+        ShopSku:{type:String,unique:true},
         package_content:String,
         Url:String,
-        multiWarehouseInventories:
+        multiWarehouseInventories:[
         {
             occupyQuantity: Number,
             quantity: Number,
             totalQuantity: Number,
             withholdQuantity: Number,
+            warehouseCode:String,
             sellableQuantity: Number
-        },
+        }],
         package_width:String,
         color_family: String,
         package_height: Number,
-        fblWarehouseInventories: 
+        fblWarehouseInventories:[ 
         {
             occupyQuantity: Number,
             quantity: Number,
             totalQuantity: Number,
             withholdQuantity: Number,
+            warehouseCode:String,
             sellableQuantity: Number
-        },
-        special_price: Number,
+        }],
+        special_price: {type:Number,default:null},
         price: Number,
         package_length: Number,
         special_from_date: String,
@@ -54,7 +55,10 @@ const darazSkuSchema=new mongoose.Schema({
             withholdQuantity: Number,
             sellableQuantity: Number
         },
-        cost:Number,
+        cost:{
+            type:Number,
+            default:0
+        },
         FBMpackagingCost:{
             type:Number,
             default:0
@@ -64,8 +68,10 @@ const darazSkuSchema=new mongoose.Schema({
             default:0
         },
         GroupSku:String,
-        ShopId:String,
-        useremail:String,
+        ShopShortCode:String,
+        ShopName:String,
+        userEmail:String,
+        itemId:Number,
         BaseSku:String,
         updatedAt:{
             type:Date,

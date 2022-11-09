@@ -3,12 +3,19 @@ const { updateTransactions } = require('../scripts/updateFinance');
 const { updateOrdersData } = require('../scripts/updateOrders');
 const { getAllSkus, updateAllSkus } = require('../scripts/updateSku');
 const { updateOrderItemStatus } = require('../scripts/updateStatus');
+const {refreshAccessToken} = require('../service/shopService');
 const router = express.Router();
 
 
 router.get('/updateOrdersData',async(req,res)=>{
     console.log("updateOrdersData api called")
     await updateOrdersData();
+    res.status(200).send();
+})
+
+router.get('/refreshAccessToken',async(req,res)=>{
+    console.log("refreshAccessToken api called")
+    await refreshAccessToken();
     res.status(200).send();
 })
 

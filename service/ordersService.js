@@ -1,16 +1,3 @@
-const moment = require('moment');
-
-function getDateFilter(query){
-
-    var startdate=moment(query.startDate).startOf('day').toDate()
-    var enddate=moment(query.endDate).endOf('day').toDate()
-    console.log(startdate)
-    console.log(enddate)
-
-    return {$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
-    
-}
-
 function updateQuery(query){
     var pageArgs={}
     var FinalFilter={}
@@ -110,7 +97,6 @@ function getAdditionStatus(stockCheckList){
 
 
 module.exports.getAdditionStatus=getAdditionStatus;
-module.exports.getDateFilter=getDateFilter;
 module.exports.updateQuery=updateQuery;
 module.exports.updateQueryForStockChecklist=updateQueryForStockChecklist;
 
