@@ -1,25 +1,31 @@
+const config = require('config');
+
 plansData  = [
     {
-        Name:"Basic",
+        Name:"Starter",
         Pricing:1000,
+        DiscountPercent:{"1":0.9,"3":0.8,"6":0.7,"12":0.5},
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-edit-box-line"
     },
     {
         Name:"Professional",
         Pricing:2000,
+        DiscountPercent:{"1":0.9,"3":0.8,"6":0.7,"12":0.5},
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-medal-line "
     },
     {
         Name:"ProfessionalPlus",
         Pricing:5000,
+        DiscountPercent:{"1":0.9,"3":0.8,"6":0.7,"12":0.5},
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-stack-line"
     },
     {
         Name:"Enterprise",
         Pricing:20000,
+        DiscountPercent:{"1":0.9,"3":0.8,"6":0.7,"12":0.5},
         Description:["Free Live Support","Unlimited Tracking","Much More"],
         icon:"ri-vip-crown-line"
     }
@@ -100,8 +106,16 @@ mailerCredential={
     mailPassword:"noreply123"
 }
 
+darazOpenAppDetails={
+    callBackUrl:config.get('baseUrl')+"/users/shops",
+    appKey:"500606",
+    pkUrl:"https://api.daraz.pk/oauth/authorize",
+    appSecret:"6Ob7pZ9yTjXTNrKSXMXXxFoatFsKP73D"
+}
+
 module.exports.plansData = plansData;
 module.exports.bankData = bankData;
 module.exports.permissions = permissions;
 module.exports.plansPermissions = plansPermissions;
 module.exports.mailerCredential=mailerCredential;
+module.exports.darazOpenAppDetails = darazOpenAppDetails;

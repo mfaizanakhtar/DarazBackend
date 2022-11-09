@@ -1,6 +1,7 @@
 const { Lookup } = require("../models/lookup");
 const { Plan } = require("../models/plan");
-const { plansData, bankData, permissions, plansPermissions, mailerCredential } = require("./data");
+const { plansData, bankData, permissions, plansPermissions, mailerCredential, darazOpenAppDetails } = require("../data/data");
+const constants = require("../data/constants");
 
 function executeAllDataQueries(){
     insertPlanData()
@@ -10,7 +11,9 @@ function executeAllDataQueries(){
     insertLookup("Professional",plansPermissions.Professional)
     insertLookup("ProfessionalPlus",plansPermissions.ProfessionalPlus)
     insertLookup("Enterprise",plansPermissions.Enterprise)
+    insertLookup(constants.TRIAL_PERMISSIONS_LOOKUP,plansPermissions.Enterprise)
     insertLookup("mailerCredential",mailerCredential)
+    insertLookup("darazOpenAppDetails",darazOpenAppDetails)
 }
 
 async function insertPlanData(){

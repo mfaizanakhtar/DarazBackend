@@ -1,10 +1,10 @@
 const nodemailer = require('nodemailer');
 const { Lookup } = require('../models/lookup');
 
-async function sendVerificationEmail(verificationCode,userEmail){
+async function sendVerificationEmail(verificationLink,userEmail){
     var {lookup_detail:mailCredential} = await Lookup.findOne({lookup_key:"mailerCredential"})
-    var subject="Email Verification Code"
-    var body = "Hello, Your Verification Code is "+verificationCode
+    var subject="Email Verification Link"
+    var body = "Hello, Your Verification Link is "+verificationLink
     console.log(mailCredential)
     sendEmail(mailCredential,subject,body,userEmail)
 }
@@ -55,3 +55,4 @@ function sendEmail(credential,subject,body,recipent){
 
 module.exports.sendVerificationEmail = sendVerificationEmail
 module.exports.sendResetEmail = sendResetEmail
+module.exports.sendInvitationVerification = sendInvitationVerification

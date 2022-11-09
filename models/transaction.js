@@ -4,7 +4,7 @@ const transactionSchema = new mongoose.Schema({
     TransactionDate:Date,
     TransactionType:String,
     FeeName:String,
-    TransactionNumber:String,
+    TransactionNumber:{type:String,unique:true},
     Details:String,
     SellerSku:String,
     LazadaSku:String,
@@ -19,8 +19,9 @@ const transactionSchema = new mongoose.Schema({
     ShipmentType:String,
     Reference:String,
     PaymentRefId:String,
-    ShopId:String,
-    useremail:String,
+    userEmail:String,
+    ShopShortCode:String,
+    ShopName:String,
     OrderItemUpdated:{type:Boolean,default:false},
     transType:String
 })

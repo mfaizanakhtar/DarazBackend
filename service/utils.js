@@ -1,0 +1,24 @@
+const crypto = require('crypto');
+const moment = require('moment');
+
+
+function SignParameters(secretkey,param){
+    //signing parameters
+    return crypto.createHmac("sha256",secretkey)
+    .update(param)
+    .digest("hex").toUpperCase();
+}
+
+function getDateFilter(query){
+
+    let startdate=moment(query.startDate).toDate()
+    let enddate=moment(query.endDate).toDate()
+    console.log(startdate)
+    console.log(enddate)
+
+    return {$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+    
+}
+
+module.exports.SignParameters = SignParameters;
+module.exports.getDateFilter = getDateFilter;

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    OrderId:String,
+    OrderId:{type:String,unique:true},
     CustomerFirstName:String,
     CustomerLastName:String,
     PaymentMethod:String,
@@ -48,14 +48,14 @@ const orderSchema = new mongoose.Schema({
     VoucherPlatform:Number,
     VoucherSeller:Number,
     ShippingFee:Number,
-    ShopId:String,
+    ShippingFeeOriginal:Number,
+    ShippingFeeDiscountSeller:Number,
+    ShippingFeeDiscountPlatform:Number,
+    ShopShortCode:String,
     ShopName:String,
-    ShopAddress:String,
-    ShopState:String,
-    ShopArea:String,
+    ShopEmail:String,
     ShopLocation:String,
-    ShopPhone:String,
-    useremail:String,
+    UserEmail:String,
     DispatchDate:Date,
     ReturnDate:Date,
     WarehouseStatus:String,
@@ -68,7 +68,7 @@ const orderSchema = new mongoose.Schema({
     ClaimNumber:String
 
 })
-
 const Order = mongoose.model('Order',orderSchema);
+
 
 module.exports.Order = Order;

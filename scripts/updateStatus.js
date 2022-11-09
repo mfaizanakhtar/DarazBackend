@@ -1,8 +1,8 @@
 const {OrderItems} = require('../models/orderItem');
-const {Darazid} = require('../models/darazid');
-const {generateMultipleOrderItemsUrl,generateLabelUrl} = require('../scripts/GenerateUrl');
+const {Shop} = require('../models/shop');
+const {generateMultipleOrderItemsUrl,generateLabelUrl} = require('../service/GenerateUrl');
 const {GetData} = require('./HttpReq');
-const {getOrderIdArray} = require('../scripts/GenerateUrl')
+const {getOrderIdArray} = require('../service/GenerateUrl')
 const cheerio = require('cheerio')
 const atob = require("atob");
 
@@ -13,65 +13,57 @@ async function updateOrderItemsForRts(user,RtsOrdersResponse){
 
         // //get All Shops in db
         // console.log("updating status")
-        var updateResult = await updateOrderItemStatus({useremail:user},{Status:'pending',ShippingType:'Dropshipping'})
+        var updateResult = await updateOrderItemStatus({userEmail:user},{Status:'pending',ShippingType:'Dropshipping'})
         console.log("user status done")
         return updateResult
     }
-
-
-    
+ 
 }
 
 async function updateOrderItemStatus(user,status){
     try{
 
-    var updateResult
-
-    var darazid = await Darazid.find({...user});
-    for(var shop of darazid){
+        let darazid = await Shop.find({...user});
+    for(let shop of darazid){
         //get order with statuses of this shop
-        splitCount=150
-        var orderitemscount = await OrderItems.countDocuments({...status,ShopId:shop.shopid})
+        splitCount=100
+        let orderitemscount = await OrderItems.countDocuments({...status,ShopShortCode:shop.shortCode})
         // console.log(orderitemscount)
-        end = Math.ceil(orderitemscount/splitCount)
+        let end = Math.ceil(orderitemscount/splitCount)
         // console.log(end)
         for(let i=0;i<end;i++){
-            var orderitems = await OrderItems.find({...status,ShopId:shop.shopid})
+            let orderitems = await OrderItems.find({...status,ShopShortCode:shop.shortCode})
             .skip(i*splitCount)
             .limit(splitCount)
             // console.log(shop.shopid+' '+orderitems.length)
-            var orderitemsrray = getOrderIdArray(orderitems)
-            url = await generateMultipleOrderItemsUrl(shop.shopid,shop.secretkey,orderitemsrray);
+            let orderitemsrray = orderitems.map((order)=>'"'+order.OrderId+'"')
+            let url = await generateMultipleOrderItemsUrl(shop.accessToken,'['+orderitemsrray+']');
             // console.log(url)
-            orderitemsdata = await GetData(url);
-            if(orderitemsdata!=null && orderitemsdata!=undefined){
+            let orderitemsdata = await GetData(url);
+            if(orderitemsdata && orderitemsdata.length>0){
                 // console.log(orderitemsdata.Orders.length)
 
-                orderitemsdata = orderitemsdata.Orders
-                //iterate all orders fetched from api
+                for(let orders of orderitemsdata){
+                    if(orders.order_items && orders.order_items.length>0){
+                        for(item of orders.order_items){
 
-                for(var orders of orderitemsdata){
-                    // console.log(orders)
-                    for(item of orders.OrderItems){
-                        // console.log(item)
-                        // if(orders.OrderItems==undefined || orders.OrderItems==null) {console.log("null here")}
-                        updateResult = await OrderItems.findOneAndUpdate(
-                        {OrderId:item.OrderId,Sku:item.Sku,ShopSku:item.ShopSku,
-                        ShippingType:item.ShippingType,OrderItemId:item.OrderItemId,ItemPrice:item.ItemPrice,
-                        ShippingAmount:item.ShippingAmount
-                        ,Variation:item.Variation},
-                        {Status:item.Status,TrackingCode:item.TrackingCode,
-                            ShipmentProvider:item.ShipmentProvider.substr(item.ShipmentProvider.indexOf(',')+2),UpdatedAt:item.UpdatedAt,Reason:item.Reason})
-                    
+                            updateResult = await OrderItems.findOneAndUpdate(
+                            {OrderId:item.order_id,Sku:item.sku,ShopSku:item.shop_sku,
+                            ShippingType:item.shipping_type,OrderItemId:item.order_item_id,ItemPrice:item.item_price,
+                            ShippingAmount:item.shipping_amount
+                            ,Variation:item.variation},
+                            {Status:item.status,TrackingCode:item.tracking_code,
+                                ShipmentProvider:item.shipment_provider.substr(item.shipment_provider.indexOf(',')+2),UpdatedAt:item.updated_at,Reason:item.reason})
+                        
+                        }
                     }
                 }
             }else{
-                console.log("Invalid username or secretkey of shop "+ shop.shopName)
+                console.log("Invalid username or secretkey of shop "+ shop.name)
             }
         }
 
     }
-
     }catch(error){
         console.log(error)
     }
@@ -79,21 +71,21 @@ async function updateOrderItemStatus(user,status){
 
 }
 
-async function fetchLabelsAndUpdate(useremail){
-    console.log("labels ",useremail)
-    darazid = await Darazid.find({useremail:useremail})
-    for(shop of darazid){
+async function fetchLabelsAndUpdate(userEmail){
+    console.log("labels ",userEmail)
+    shops = await Shop.find({userEmail:userEmail})
+    for(shop of shops){
         var orderitemsIds=[]
-        items= await OrderItems.find({ShopId:shop.shopid,Status:'ready_to_ship',labelTracking:'',ShippingType:'Dropshipping'})
+        items= await OrderItems.find({ShopShortCode:shop.shortCode,Status:'ready_to_ship',labelTracking:'',ShippingType:'Dropshipping'})
         // console.log(items)
         for(item of items){
             orderitemsIds.push(item.OrderItemId)
         }
-        await updateOrderItemPortCodes(shop.shopid,shop.secretkey,orderitemsIds)
+        await updateOrderItemPortCodes(shop.accessToken,orderitemsIds)
     }
 }
 
-async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
+async function updateOrderItemPortCodes(accessToken,orderItemIds){
     console.log(orderItemIds,orderItemIds.length)
     console.log("Entry Checkpoint")
 
@@ -110,23 +102,12 @@ async function updateOrderItemPortCodes(shopid,secretkey,orderItemIds){
         var labelOrderNumbers=[]
         var sellerAddress=[]
         console.log("First Loop")
-    
-    OrderItemStringArray='['
-    end=lastCount+splitCount
-
-    if(orderItemIds.length<=end) {end=orderItemIds.length}
-    for(let i=lastCount;i<end;i++){
-        OrderItemStringArray=OrderItemStringArray+orderItemIds[i]+','
-        lastCount++
-    }
-    OrderItemStringArray=OrderItemStringArray+']'
-    console.log(OrderItemStringArray) 
 
     try{
-    url = generateLabelUrl(shopid,secretkey,OrderItemStringArray)
+    url = generateLabelUrl(accessToken,"["+orderItemIds.toString()+"]",'shippingLabel')
     var data = await GetData(url)
     console.log("1st Checkpoint")
-    var result = atob(data.Document.File)
+    var result = atob(data.document.file)
     const $=cheerio.load(result)
         //scrape portcodes
     $("div").find('div:nth-child(5)').each(function(index,element){

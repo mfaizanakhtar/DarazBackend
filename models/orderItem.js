@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 
 const OrderItemsSchema = new mongoose.Schema({
     OrderId:String,
-    OrderItemId:String,
-    ShopId:String,
+    OrderItemId:{type:String,unique:true},
+    ShopShortCode:String,
+    ShopName:String,
     Name:String,
     Sku:String,
     ShopSku:String,
@@ -16,6 +17,7 @@ const OrderItemsSchema = new mongoose.Schema({
     WarehouseStatus:String,
     TrackingCode:String,
     PreviousTracking:String,
+    SlaTimeStamp:Date,
     labelTracking:{type:String,default:''},
     SeperateRts:{type:Boolean,default:false},
     ShippingProviderType:String,
@@ -23,10 +25,12 @@ const OrderItemsSchema = new mongoose.Schema({
     CreatedAt:Date,
     UpdatedAt:Date,
     productMainImage:String,
+    productDetailUrl:String,
+    Currency:String,
     Variation:String,
     DispatchDate:{type:Date,default:''},
     ReturnDate:Date,
-    useremail:String,
+    userEmail:String,
     Transactions:[{
         _id:{ type:mongoose.Schema.Types.ObjectId,ref:'Transaction' },
         TransactionType:String,
@@ -52,10 +56,6 @@ const OrderItemsSchema = new mongoose.Schema({
     trackingChangeCount:{
         type:Number,
         default:0
-    },
-    ReturnedStockAdded:{
-        type:Boolean,
-        default:false
     },
     ReceiveBy:String,
     DispatchBy:String
