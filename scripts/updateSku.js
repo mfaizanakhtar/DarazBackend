@@ -3,20 +3,40 @@ const {generateSkuUrl} = require('../service/GenerateUrl')
 const {Shop} = require('../models/shop')
 const {darazProduct} = require('../models/darazproduct')
 const {darazSku} = require('../models/darazsku')
-const {Sku} = require('../models/sku')
-const {updateOrderItemStatus} = require('../scripts/updateStatus')
-const LazadaAPI = require('lazada-open-platform-sdk')
-const {darazOpenAppDetails} = require('../data/data')
 const moment = require('moment')
+
+async function updateSkuPriceQuantity(skuId,updatedFields){
+    try{
+        return new Promise(async(resolve,reject)=>{
+            let fieldsToUpdate={}
+            if(updatedFields.Price) fieldsToUpdate={...fieldsToUpdate,price:updatedFields.Price}
+            if(updatedFields.SalePrice) fieldsToUpdate={...fieldsToUpdate,special_price:updatedFields.SalePrice}
+            if(updatedFields.SaleStartDate) fieldsToUpdate={...fieldsToUpdate,special_from_date:updatedFields.SaleStartDate}
+            if(updatedFields.SaleEndDate) fieldsToUpdate={...fieldsToUpdate,special_to_date:updatedFields.SaleEndDate}
+            if(updatedFields.Quantity) fieldsToUpdate={...fieldsToUpdate,"FBMstock.quantity":updatedFields.Quantity,quantity:{$sum:["$FBDstock.quantity",updatedFields.Quantity]}}
+    
+            if(Object.keys(fieldsToUpdate).length>0){
+                let updatedSku = await darazSku.findOneAndUpdate({_id:skuId},[{$set:fieldsToUpdate}],{new:true})
+                console.log(updatedSku.FBMstock.quantity)
+                resolve(updatedSku)
+            }else{
+                reject("Could Not Update Sku")
+            }
+        })
+    }catch(ex){
+        reject(ex.message)
+    }
+    
+}
 
 async function getSkus(shop,skus){
     try{
 
-        var Url
+        let Url
         splitCount=50
-        var skuitemscount = skus.length
+        let skuitemscount = skus.length
         
-        var end = Math.ceil(skuitemscount/splitCount)
+        let end = Math.ceil(skuitemscount/splitCount)
     
         for(let i=0;i<end;i++){
             if(skus!=undefined){
@@ -25,25 +45,25 @@ async function getSkus(shop,skus){
             }
             
             // console.log(Url)
-            var ProductSku = await GetData(Url)
+            let ProductSku = await GetData(Url)
             if(ProductSku!=null){
-            var Products = ProductSku.products
+            let Products = ProductSku.products
             for(product of Products){
-                var upsertedSkuIds=[]
+                let upsertedSkuIds=[]
                 for(const [i,sku] of product.skus.entries()){
                     
                     sku.ShopShortCode=shop.shortCode
                     sku.ShopName=shop.name
                     sku.userEmail=shop.userEmail
                     
-                    var result = null
+                    let result = null
                     result = await CompileFbdFbmStock(sku)
                     sku.FBMstock = result.FBMstock
                     sku.FBDstock = result.FBDstock
                     sku.updatedAt = moment().toDate();
                     sku.itemId=product.item_id;
 
-                skuResult = await darazSku.updateOne(
+                let skuResult = await darazSku.updateOne(
                     {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopShortCode:shop.shortCode,userEmail:shop.userEmail},
                     {$set:sku},
                     {upsert:true}
@@ -66,7 +86,7 @@ async function getSkus(shop,skus){
 }
 
 function createProductObj(product,skus){
-    var darazProduct = {
+    let darazProduct = {
         PrimaryCategory:product.primary_category,
         ItemId:product.item_id,
         createdTime:moment(parseInt(product.created_time)),
@@ -81,40 +101,41 @@ function createProductObj(product,skus){
 async function updateAllSkus(){
     try{
     shops = await Shop.find()
-    for(var shop of shops){
+    for(let shop of shops){
         
         splitCount=30
-        var skuitemscount = await darazSku.countDocuments({ShopShortCode:shop.shortCode})
+        let skuitemscount = await darazSku.countDocuments({ShopShortCode:shop.shortCode})
         
         end = Math.ceil(skuitemscount/splitCount)
         
         for(let i=0;i<end;i++){
-            var AllShopSkus = await darazSku.find({ShopShortCode:shop.shortCode})
+            let AllShopSkus = await darazSku.find({ShopShortCode:shop.shortCode})
             .skip(i*splitCount)
             .limit(splitCount)
-            if(skus!=undefined){
-                skus=AllShopSkus.map(sku=>'"'+sku.SellerSku+'"')
+            if(AllShopSkus!=undefined){
+                let skus=AllShopSkus.map(sku=>'"'+sku.SellerSku+'"')
                 AllShopSkusUrl = generateSkuUrl(shop.accessToken,"all",splitCount,splitCount*i,'['+skus.slice(i*splitCount,(i*splitCount)+splitCount).toString()+']')
             }
             
             // console.log(Url)
-            var ProductSku = await GetData(AllShopSkusUrl)
+            let ProductSku = await GetData(AllShopSkusUrl)
             if(ProductSku!=null){
-            var Products = ProductSku.products
+            let Products = ProductSku.products
             for(product of Products){
-                var upsertedSkuIds=[]
+                let upsertedSkuIds=[]
                 for(const [i,sku] of product.skus.entries()){
                     
                     sku.ShopShortCode=shop.shortCode
                     sku.ShopName=shop.name
                     sku.userEmail=shop.userEmail
                     
-                    var result = null
+                    let result = null
                     result = await CompileFbdFbmStock(sku)
                     sku.FBMstock = result.FBMstock
                     sku.FBDstock = result.FBDstock
                     sku.updatedAt = moment().toDate();
                     sku.itemId=product.item_id;
+                    if(sku.special_price==0)sku.special_price=null;
 
                 skuResult = await darazSku.updateOne(
                     {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopShortCode:shop.shortCode,userEmail:shop.userEmail},
@@ -141,24 +162,24 @@ async function updateAllSkus(){
 
 async function getAllSkus(){
     shops = await Shop.find()
-    var Url;
-    for(var shop of shops){
+    let Url;
+    for(let shop of shops){
 
             Url = generateSkuUrl(shop.accessToken,"all",0,0,'[]')
 
             // console.log(Url)
-            var ProductSku = await GetData(Url)
+            let ProductSku = await GetData(Url)
             if(ProductSku!=null){
-            var Products = ProductSku.products
+            let Products = ProductSku.products
             for(product of Products){
-                var upsertedSkuIds=[]
+                let upsertedSkuIds=[]
                 for(const [i,sku] of product.skus.entries()){
                     
                     sku.ShopShortCode=shop.shortCode
                     sku.ShopName=shop.name
                     sku.userEmail=shop.userEmail
                     
-                    var result = null
+                    let result = null
                     result = await CompileFbdFbmStock(sku)
                     sku.FBMstock = result.FBMstock
                     sku.FBDstock = result.FBDstock
@@ -186,8 +207,8 @@ console.log("New Skus Fetched")
 }
 
 async function CompileFbdFbmStock(sku){
-    var FBMstock={occupyQuantity: 0,quantity: 0,totalQuantity: 0,withholdQuantity: 0,sellableQuantity: 0}
-    var FBDstock={occupyQuantity: 0,quantity: 0,totalQuantity: 0,withholdQuantity: 0,sellableQuantity: 0}
+    let FBMstock={occupyQuantity: 0,quantity: 0,totalQuantity: 0,withholdQuantity: 0,sellableQuantity: 0}
+    let FBDstock={occupyQuantity: 0,quantity: 0,totalQuantity: 0,withholdQuantity: 0,sellableQuantity: 0}
     try{
        for(fblStock of sku.fblWarehouseInventories){
             for(stockType in FBDstock){
@@ -209,3 +230,4 @@ async function CompileFbdFbmStock(sku){
 module.exports.getSkus = getSkus
 module.exports.getAllSkus=getAllSkus
 module.exports.updateAllSkus=updateAllSkus
+module.exports.updateSkuPriceQuantity=updateSkuPriceQuantity

@@ -35,9 +35,12 @@ async function updateNewOrders(shop,OrdersData){
     // console.log(result)
 
     if(!result){
-        var orderobj = setOrderObj(order,shop)
-        var res = await orderobj.save()
-        // console.log(res);
+        try{
+            let orderobj = setOrderObj(order,shop)
+            await orderobj.save()
+        }catch(ex){
+            console.log("Order Object already in db")
+        }
     }
 }
 
@@ -46,33 +49,36 @@ async function updateNewOrders(shop,OrdersData){
 
 async function updateNewOrderItems(shop,orders){
 
-    var toFetchUpdateDarazSkus=[]
+    let toFetchUpdateDarazSkus=[]
     //fetch orderItems data from daraz api
     try{
             OrderItemsData = await getOrderItemsData(shop.accessToken,orders)
         //iterate orderitems fetched data
         for(const items of OrderItemsData){
-            for(var item of items.order_items){
+            for(let item of items.order_items){
                 // console.log(item)
-            var result = await OrderItems.findOne({OrderItemId:item.order_item_id,ShopShortCode:shop.shortCode})
+                let result = await OrderItems.findOne({OrderItemId:item.order_item_id,ShopShortCode:shop.shortCode})
             // if orderitem does not exist, add to db
             
             if(!result){
-                var dSku = await darazSku.findOne({ShopSku:item.shop_sku,userEmail:shop.userEmail})
+                let dSku = await darazSku.findOne({ShopSku:item.shop_sku,userEmail:shop.userEmail})
 				if(dSku==null){
                     dSku={FBMpackagingCost:0,FBDpackagingCost:0,cost:0}
                 }
-                if(!toFetchUpdateDarazSkus.includes(item.sku)) toFetchUpdateDarazSkus.push(item.sku)
-
-                var orderItem = setOrderItemObj(item,shop.shortCode,shop.userEmail,dSku,shop.name)
-
-                var result = await orderItem.save();
+                let orderItem = setOrderItemObj(item,shop.shortCode,shop.userEmail,dSku,shop.name)
+                try{
+                    result = await orderItem.save();
+                    if(!toFetchUpdateDarazSkus.includes(item.sku)) toFetchUpdateDarazSkus.push(item.sku)
+                }catch(ex){
+                    console.log("OrderItem already exists")
+                }
                 //pushing orderItemId._id in Order Record for reference
-                await Order.updateMany({
-                    OrderId:result.OrderId,ShopShortCode:shop.shortCode
-                },
-                {$push:{OrderItems:result._id,Skus:result.Sku,BaseSkus:result.BaseSku}})
-
+                if(result){
+                    await Order.updateMany({
+                        OrderId:result.OrderId,ShopShortCode:shop.shortCode
+                    },
+                    {$push:{OrderItems:result._id,Skus:result.Sku,BaseSkus:result.BaseSku}})
+                }
             }
         }
         };

@@ -17,6 +17,13 @@ function getRefreshAccessTokenUrl(refresh_token){
     var params = {refresh_token:refresh_token};   
     return createGetUrl(getRefreshAccessTokenUrl,params)
 }
+function postUpdatePriceQuantity(access_token,payload){
+
+    
+    var postUpdatePriceQuantityUrl="/product/price_quantity/update"
+    var params = {access_token:access_token,payload:payload};   
+    return createGetUrl(postUpdatePriceQuantityUrl,params)
+}
 
 function getSellerUrl(access_token){
     
@@ -103,7 +110,7 @@ function sortAndFormatParams(params){
         if(i==0){
             queryParams=queryParams+"?"
         }
-        queryParams=queryParams+currVal+"="+((currVal=="sku_seller_list" || currVal=="order_item_ids") ? encodeURIComponent(params[currVal]) : params[currVal])
+        queryParams=queryParams+currVal+"="+((currVal=="sku_seller_list" || currVal=="order_item_ids" || currVal=="payload") ? encodeURIComponent(params[currVal]) : params[currVal])
         
         i++
         return accumulator;
@@ -127,3 +134,4 @@ module.exports.generateSkuUrl = generateSkuUrl
 module.exports.generateAccessTokenUrl = generateAccessTokenUrl;
 module.exports.getSellerUrl = getSellerUrl;
 module.exports.getRefreshAccessTokenUrl = getRefreshAccessTokenUrl;
+module.exports.postUpdatePriceQuantity = postUpdatePriceQuantity;

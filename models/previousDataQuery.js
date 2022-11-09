@@ -7,7 +7,7 @@ const previousQuerySchema = new mongoose.Schema({
     createdAt:{
         type:Date,
         default:Date.now,
-        expires:24*60*60*1000
+        expires:2*24*60*60
     }
 })
 

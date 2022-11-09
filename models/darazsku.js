@@ -31,7 +31,7 @@ const darazSkuSchema=new mongoose.Schema({
             warehouseCode:String,
             sellableQuantity: Number
         }],
-        special_price: Number,
+        special_price: {type:Number,default:null},
         price: Number,
         package_length: Number,
         special_from_date: String,
