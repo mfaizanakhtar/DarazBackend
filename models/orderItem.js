@@ -22,7 +22,7 @@ const OrderItemsSchema = new mongoose.Schema({
     SeperateRts:{type:Boolean,default:false},
     ShippingProviderType:String,
     ShipmentProvider:String,
-    CreatedAt:Date,
+    CreatedAt:{type:Date,index:true},
     UpdatedAt:Date,
     productMainImage:String,
     productDetailUrl:String,
@@ -30,7 +30,7 @@ const OrderItemsSchema = new mongoose.Schema({
     Variation:String,
     DispatchDate:{type:Date,default:''},
     ReturnDate:Date,
-    userEmail:String,
+    userEmail:{type:String,index:true},
     Transactions:[{
         _id:{ type:mongoose.Schema.Types.ObjectId,ref:'Transaction' },
         TransactionType:String,

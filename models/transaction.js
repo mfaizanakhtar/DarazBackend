@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
-    TransactionDate:Date,
+    TransactionDate:{type:Date,index:true},
     TransactionType:String,
     FeeName:String,
     TransactionNumber:{type:String,unique:true},
@@ -10,7 +10,7 @@ const transactionSchema = new mongoose.Schema({
     LazadaSku:String,
     Amount:Number,
     VATinAmount:Number,
-    Statement:String,
+    Statement:{type:String,index:true},
     PaidStatus:String,
     OrderNo:String,
     OrderItemNo:String,
