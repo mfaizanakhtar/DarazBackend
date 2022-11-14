@@ -173,20 +173,20 @@ router.post('/getLabelsData',auth,async(req,res)=>{
 
 router.post('/getStockChecklist/:skuType',auth,async(req,res)=>{
     if(req.body.trackings!=undefined){
-        var matchFilter = {$match:{TrackingCode:{$in:req.body.trackings},useremail:req.user.userEmail,ReturnedStockAdded:{$ne:true}}}
+        var matchFilter = {$match:{TrackingCode:{$in:req.body.trackings},userEmail:req.user.userEmail,ReturnedStockAdded:{$ne:true}}}
     }  
     else if(req.body.orders!=undefined && req.body.orders.length>0){
-    var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping",useremail:req.user.userEmail}}
+    var matchFilter = {$match:{OrderId:{$in:req.body.orders},ShippingType:"Dropshipping",userEmail:req.user.userEmail}}
     }
     else{
-    var matchFilter = {$match:{Status:"ready_to_ship",DispatchDate:null,ShippingType:"Dropshipping",useremail:req.user.userEmail}}
+    var matchFilter = {$match:{Status:"ready_to_ship",DispatchDate:null,ShippingType:"Dropshipping",userEmail:req.user.userEmail}}
     }
     var result = await OrderItems.aggregate([
         matchFilter,
         {$group:{
             _id:"$"+req.params.skuType,
             count:{$sum:1},
-            ReturnedStockAdded:{$first:"$ReturnedStockAdded"},
+            // ReturnedStockAdded:{$first:"$ReturnedStockAdded"},
             img:{$first:"$productMainImage"}
         }},
         {$sort:{"_id":1}}
@@ -219,7 +219,7 @@ router.get('/getFilterStockChecklist',auth,async(req,res)=>{
     var result = await OrderItems.aggregate([
         matchFilter,
         {$group:{
-            _id:"$BaseSku",
+            _id:"$Sku",
             count:{$sum:1},
             // ReturnedStockAdded:{$first:"$ReturnedStockAdded"},
             img:{$first:"$productMainImage"}
