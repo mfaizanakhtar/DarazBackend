@@ -1,4 +1,6 @@
-function updateQuery(query){
+const { CustomOrderStatus } = require("../models/customOrderStatus");
+
+async function updateQuery(query){
     var pageArgs={}
     var FinalFilter={}
     claimDate = new Date();
@@ -7,13 +9,20 @@ function updateQuery(query){
     var AdditionStatus = getAdditionStatus(false)
 
     //removing datefilter if status = claimaible
-    if(AdditionStatus[query["OrderItems.Status"]]){
-        // if(query["OrderItems.Status"]=="Claimable" || query["OrderItems.Status"]=="ClaimFiled" || query["OrderItems.Status"]=="ClaimReceived") dateFilter={}
-        //if status found from additionstatus, delete orderitems.status
-        FinalFilter={...AdditionStatus[query["OrderItems.Status"]]}
-        console.log(FinalFilter)
+    // if(AdditionStatus[query["OrderItems.Status"]]){
+    //     // if(query["OrderItems.Status"]=="Claimable" || query["OrderItems.Status"]=="ClaimFiled" || query["OrderItems.Status"]=="ClaimReceived") dateFilter={}
+    //     //if status found from additionstatus, delete orderitems.status
+    //     FinalFilter={...AdditionStatus[query["OrderItems.Status"]]}
+    //     console.log(FinalFilter)
+    //     query["OrderItems.Status"]="null"
+    // } 
+    var customStatusQuery;
+    if(query.isCustomStatus=='true'){
+        let customStatusResult = await CustomOrderStatus.findOne({_id:query["OrderItems.Status"]})
+        if(customStatusResult) customStatusQuery = customStatusResult.statusMongoQuery
         query["OrderItems.Status"]="null"
-    } 
+    }
+    query.isCustomStatus="null"
     //iterate the query object
     for(var propName in query){//if value is null,startdate or enddate, delete the object key value
         if(query[propName] == "null" || propName=="startDate" || propName=="endDate" || propName=="skuSort" || propName=="shopSort" || propName=="Printed" || propName=="unPrinted") 
@@ -29,7 +38,7 @@ function updateQuery(query){
         }
     }
 
-    return({query:query,pageArgs:pageArgs,FinalFilter:FinalFilter})
+    return({query:query,pageArgs:pageArgs,FinalFilter:FinalFilter,customStatusQuery:customStatusQuery})
 }
 
 function updateQueryForStockChecklist(query){

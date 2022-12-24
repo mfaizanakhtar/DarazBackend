@@ -1,4 +1,5 @@
 const config = require('config');
+const { FILTERCONST } = require('./constants');
 
 plansData  = [
     {
@@ -113,9 +114,16 @@ darazOpenAppDetails={
     appSecret:"6Ob7pZ9yTjXTNrKSXMXXxFoatFsKP73D"
 }
 
+customOrderFilterTypes=["AND","OR"]
+
+
+customOrderFilters=[FILTERCONST.ORDER_STATUS,FILTERCONST.CUSTOM_ORDER_STATUS]
+
 module.exports.plansData = plansData;
 module.exports.bankData = bankData;
 module.exports.permissions = permissions;
 module.exports.plansPermissions = plansPermissions;
 module.exports.mailerCredential=mailerCredential;
 module.exports.darazOpenAppDetails = darazOpenAppDetails;
+module.exports.customOrderFilterTypes = customOrderFilterTypes;
+module.exports.customOrderFilters = customOrderFilters;

@@ -30,6 +30,7 @@ const { billings } = require('./routes/billings');
 const { schedulerRouter } = require('./routes/scheduler');
 const { scheduler } = require('./scripts/scheduler');
 const { refreshAccessToken } = require('./service/shopService');
+const { customOrderStatusRouter } = require('./routes/customOrderStatus');
  
 mongoose.connect(config.connectionstring,{useFindAndModify:false,useNewUrlParser:true,useUnifiedTopology:true,useCreateIndex:true})
     .then(()=>{
@@ -65,6 +66,7 @@ app.use('/api/lookups',lookups)
 app.use('/api/billings',billings)
 app.use('/api/scheduler',schedulerRouter)
 app.use('/api/coupon',coupons)
+app.use('/api/customStatus',customOrderStatusRouter)
 
 if(config.util.getEnv('NODE_ENV')=="development"){
     scheduler();

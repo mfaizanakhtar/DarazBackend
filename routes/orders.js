@@ -29,7 +29,7 @@ async function FindQuery(query,user){
     if(query.unPrinted=="true") isPrinted={isPrinted:false}
 
     dateFilter=getDateFilter(query);
-    updateQueryResult = updateQuery(query);
+    updateQueryResult = await updateQuery(query);
 
     query = updateQueryResult.query;
     var pageArgs=updateQueryResult.pageArgs
@@ -41,6 +41,10 @@ async function FindQuery(query,user){
 
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,"OrderItems.userEmail":user.userEmail,...isPrinted}
+    if(updateQueryResult.customStatusQuery){
+        let parsedCustomQuery = JSON.parse(updateQueryResult.customStatusQuery)
+        FinalFilter = {$and:[{...FinalFilter},{...parsedCustomQuery}]}
+    }
     console.log(FinalFilter)
     //query generated
     const orders = await Order.aggregate([

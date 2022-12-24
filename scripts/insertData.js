@@ -1,6 +1,6 @@
 const { Lookup } = require("../models/lookup");
 const { Plan } = require("../models/plan");
-const { plansData, bankData, permissions, plansPermissions, mailerCredential, darazOpenAppDetails } = require("../data/data");
+const { plansData, bankData, permissions, plansPermissions, mailerCredential, darazOpenAppDetails, customOrderFilterTypes, customOrderFilters } = require("../data/data");
 const constants = require("../data/constants");
 
 function executeAllDataQueries(){
@@ -14,6 +14,8 @@ function executeAllDataQueries(){
     insertLookup(constants.TRIAL_PERMISSIONS_LOOKUP,plansPermissions.Enterprise)
     insertLookup("mailerCredential",mailerCredential)
     insertLookup("darazOpenAppDetails",darazOpenAppDetails)
+    insertLookup("customOrderFilterTypes",customOrderFilterTypes);
+    insertLookup("customOrderFilters",customOrderFilters);
 }
 
 async function insertPlanData(){
