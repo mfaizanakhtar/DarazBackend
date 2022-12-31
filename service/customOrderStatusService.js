@@ -25,14 +25,19 @@ async function createCustomOrderStatus(customStatusReq,userEmail){
                 for(seperatedStatus in seperateByFilter){
                     if(seperatedStatus==FILTERCONST.ORDER_STATUS.value){
                         let query = createOrderStatusQuery(seperateByFilter[seperatedStatus])
-                        baseQueryAnd.push(query.and)
-                        baseQueryOr.push(...query.or)
+                        if(query.and) baseQueryAnd.push(query.and)
+                        if(query.or?.length>0) baseQueryOr=[...baseQueryOr,...query.or]
+                    }else if(seperatedStatus==FILTERCONST.CUSTOM_ORDER_STATUS.value){
+                        let query = createWarehouseOrderStatusQuery(seperateByFilter[seperatedStatus])
+                        if(query.and) baseQueryAnd.push(query.and)
+                        if(query.or?.length>0) baseQueryOr=[...baseQueryOr,...query.or]
                     }
                 }
             }
-            let finalQuery;
-            if(baseQueryOr.length>0) finalQuery={$or:[{$and:baseQueryAnd},{...baseQueryOr}]}
-            else finalQuery={$or:[{$and:baseQueryAnd}]}
+            let finalQuery={$or:[]};
+            if(baseQueryOr.length>0) finalQuery["$or"]=[...finalQuery["$or"],...baseQueryOr]
+            if(baseQueryAnd.length>0) finalQuery["$or"].push({$and:baseQueryAnd})
+            // else finalQuery={$or:[{$and:baseQueryAnd}]}
             let finalStringifyQuery = JSON.stringify(finalQuery);
             let customStatus = new CustomOrderStatus({
                 statusName:customStatusReq.orderStatusName,
@@ -80,20 +85,33 @@ function createOrderStatusQuery(orderStatuses){
             }
         }
     }
-    let mongoQuery = {and:{$or:AndOrderStatusesQuery},or:OrOrderStatusesQuery};
+    let mongoQuery={}
+    if(OrOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,or:OrOrderStatusesQuery}
+    if(AndOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,and:{$or:AndOrderStatusesQuery}}
     return mongoQuery;
 }
 
 function createWarehouseOrderStatusQuery(orderStatuses){
-    let orderStatusesQuery = []
+    let AndOrderStatusesQuery = []
+    let OrOrderStatusesQuery = []
     for(orderStatus of orderStatuses){
         if(orderStatus?.isNot===true){
-            orderStatusesQuery.push({"OrderItems.WarehouseStatus":{$ne:orderStatus.value}})
+            if(orderStatus.filterType=='AND'){
+                AndOrderStatusesQuery.push({"OrderItems.WarehouseStatus":{$ne:orderStatus.value}})
+            }else if(orderStatus.filterType=='OR'){
+                OrOrderStatusesQuery.push({"OrderItems.WarehouseStatus":{$ne:orderStatus.value}})
+            }
         }else{
-            orderStatusesQuery.push({"OrderItems.WarehouseStatus":orderStatus.value})
+            if(orderStatus.filterType=='AND'){
+                AndOrderStatusesQuery.push({"OrderItems.WarehouseStatus":orderStatus.value})
+            }else if(orderStatus.filterType=='OR'){
+                OrOrderStatusesQuery.push({"OrderItems.WarehouseStatus":orderStatus.value})
+            }
         }
     }
-    let mongoQuery = {$or:orderStatusesQuery};
+    let mongoQuery={}
+    if(OrOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,or:OrOrderStatusesQuery}
+    if(AndOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,and:{$or:AndOrderStatusesQuery}}
     return mongoQuery;
 }
 
