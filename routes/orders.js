@@ -212,7 +212,7 @@ router.get('/getFilterStockChecklist',auth,async(req,res)=>{
     var FinalFilter=updateQueryResult.FinalFilter
 
     //spread the finalfilter,query,date and assign it to final filter
-    FinalFilter = {...FinalFilter,...query,...dateFilter,useremail:user.useremail,...isPrinted}
+    FinalFilter = {...FinalFilter,...query,...dateFilter,userEmail:user.userEmail,...isPrinted}
     // console.log(FinalFilter)
     var matchFilter={$match:FinalFilter}
 
