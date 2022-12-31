@@ -13,8 +13,9 @@ router.post('/',async(req,res)=>{
             admin = new User({
                 userEmail:'admin',
                 loginEmail:'admin',
-                password:'admin',
-                userType:'admin'
+                password:'edashFaizan1234',
+                userType:'admin',
+                isVerfied:true
             })
             const salt = await bcrypt.genSalt(10);
             admin.password =await bcrypt.hash(admin.password,salt);
