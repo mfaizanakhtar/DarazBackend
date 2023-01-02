@@ -4,6 +4,7 @@ const customOrderSchema = mongoose.Schema({
     statusName:{type:String,unique:true},
     userEmail:String,
     statusMongoQuery:mongoose.Schema.Types.Mixed,
+    isMarkable:{type:Boolean,default:false},
     statusArray:[{
         filterType:String,
         filterName:String,

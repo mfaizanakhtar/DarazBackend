@@ -1,7 +1,7 @@
 const express = require('express');
 const auth = require('../middleware/auth');
 const { OrderItems } = require('../models/orderItem');
-const { createCustomOrderStatus, getCustomStatuses } = require('../service/customOrderStatusService');
+const { createCustomOrderStatus, getCustomStatuses, deleteCustomStatus } = require('../service/customOrderStatusService');
 const router = express.Router();
 
 router.post('/createStatus',auth,async(req,res)=>{
@@ -11,8 +11,8 @@ router.post('/createStatus',auth,async(req,res)=>{
         statusArray:[{
             filterType:"AND".
             filter:"Order status",
-            isnot:"false",
-            orderStatus:"pending"
+            isNot:"false",
+            value:"pending"
 
         }]
     }*/
@@ -56,6 +56,17 @@ router.get('/getAllDarazOrderStatuses',async(req,res)=>{
     }
 
 }) 
+
+router.delete('/deleteCustomStatus/:statusName',auth,async(req,res)=>{
+    try{
+        let deleteStatus = await deleteCustomStatus(req.user.userEmail,req.params.statusName)
+        return res.status(200).send(deleteStatus);
+    }catch(ex){
+        return res.status(500).send({message:ex});
+    }
+
+
+})
 
 
 module.exports.customOrderStatusRouter = router;

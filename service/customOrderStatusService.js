@@ -4,6 +4,7 @@ const { CustomOrderStatus } = require("../models/customOrderStatus");
 async function createCustomOrderStatus(customStatusReq,userEmail){
     return new Promise(async(resolve,reject)=>{
         try{
+            let isMarkable=false;
             if(!customStatusReq.isEdit){
                 let findStatus = await CustomOrderStatus.findOne({statusName:customStatusReq.orderStatusName})
                 if(findStatus){
@@ -28,7 +29,8 @@ async function createCustomOrderStatus(customStatusReq,userEmail){
                         if(query.and) baseQueryAnd.push(query.and)
                         if(query.or?.length>0) baseQueryOr=[...baseQueryOr,...query.or]
                     }else if(seperatedStatus==FILTERCONST.CUSTOM_ORDER_STATUS.value){
-                        let query = createWarehouseOrderStatusQuery(seperateByFilter[seperatedStatus])
+                        let query = createWarehouseOrderStatusQuery(seperateByFilter[seperatedStatus],customStatusReq.orderStatusName)
+                        isMarkable=query.isMarkable;
                         if(query.and) baseQueryAnd.push(query.and)
                         if(query.or?.length>0) baseQueryOr=[...baseQueryOr,...query.or]
                     }
@@ -43,10 +45,12 @@ async function createCustomOrderStatus(customStatusReq,userEmail){
                 statusName:customStatusReq.orderStatusName,
                 statusArray:customStatusReq.statusArray,
                 statusMongoQuery:finalStringifyQuery,
+                isMarkable:isMarkable,
                 userEmail:userEmail
             })
             let createdCustomStatus = await customStatus.save()
-            let formattedCustomStatus = {statusName:createdCustomStatus.statusName,_id:createdCustomStatus._id}
+            let formattedCustomStatus = {statusName:createdCustomStatus.statusName,_id:createdCustomStatus._id,
+                isMarkable:createdCustomStatus.isMarkable,statusArray:createdCustomStatus.statusArray}
             resolve({message:"Custom Status Created Successfully",createdCustomStatus:formattedCustomStatus})
         }catch(ex){
             reject(ex.message)
@@ -59,8 +63,19 @@ async function createCustomOrderStatus(customStatusReq,userEmail){
 function getCustomStatuses(userEmail){
     return new Promise(async(resolve,reject)=>{
         try{
-            let allCustomStatusesOfUser = await CustomOrderStatus.find({userEmail:userEmail},{statusName:1,"statusArray.filterType":1,"statusArray.value":1})
+            let allCustomStatusesOfUser = await CustomOrderStatus.find({$or:[{userEmail:userEmail},{userEmail:"all"}]},{statusName:1,statusArray:1,isMarkable:1})
             resolve(allCustomStatusesOfUser);
+        }catch(ex){
+            reject(ex.message)
+        }
+    })
+}
+
+function deleteCustomStatus(userEmail,statusName){
+    return new Promise(async(resolve,reject)=>{
+        try{
+            let toDeleteCustomStatus = await CustomOrderStatus.deleteOne({userEmail:userEmail,statusName:statusName})
+            resolve(toDeleteCustomStatus);
         }catch(ex){
             reject(ex.message)
         }
@@ -91,10 +106,12 @@ function createOrderStatusQuery(orderStatuses){
     return mongoQuery;
 }
 
-function createWarehouseOrderStatusQuery(orderStatuses){
+function createWarehouseOrderStatusQuery(orderStatuses,statusName){
     let AndOrderStatusesQuery = []
     let OrOrderStatusesQuery = []
+    let isMarkable=false;
     for(orderStatus of orderStatuses){
+        if(orderStatus.value==statusName) isMarkable=true;
         if(orderStatus?.isNot===true){
             if(orderStatus.filterType=='AND'){
                 AndOrderStatusesQuery.push({"OrderItems.WarehouseStatus":{$ne:orderStatus.value}})
@@ -109,7 +126,7 @@ function createWarehouseOrderStatusQuery(orderStatuses){
             }
         }
     }
-    let mongoQuery={}
+    let mongoQuery={isMarkable:isMarkable}
     if(OrOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,or:OrOrderStatusesQuery}
     if(AndOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,and:{$or:AndOrderStatusesQuery}}
     return mongoQuery;
@@ -117,3 +134,4 @@ function createWarehouseOrderStatusQuery(orderStatuses){
 
 module.exports.createCustomOrderStatus = createCustomOrderStatus;
 module.exports.getCustomStatuses = getCustomStatuses;
+module.exports.deleteCustomStatus = deleteCustomStatus;

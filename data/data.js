@@ -114,6 +114,19 @@ darazOpenAppDetails={
     appSecret:"6Ob7pZ9yTjXTNrKSXMXXxFoatFsKP73D"
 }
 
+customDispatchedReceivedStatus=[{
+    isMarkable:true,
+    statusName:'Dispatched',
+    statusMongoQuery:'{"$or":[{"$and":[{"$or":[{"OrderItems.WarehouseStatus":"Dispatched"}]}]}]}',
+    userEmail:'all'
+},
+{
+    isMarkable:true,
+    statusName:'Received',
+    statusMongoQuery:'{"$or":[{"$and":[{"$or":[{"OrderItems.WarehouseStatus":"Received"}]}]}]}',
+    userEmail:'all'
+}]
+
 customOrderFilterTypes=["AND","OR"]
 
 
@@ -127,3 +140,4 @@ module.exports.mailerCredential=mailerCredential;
 module.exports.darazOpenAppDetails = darazOpenAppDetails;
 module.exports.customOrderFilterTypes = customOrderFilterTypes;
 module.exports.customOrderFilters = customOrderFilters;
+module.exports.customDispatchedReceivedStatus=customDispatchedReceivedStatus;

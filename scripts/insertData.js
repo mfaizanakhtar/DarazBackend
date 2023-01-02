@@ -1,10 +1,12 @@
 const { Lookup } = require("../models/lookup");
 const { Plan } = require("../models/plan");
-const { plansData, bankData, permissions, plansPermissions, mailerCredential, darazOpenAppDetails, customOrderFilterTypes, customOrderFilters } = require("../data/data");
+const { plansData, bankData, permissions, plansPermissions, mailerCredential, darazOpenAppDetails, customOrderFilterTypes, customOrderFilters, customDispatchedReceivedStatus } = require("../data/data");
 const constants = require("../data/constants");
+const { CustomOrderStatus } = require("../models/customOrderStatus");
 
 function executeAllDataQueries(){
     insertPlanData()
+    insertCustomStatuses()
     insertLookup("bankDetails",bankData)
     insertLookup("permissions",permissions)
     insertLookup("Starter",plansPermissions.Starter)
@@ -37,6 +39,17 @@ async function insertLookup(lookup_key,lookup_detail){
         await lookup.save()
     }
 
+}
+
+async function insertCustomStatuses(){
+    let customStatuses = customDispatchedReceivedStatus
+    for(customStatus of customStatuses){
+        let statusExists = await CustomOrderStatus.findOne({statusName:customStatus.statusName});
+        if(!statusExists){
+            let status = new CustomOrderStatus(customStatus);
+            await status.save();
+        }
+    }
 }
 
 module.exports.dataQueries = executeAllDataQueries;
