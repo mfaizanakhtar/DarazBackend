@@ -4,7 +4,8 @@ module.exports = {
     EASYPAISA_URL:"https://www.google.com/",
     PENDING_PAYMENT:"payment pending",
     FILTERCONST:{
-        ORDER_STATUS:{name:"Order Status",value:"OrderStatus"},
-        CUSTOM_ORDER_STATUS:{name:"Custom Order Status",value:"CustomOrderStatus"}
+        ORDER_STATUS:{name:"Order Status Filter",value:"OrderStatus"},
+        CUSTOM_ORDER_STATUS:{name:"Custom Order Status Filter",value:"CustomOrderStatus"},
+        DATE_RANGE_FILTER:{name:"Date Range Filter",value:"DateRangeFilter"}
     }
 }

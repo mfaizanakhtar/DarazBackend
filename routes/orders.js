@@ -8,7 +8,7 @@ const {RtsURL} = require('../service/GenerateUrl')
 const {GetData,PostData} = require('../scripts/HttpReq')
 const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
 const {updateQuery, updateQueryForStockChecklist} = require('../service/ordersService')
-const {getDateFilter} = require('../service/utils');
+const {getDateFilter, replaceUnderScoreKeysToDollar} = require('../service/utils');
 
 router.get('/orders/',auth,async(req,res)=>{
 
@@ -42,7 +42,7 @@ async function FindQuery(query,user){
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,"OrderItems.userEmail":user.userEmail,...isPrinted}
     if(updateQueryResult.customStatusQuery){
-        let parsedCustomQuery = JSON.parse(updateQueryResult.customStatusQuery)
+        let parsedCustomQuery = replaceUnderScoreKeysToDollar(updateQueryResult.customStatusQuery)
         FinalFilter = {$and:[{...FinalFilter},{...parsedCustomQuery}]}
     }
     console.log(FinalFilter)
