@@ -1,5 +1,5 @@
 {
-    "connectionstring" : "mongodb://localhost:27017/Daraz_open",
+    "connectionstring" : "mongodb://127.0.0.1:27017/Daraz_open",
     "jwtprivatekey":"1234",
     "baseUrl":"http://localhost:4200"
 }

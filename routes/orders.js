@@ -8,7 +8,7 @@ const {RtsURL} = require('../service/GenerateUrl')
 const {GetData,PostData} = require('../scripts/HttpReq')
 const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
 const {updateQuery, updateQueryForStockChecklist} = require('../service/ordersService')
-const {getDateFilter} = require('../service/utils');
+const {getDateFilter, replaceUnderScoreKeysToDollar} = require('../service/utils');
 
 router.get('/orders/',auth,async(req,res)=>{
 
@@ -29,7 +29,7 @@ async function FindQuery(query,user){
     if(query.unPrinted=="true") isPrinted={isPrinted:false}
 
     dateFilter=getDateFilter(query);
-    updateQueryResult = updateQuery(query);
+    updateQueryResult = await updateQuery(query);
 
     query = updateQueryResult.query;
     var pageArgs=updateQueryResult.pageArgs
@@ -41,6 +41,10 @@ async function FindQuery(query,user){
 
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,"OrderItems.userEmail":user.userEmail,...isPrinted}
+    if(updateQueryResult.customStatusQuery){
+        let parsedCustomQuery = replaceUnderScoreKeysToDollar(updateQueryResult.customStatusQuery)
+        FinalFilter = {$and:[{...FinalFilter},{...parsedCustomQuery}]}
+    }
     console.log(FinalFilter)
     //query generated
     const orders = await Order.aggregate([
@@ -230,10 +234,10 @@ router.get('/getFilterStockChecklist',auth,async(req,res)=>{
     res.send(result)
 })
 
-router.put("/updateClaim/:id",auth,async (req,res)=>{
+router.put("/updateRemarks/:id",auth,async (req,res)=>{
     // console.log(req.body)
     // console.log(req.params)
-    var result = await Order.findOneAndUpdate({_id:req.params.id},{ClaimNumber:req.body.ClaimNumber},{returnNewDocument:true})
+    var result = await Order.findOneAndUpdate({_id:req.params.id},{Remarks:req.body.Remarks},{returnNewDocument:true})
     console.log(result)
     if(result==null){
         res.sendStatus(404).send({message:"Not Found"})

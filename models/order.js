@@ -65,7 +65,7 @@ const orderSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    ClaimNumber:String
+    Remarks:String
 
 })
 orderSchema.index({ OrderId: 1, ShopShortCode: 1 }, { unique: true })
