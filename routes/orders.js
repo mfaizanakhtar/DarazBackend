@@ -42,7 +42,7 @@ async function FindQuery(query,user){
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,"OrderItems.userEmail":user.userEmail,...isPrinted}
     if(updateQueryResult.customStatusQuery){
-        let parsedCustomQuery = replaceUnderScoreKeysToDollar(updateQueryResult.customStatusQuery)
+        let parsedCustomQuery = JSON.parse(updateQueryResult.customStatusQuery)
         FinalFilter = {$and:[{...FinalFilter},{...parsedCustomQuery}]}
     }
     console.log(FinalFilter)
