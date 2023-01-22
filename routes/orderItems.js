@@ -27,7 +27,7 @@ router.put('/updateStatus/:Status',auth,async(req,res)=>{
             statusToUpdate=null;
         }
         let updateBody={WarehouseStatus:statusToUpdate}
-        if(Object.keys(dateArgs).length>0) updateBody={updateBody,...dateArgs}
+        if(Object.keys(dateArgs).length>0) updateBody={...updateBody,...dateArgs}
         ordersUpdated = await OrderItems.updateMany({OrderId:{$in:req.body.orders}},{
             $set:updateBody
         })

@@ -117,13 +117,13 @@ darazOpenAppDetails={
 customDispatchedReceivedStatus=[{
     isMarkable:true,
     statusName:'Dispatched',
-    statusMongoQuery:{_or:[{_and:[{_or:[{OrderItemsDOTWarehouseStatus:"Dispatched"}]}]}]},
+    statusMongoQuery:'{"$or":[{"$and":[{"$or":[{"$in":["Dispatched","$OrderItems.WarehouseStatus"]}]}]}]}',
     userEmail:'all'
 },
 {
     isMarkable:true,
     statusName:'Received',
-    statusMongoQuery:{_or:[{_and:[{_or:[{OrderItemsDOTWarehouseStatus:"Received"}]}]}]},
+    statusMongoQuery:'{"$or":[{"$and":[{"$or":[{"$in":["Received","$OrderItems.WarehouseStatus"]}]}]}]}',
     userEmail:'all'
 }]
 
