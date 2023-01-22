@@ -41,13 +41,13 @@ async function FindQuery(query,user){
 
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,"OrderItems.userEmail":user.userEmail,...isPrinted}
+    let parsedCustomQuery
     if(updateQueryResult.customStatusQuery){
-        let parsedCustomQuery = replaceUnderScoreKeysToDollar(updateQueryResult.customStatusQuery)
-        FinalFilter = {$and:[{...FinalFilter},{...parsedCustomQuery}]}
+        parsedCustomQuery = JSON.parse(updateQueryResult.customStatusQuery)
+        // FinalFilter = {$and:[{...FinalFilter},{...parsedCustomQuery}]}
     }
     console.log(FinalFilter)
-    //query generated
-    const orders = await Order.aggregate([
+    let aggregateQueryObj=[
         {
             $match:{UserEmail:user.userEmail,...dateFilter}
         },
@@ -57,7 +57,12 @@ async function FindQuery(query,user){
             foreignField:"_id",
             as:"OrderItems"
         }},
-        {$match:FinalFilter},
+        {$match:FinalFilter}
+    ]
+    
+    if(parsedCustomQuery) aggregateQueryObj=[...aggregateQueryObj,{$match:{$expr:parsedCustomQuery}}]
+    //query generated
+    const orders = await Order.aggregate([...aggregateQueryObj,
         {$sort:{"CreatedAt":1}},
         ...skuSort,
         ...shopSort,
@@ -66,17 +71,7 @@ async function FindQuery(query,user){
     .limit(parseInt(pageArgs.pageSize))
     //use for counting the documents
     // console.log("here",orders)
-    const length = await Order.aggregate([
-        {
-            $match:{UserEmail:user.userEmail,...dateFilter}
-        },
-        {$lookup:{
-            from:'orderitems',
-            localField:"OrderItems",
-            foreignField:"_id",
-            as:"OrderItems"
-        }},
-        {$match:FinalFilter},
+    const length = await Order.aggregate([...aggregateQueryObj,
         {$count:"count"}
     ])
     if(length[0]) return {orders:orders,count:length[0].count}

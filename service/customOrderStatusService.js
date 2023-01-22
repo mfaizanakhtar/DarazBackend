@@ -42,21 +42,21 @@ async function createCustomOrderStatus(customStatusReq,userEmail){
                     }
                 }
             }
-            let finalQuery={_or:[]};
-            if(baseQueryOr.length>0) finalQuery["_or"]=[...finalQuery["_or"],...baseQueryOr]
-            if(baseQueryAnd.length>0) finalQuery["_or"].push({_and:baseQueryAnd})
+            let finalQuery={$or:[]};
+            if(baseQueryOr.length>0) finalQuery["$or"]=[...finalQuery["$or"],...baseQueryOr]
+            if(baseQueryAnd.length>0) finalQuery["$or"].push({$and:baseQueryAnd})
             // else finalQuery={$or:[{$and:baseQueryAnd}]}
             let finalStringifyQuery = JSON.stringify(finalQuery);
             if(customStatus){
                 customStatus.statusArray=customStatusReq.statusArray;
-                customStatus.statusMongoQuery=finalQuery
+                customStatus.statusMongoQuery=finalStringifyQuery
                 customStatus.isMarkable=isMarkable
                 customStatus.hasDateRange=hasDateRange
             }else{
                 customStatus = new CustomOrderStatus({
                     statusName:customStatusReq.orderStatusName,
                     statusArray:customStatusReq.statusArray,
-                    statusMongoQuery:finalQuery,
+                    statusMongoQuery:finalStringifyQuery,
                     isMarkable:isMarkable,
                     hasDateRange:hasDateRange,
                     userEmail:userEmail
@@ -103,24 +103,24 @@ function createOrderStatusQuery(orderStatuses){
     for(orderStatus of orderStatuses){
         if(orderStatus?.isNot===true){
             if(orderStatus.filterType=='AND'){
-                NOTAndOrderStatusesQuery.push({"OrderItemsDOTStatus":{_ne:orderStatus.value}})
+                NOTAndOrderStatusesQuery.push({"$not":{"$in":[orderStatus.value,"$OrderItems.Status"]}})
             }else if(orderStatus.filterType=='OR'){
-                OrOrderStatusesQuery.push({"OrderItemsDOTStatus":{_ne:orderStatus.value}})
+                OrOrderStatusesQuery.push({"$not":{"$in":[orderStatus.value,"$OrderItems.Status"]}})
             }
         }else{
             if(orderStatus.filterType=='AND'){
-                AndOrderStatusesQuery.push({"OrderItemsDOTStatus":orderStatus.value})
+                AndOrderStatusesQuery.push({"$in":[orderStatus.value,"$OrderItems.Status"]})
             }else if(orderStatus.filterType=='OR'){
-                OrOrderStatusesQuery.push({"OrderItemsDOTStatus":orderStatus.value})
+                OrOrderStatusesQuery.push({"$in":[orderStatus.value,"$OrderItems.Status"]})
             }
         }
     }
     let mongoQuery={}
     if(OrOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,or:OrOrderStatusesQuery}
-    if(AndOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,and:[{_or:AndOrderStatusesQuery}]}
+    if(AndOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,and:[{$or:AndOrderStatusesQuery}]}
     if(NOTAndOrderStatusesQuery.length>0){
-        if(mongoQuery.and) mongoQuery.and.push({_and:NOTAndOrderStatusesQuery}) 
-        else mongoQuery.and=[{_and:NOTAndOrderStatusesQuery}]
+        if(mongoQuery.and) mongoQuery.and.push({$and:NOTAndOrderStatusesQuery}) 
+        else mongoQuery.and=[{$and:NOTAndOrderStatusesQuery}]
     }
     return mongoQuery;
 }
@@ -134,24 +134,24 @@ function createWarehouseOrderStatusQuery(orderStatuses,statusName){
         if(orderStatus.value==statusName) isMarkable=true;
         if(orderStatus?.isNot===true){
             if(orderStatus.filterType=='AND'){
-                NOTAndOrderStatusesQuery.push({"OrderItemsDOTWarehouseStatus":{_ne:orderStatus.value}})
+                NOTAndOrderStatusesQuery.push({"$not":{"$in":[orderStatus.value,"$OrderItems.WarehouseStatus"]}})
             }else if(orderStatus.filterType=='OR'){
-                OrOrderStatusesQuery.push({"OrderItemsDOTWarehouseStatus":{_ne:orderStatus.value}})
+                OrOrderStatusesQuery.push({"$not":{"$in":[orderStatus.value,"$OrderItems.WarehouseStatus"]}})
             }
         }else{
             if(orderStatus.filterType=='AND'){
-                AndOrderStatusesQuery.push({"OrderItemsDOTWarehouseStatus":orderStatus.value})
+                AndOrderStatusesQuery.push({"$in":[orderStatus.value,"$OrderItems.WarehouseStatus"]})
             }else if(orderStatus.filterType=='OR'){
-                OrOrderStatusesQuery.push({"OrderItemsDOTWarehouseStatus":orderStatus.value})
+                OrOrderStatusesQuery.push({"$in":[orderStatus.value,"$OrderItems.WarehouseStatus"]})
             }
         }
     }
     let mongoQuery={isMarkable:isMarkable}
     if(OrOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,or:OrOrderStatusesQuery}
-    if(AndOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,and:[{_or:AndOrderStatusesQuery}]}
+    if(AndOrderStatusesQuery.length>0) mongoQuery={...mongoQuery,and:[{$or:AndOrderStatusesQuery}]}
     if(NOTAndOrderStatusesQuery.length>0){
-        if(mongoQuery.and) mongoQuery.and.push({_and:NOTAndOrderStatusesQuery}) 
-        else mongoQuery.and=[{_and:NOTAndOrderStatusesQuery}]
+        if(mongoQuery.and) mongoQuery.and.push({$and:NOTAndOrderStatusesQuery}) 
+        else mongoQuery.and=[{$and:NOTAndOrderStatusesQuery}]
     }
     return mongoQuery;
 }
@@ -164,20 +164,20 @@ function createDateRangequery(dateFilters){
         let greaterThanDate
         let lesserThanDate
         if( dateFilter.value?.greaterThan && dateFilter.value?.lesserThan){
-            greaterThanDate = moment().subtract(dateFilter.value.greaterThan,'days').toDate()
-            lesserThanDate = moment().subtract(dateFilter.value.lesserThan,'days').toDate()
-        }
-        if(greaterThanDate && lesserThanDate){
+            greaterThanDate = parseInt(dateFilter.value.greaterThan)
+            lesserThanDate = parseInt(dateFilter.value.lesserThan)
             if(dateFilter.filterType=='AND'){
-                AndDateRangeQuery.push({_and:[{CreatedAt:{_gte:greaterThanDate}},{CreatedAt:{_lte:lesserThanDate}}]})
+                AndDateRangeQuery.push({$and:[{$gte:['$CreatedAt',{$dateSubtract:{startDate:'$$NOW',unit:'day',amount:greaterThanDate}}]},
+                {$lte:['$CreatedAt',{$dateSubtract:{startDate:'$$NOW',unit:'day',amount:lesserThanDate}}]}]})
             }else if(dateFilter.filterType=='OR'){
-                OrDateRangeQuery.push({_and:[{CreatedAt:{_gte:greaterThanDate}},{CreatedAt:{_lte:lesserThanDate}}]})
+                OrDateRangeQuery.push({$and:[{$gte:['$CreatedAt',{$dateSubtract:{startDate:'$$NOW',unit:'day',amount:greaterThanDate}}]},
+                {$lte:['$CreatedAt',{$dateSubtract:{startDate:'$$NOW',unit:'day',amount:lesserThanDate}}]}]})
             }
         }
     }
     let mongoQuery={}
     if(OrDateRangeQuery.length>0) mongoQuery={...mongoQuery,or:OrDateRangeQuery}
-    if(AndDateRangeQuery.length>0) mongoQuery={...mongoQuery,and:[{_or:AndDateRangeQuery}]}
+    if(AndDateRangeQuery.length>0) mongoQuery={...mongoQuery,and:[{$or:AndDateRangeQuery}]}
     return mongoQuery;
 }
 
