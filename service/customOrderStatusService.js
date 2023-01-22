@@ -39,6 +39,10 @@ async function createCustomOrderStatus(customStatusReq,userEmail){
                         hasDateRange=true
                         if(query.and?.length>0) baseQueryAnd=[...baseQueryAnd,...query.and]
                         if(query.or?.length>0) baseQueryOr=[...baseQueryOr,...query.or]
+                    }else if(seperatedStatus==FILTERCONST.ORDER_PAYOUT_FILTER.value){
+                        let query = createOrderPayoutQuery(seperateByFilter[seperatedStatus])
+                        if(query.and?.length>0) baseQueryAnd=[...baseQueryAnd,...query.and]
+                        if(query.or?.length>0) baseQueryOr=[...baseQueryOr,...query.or]
                     }
                 }
             }
@@ -178,6 +182,37 @@ function createDateRangequery(dateFilters){
     let mongoQuery={}
     if(OrDateRangeQuery.length>0) mongoQuery={...mongoQuery,or:OrDateRangeQuery}
     if(AndDateRangeQuery.length>0) mongoQuery={...mongoQuery,and:[{$or:AndDateRangeQuery}]}
+    return mongoQuery;
+}
+
+function createOrderPayoutQuery(orderPayoutFilters){
+    let AndOrderPayoutQuery = []
+    let OrOrderPayoutQuery = []
+
+    for(orderPayoutFilter of orderPayoutFilters){
+        if(orderPayoutFilter.value?.type && orderPayoutFilter.value?.val){
+            let value = parseInt(orderPayoutFilter.value?.val)
+            let type = orderPayoutFilter.value?.type
+            let query=null
+            if(type=='\>\='){
+                query={$gte:['$maxPayout',value]}
+            }else if(type=='\<\='){
+                query={$lte:['$minPayout',value]}
+            }else if(type=='\='){
+                query={$in:[value,'$OrderItems.TransactionPayout']}
+            }
+            if(query){
+                if(orderPayoutFilter.filterType=='AND'){
+                    AndOrderPayoutQuery.push(query)
+                }else if(orderPayoutFilter.filterType=='OR'){
+                    OrOrderPayoutQuery.push(query)
+                }
+            }
+        }
+    }
+    let mongoQuery={}
+    if(OrOrderPayoutQuery.length>0) mongoQuery={...mongoQuery,or:OrOrderPayoutQuery}
+    if(AndOrderPayoutQuery.length>0) mongoQuery={...mongoQuery,and:[{$or:AndOrderPayoutQuery}]}
     return mongoQuery;
 }
 

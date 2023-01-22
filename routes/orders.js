@@ -57,6 +57,20 @@ async function FindQuery(query,user){
             foreignField:"_id",
             as:"OrderItems"
         }},
+        {$addFields: {
+            "TransactionsPayouts": {
+                $map: {
+                    input: "$OrderItems",
+                    as: "item",
+                    in: "$$item.TransactionsPayout"
+                }
+            }
+        }},{
+            $addFields:{
+                "maxPayout": { $max: "$TransactionsPayouts" },
+                "minPayout": { $min: "$TransactionsPayouts" }
+            }
+        },
         {$match:FinalFilter}
     ]
     

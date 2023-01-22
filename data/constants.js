@@ -6,6 +6,7 @@ module.exports = {
     FILTERCONST:{
         ORDER_STATUS:{name:"Order Status Filter",value:"OrderStatus"},
         CUSTOM_ORDER_STATUS:{name:"Custom Order Status Filter",value:"CustomOrderStatus"},
-        DATE_RANGE_FILTER:{name:"Date Range Filter",value:"DateRangeFilter"}
+        DATE_RANGE_FILTER:{name:"Date Range Filter",value:"DateRangeFilter"},
+        ORDER_PAYOUT_FILTER:{name:"Order Payout Filter",value:"OrderPayoutFilter"}
     }
 }
