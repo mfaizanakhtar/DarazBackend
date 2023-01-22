@@ -103,15 +103,15 @@ function createOrderStatusQuery(orderStatuses){
     for(orderStatus of orderStatuses){
         if(orderStatus?.isNot===true){
             if(orderStatus.filterType=='AND'){
-                NOTAndOrderStatusesQuery.push({"OrderItems.Status":{$ne:orderStatus.value}})
+                NOTAndOrderStatusesQuery.push({"$not":{"$in":[orderStatus.value,"$OrderItems.Status"]}})
             }else if(orderStatus.filterType=='OR'){
-                OrOrderStatusesQuery.push({"OrderItems.Status":{$ne:orderStatus.value}})
+                OrOrderStatusesQuery.push({"$not":{"$in":[orderStatus.value,"$OrderItems.Status"]}})
             }
         }else{
             if(orderStatus.filterType=='AND'){
-                AndOrderStatusesQuery.push({"OrderItems.Status":orderStatus.value})
+                AndOrderStatusesQuery.push({"$in":[orderStatus.value,"$OrderItems.Status"]})
             }else if(orderStatus.filterType=='OR'){
-                OrOrderStatusesQuery.push({"OrderItems.Status":orderStatus.value})
+                OrOrderStatusesQuery.push({"$in":[orderStatus.value,"$OrderItems.Status"]})
             }
         }
     }
@@ -134,15 +134,15 @@ function createWarehouseOrderStatusQuery(orderStatuses,statusName){
         if(orderStatus.value==statusName) isMarkable=true;
         if(orderStatus?.isNot===true){
             if(orderStatus.filterType=='AND'){
-                NOTAndOrderStatusesQuery.push({"OrderItems.WarehouseStatus":{$ne:orderStatus.value}})
+                NOTAndOrderStatusesQuery.push({"$not":{"$in":[orderStatus.value,"$OrderItems.WarehouseStatus"]}})
             }else if(orderStatus.filterType=='OR'){
-                OrOrderStatusesQuery.push({"OrderItems.WarehouseStatus":{$ne:orderStatus.value}})
+                OrOrderStatusesQuery.push({"$not":{"$in":[orderStatus.value,"$OrderItems.WarehouseStatus"]}})
             }
         }else{
             if(orderStatus.filterType=='AND'){
-                AndOrderStatusesQuery.push({"OrderItems.WarehouseStatus":orderStatus.value})
+                AndOrderStatusesQuery.push({"$in":[orderStatus.value,"$OrderItems.WarehouseStatus"]})
             }else if(orderStatus.filterType=='OR'){
-                OrOrderStatusesQuery.push({"OrderItems.WarehouseStatus":orderStatus.value})
+                OrOrderStatusesQuery.push({"$in":[orderStatus.value,"$OrderItems.WarehouseStatus"]})
             }
         }
     }
@@ -164,14 +164,14 @@ function createDateRangequery(dateFilters){
         let greaterThanDate
         let lesserThanDate
         if( dateFilter.value?.greaterThan && dateFilter.value?.lesserThan){
-            greaterThanDate = moment().subtract(dateFilter.value.greaterThan,'days').toDate()
-            lesserThanDate = moment().subtract(dateFilter.value.lesserThan,'days').toDate()
-        }
-        if(greaterThanDate && lesserThanDate){
+            greaterThanDate = parseInt(dateFilter.value.greaterThan)
+            lesserThanDate = parseInt(dateFilter.value.lesserThan)
             if(dateFilter.filterType=='AND'){
-                AndDateRangeQuery.push({$and:[{CreatedAt:{$gte:greaterThanDate}},{CreatedAt:{$lte:lesserThanDate}}]})
+                AndDateRangeQuery.push({$and:[{$gte:['$CreatedAt',{$dateSubtract:{startDate:'$$NOW',unit:'day',amount:greaterThanDate}}]},
+                {$lte:['$CreatedAt',{$dateSubtract:{startDate:'$$NOW',unit:'day',amount:lesserThanDate}}]}]})
             }else if(dateFilter.filterType=='OR'){
-                OrDateRangeQuery.push({$and:[{CreatedAt:{$gte:greaterThanDate}},{CreatedAt:{$lte:lesserThanDate}}]})
+                OrDateRangeQuery.push({$and:[{$gte:['$CreatedAt',{$dateSubtract:{startDate:'$$NOW',unit:'day',amount:greaterThanDate}}]},
+                {$lte:['$CreatedAt',{$dateSubtract:{startDate:'$$NOW',unit:'day',amount:lesserThanDate}}]}]})
             }
         }
     }

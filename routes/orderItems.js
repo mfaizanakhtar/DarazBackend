@@ -23,7 +23,7 @@ router.put('/updateStatus/:Status',auth,async(req,res)=>{
         else if(req.params.Status=='Reset Received'){
             dateArgs={ReturnDate:null}
             statusToUpdate=null;
-        }else if(req.params.Status='Reset'){
+        }else if(req.params.Status=='Reset'){
             statusToUpdate=null;
         }
         let updateBody={WarehouseStatus:statusToUpdate}
