@@ -130,7 +130,7 @@ customDispatchedReceivedStatus=[{
 customOrderFilterTypes=["AND","OR"]
 
 
-customOrderFilters=[FILTERCONST.ORDER_STATUS,FILTERCONST.CUSTOM_ORDER_STATUS,FILTERCONST.DATE_RANGE_FILTER]
+customOrderFilters=[FILTERCONST.ORDER_STATUS,FILTERCONST.CUSTOM_ORDER_STATUS,FILTERCONST.DATE_RANGE_FILTER,FILTERCONST.ORDER_PAYOUT_FILTER]
 
 module.exports.plansData = plansData;
 module.exports.bankData = bankData;
