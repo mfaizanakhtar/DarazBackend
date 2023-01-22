@@ -199,7 +199,7 @@ function createOrderPayoutQuery(orderPayoutFilters){
             }else if(type=='\<\='){
                 query={$lte:['$minPayout',value]}
             }else if(type=='\='){
-                query={$in:[value,'$OrderItems.TransactionPayout']}
+                query={$in:[value,'$OrderItems.TransactionsPayout']}
             }
             if(query){
                 if(orderPayoutFilter.filterType=='AND'){
