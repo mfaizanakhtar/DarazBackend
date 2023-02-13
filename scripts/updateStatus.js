@@ -165,7 +165,7 @@ async function updateOrderItemPortCodes(accessToken,orderItemIds){
 
     for(let i=0;i<trackings.length;i++){
         console.log("3rd Checkpoint")
-
+    if(trackings[i] && labelOrderNumbers[i]){
         updateResult = await OrderItems.updateMany({TrackingCode:trackings[i].toString(),OrderId:labelOrderNumbers[i].toString()},{
             $set:{
                 PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],
@@ -175,8 +175,7 @@ async function updateOrderItemPortCodes(accessToken,orderItemIds){
             }
         })
         console.log(updateResult)
-
-        
+    }      
     }
 }catch(error){
     console.log(error)
