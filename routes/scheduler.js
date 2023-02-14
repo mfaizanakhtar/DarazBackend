@@ -1,6 +1,6 @@
 const express = require('express');
 const { updateTransactions } = require('../scripts/updateFinance');
-const { updateOrdersData } = require('../scripts/updateOrders');
+const { updateOrdersData, updateOrdersOnConfiguredOrderStatuses } = require('../scripts/updateOrders');
 const { getAllSkus, updateAllSkus } = require('../scripts/updateSku');
 const { updateOrderItemStatus } = require('../scripts/updateStatus');
 const {refreshAccessToken} = require('../service/shopService');
@@ -10,6 +10,12 @@ const router = express.Router();
 router.get('/updateOrdersData',async(req,res)=>{
     console.log("updateOrdersData api called")
     await updateOrdersData();
+    res.status(200).send();
+})
+
+router.get('/updateOrdersOnConfiguredOrderStatuses',async(req,res)=>{
+    console.log("updateOrdersOnConfiguredOrderStatuses api called")
+    await updateOrdersOnConfiguredOrderStatuses();
     res.status(200).send();
 })
 

@@ -32,10 +32,11 @@ function getSellerUrl(access_token){
     return createGetUrl(getSellerUrl,params)
 }
 
-function generateOrdersUrl(access_token,offSet){
+function generateOrdersUrl(access_token,offSet,orderStatus){
 
     var getOrdersUrl="/orders/get";
     var params = {access_token:access_token,sort_by:"created_at",sort_direction:"DESC",limit:100,offset:offSet,created_after:moment().subtract(365,"days").toISOString()};
+    if(orderStatus) params={...params,status:orderStatus};
     return createGetUrl(getOrdersUrl,params);    
 
 }
