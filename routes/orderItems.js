@@ -5,9 +5,10 @@ const {Sku} = require('../models/sku')
 const auth = require('../middleware/auth')
 
 
-router.put('/Update/:Status',auth,async(req,res)=>{
+router.put('/updateStatus/:Status',auth,async(req,res)=>{
     console.log(req.body)
-    var dateArgs
+    var dateArgs={}
+    let statusToUpdate=req.params.Status;
         if(req.params.Status=='Dispatched'){
             dateArgs={DispatchDate:new Date(req.body.date)},
             Username={DispatchBy:req.user.username}
@@ -15,14 +16,20 @@ router.put('/Update/:Status',auth,async(req,res)=>{
             dateArgs={ReturnDate:new Date(req.body.date)},
             Username={ReceiveBy:req.user.username}
         }
-        else if(req.params.Status=='Reverse Dispatch'){
+        else if(req.params.Status=='Reset Dispatched'){
             dateArgs={DispatchDate:null}
+            statusToUpdate=null;
         }
+        else if(req.params.Status=='Reset Received'){
+            dateArgs={ReturnDate:null}
+            statusToUpdate=null;
+        }else if(req.params.Status=='Reset'){
+            statusToUpdate=null;
+        }
+        let updateBody={WarehouseStatus:statusToUpdate}
+        if(Object.keys(dateArgs).length>0) updateBody={...updateBody,...dateArgs}
         ordersUpdated = await OrderItems.updateMany({OrderId:{$in:req.body.orders}},{
-            $set:{
-                WarehouseStatus:req.params.Status,
-                ...dateArgs
-            }
+            $set:updateBody
         })
     
     
@@ -87,7 +94,7 @@ else{
 } 
 })
 
-router.get('/ordermovement/:filter',auth,async(req,res)=>{
+router.get('/getDispatchReceivedOrders/:filter',auth,async(req,res)=>{
     var orderItem;
     var startdate;
     var enddate;

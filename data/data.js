@@ -1,4 +1,5 @@
 const config = require('config');
+const { FILTERCONST } = require('./constants');
 
 plansData  = [
     {
@@ -113,9 +114,30 @@ darazOpenAppDetails={
     appSecret:"6Ob7pZ9yTjXTNrKSXMXXxFoatFsKP73D"
 }
 
+customDispatchedReceivedStatus=[{
+    isMarkable:true,
+    statusName:'Dispatched',
+    statusMongoQuery:'{"$or":[{"$and":[{"$or":[{"$in":["Dispatched","$OrderItems.WarehouseStatus"]}]}]}]}',
+    userEmail:'all'
+},
+{
+    isMarkable:true,
+    statusName:'Received',
+    statusMongoQuery:'{"$or":[{"$and":[{"$or":[{"$in":["Received","$OrderItems.WarehouseStatus"]}]}]}]}',
+    userEmail:'all'
+}]
+
+customOrderFilterTypes=["AND","OR"]
+
+
+customOrderFilters=[FILTERCONST.ORDER_STATUS,FILTERCONST.CUSTOM_ORDER_STATUS,FILTERCONST.DATE_RANGE_FILTER,FILTERCONST.ORDER_PAYOUT_FILTER]
+
 module.exports.plansData = plansData;
 module.exports.bankData = bankData;
 module.exports.permissions = permissions;
 module.exports.plansPermissions = plansPermissions;
 module.exports.mailerCredential=mailerCredential;
 module.exports.darazOpenAppDetails = darazOpenAppDetails;
+module.exports.customOrderFilterTypes = customOrderFilterTypes;
+module.exports.customOrderFilters = customOrderFilters;
+module.exports.customDispatchedReceivedStatus=customDispatchedReceivedStatus;

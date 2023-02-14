@@ -10,7 +10,7 @@ function SignParameters(secretkey,param){
 }
 
 function getDateFilter(query){
-
+    if(query.startDate=='undefined' || !query.endDate=='undefined') return {}
     let startdate=moment(query.startDate).toDate()
     let enddate=moment(query.endDate).toDate()
     console.log(startdate)
@@ -20,5 +20,31 @@ function getDateFilter(query){
     
 }
 
+function replaceUnderScoreKeysToDollar(object){
+    for(let key of Object.keys(object)){
+        if(Array.isArray(object[key])){
+            for(arrayObj of object[key]){
+                replaceUnderScoreKeysToDollar(arrayObj)
+            }
+        }
+        let replacedDollarKey=key.replace('_','$')
+        if(replacedDollarKey!=key){
+            object[replacedDollarKey]=object[key]
+            delete object[key]
+        }
+        let replacedDOTKey=replacedDollarKey.replace('DOT','.')
+        if(replacedDOTKey!=replacedDollarKey){
+            object[replacedDOTKey]=object[key]
+            delete object[key]
+        }
+        if(!(typeof object[replacedDOTKey] === 'object')){
+             return
+        }
+        replaceUnderScoreKeysToDollar(object[replacedDOTKey])
+    }
+    return object
+}
+
 module.exports.SignParameters = SignParameters;
+module.exports.replaceUnderScoreKeysToDollar = replaceUnderScoreKeysToDollar;
 module.exports.getDateFilter = getDateFilter;

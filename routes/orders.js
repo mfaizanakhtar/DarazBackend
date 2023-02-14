@@ -8,7 +8,7 @@ const {RtsURL} = require('../service/GenerateUrl')
 const {GetData,PostData} = require('../scripts/HttpReq')
 const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
 const {updateQuery, updateQueryForStockChecklist} = require('../service/ordersService')
-const {getDateFilter} = require('../service/utils');
+const {getDateFilter, replaceUnderScoreKeysToDollar} = require('../service/utils');
 
 router.get('/orders/',auth,async(req,res)=>{
 
@@ -29,7 +29,7 @@ async function FindQuery(query,user){
     if(query.unPrinted=="true") isPrinted={isPrinted:false}
 
     dateFilter=getDateFilter(query);
-    updateQueryResult = updateQuery(query);
+    updateQueryResult = await updateQuery(query);
 
     query = updateQueryResult.query;
     var pageArgs=updateQueryResult.pageArgs
@@ -41,9 +41,13 @@ async function FindQuery(query,user){
 
     //spread the finalfilter,query,date and assign it to final filter
     FinalFilter = {...FinalFilter,...query,...dateFilter,"OrderItems.userEmail":user.userEmail,...isPrinted}
+    let parsedCustomQuery
+    if(updateQueryResult.customStatusQuery){
+        parsedCustomQuery = JSON.parse(updateQueryResult.customStatusQuery)
+        // FinalFilter = {$and:[{...FinalFilter},{...parsedCustomQuery}]}
+    }
     console.log(FinalFilter)
-    //query generated
-    const orders = await Order.aggregate([
+    let aggregateQueryObj=[
         {
             $match:{UserEmail:user.userEmail,...dateFilter}
         },
@@ -53,7 +57,26 @@ async function FindQuery(query,user){
             foreignField:"_id",
             as:"OrderItems"
         }},
-        {$match:FinalFilter},
+        {$addFields: {
+            "TransactionsPayouts": {
+                $map: {
+                    input: "$OrderItems",
+                    as: "item",
+                    in: "$$item.TransactionsPayout"
+                }
+            }
+        }},{
+            $addFields:{
+                "maxPayout": { $max: "$TransactionsPayouts" },
+                "minPayout": { $min: "$TransactionsPayouts" }
+            }
+        },
+        {$match:FinalFilter}
+    ]
+    
+    if(parsedCustomQuery) aggregateQueryObj=[...aggregateQueryObj,{$match:{$expr:parsedCustomQuery}}]
+    //query generated
+    const orders = await Order.aggregate([...aggregateQueryObj,
         {$sort:{"CreatedAt":1}},
         ...skuSort,
         ...shopSort,
@@ -62,17 +85,7 @@ async function FindQuery(query,user){
     .limit(parseInt(pageArgs.pageSize))
     //use for counting the documents
     // console.log("here",orders)
-    const length = await Order.aggregate([
-        {
-            $match:{UserEmail:user.userEmail,...dateFilter}
-        },
-        {$lookup:{
-            from:'orderitems',
-            localField:"OrderItems",
-            foreignField:"_id",
-            as:"OrderItems"
-        }},
-        {$match:FinalFilter},
+    const length = await Order.aggregate([...aggregateQueryObj,
         {$count:"count"}
     ])
     if(length[0]) return {orders:orders,count:length[0].count}
@@ -230,10 +243,10 @@ router.get('/getFilterStockChecklist',auth,async(req,res)=>{
     res.send(result)
 })
 
-router.put("/updateClaim/:id",auth,async (req,res)=>{
+router.put("/updateRemarks/:id",auth,async (req,res)=>{
     // console.log(req.body)
     // console.log(req.params)
-    var result = await Order.findOneAndUpdate({_id:req.params.id},{ClaimNumber:req.body.ClaimNumber},{returnNewDocument:true})
+    var result = await Order.findOneAndUpdate({_id:req.params.id},{Remarks:req.body.Remarks},{returnNewDocument:true})
     console.log(result)
     if(result==null){
         res.sendStatus(404).send({message:"Not Found"})
