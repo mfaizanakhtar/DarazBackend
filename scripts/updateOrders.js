@@ -7,6 +7,8 @@ const {generateMultipleOrderItemsUrl,getOrderIdArray,generateOrdersUrl,generateL
 const {getSkus} = require('./updateSku')
 const { previousDataQuery } = require('../models/previousDataQuery');
 const moment = require('moment');
+const { getLookupValue } = require('../service/utils');
+const constants = require('../data/constants');
 
 
 async function getOrderItemsData(accessToken,data){
@@ -193,42 +195,62 @@ function setOrderObj(order,shop){
 }
 
 async function updateOrdersData(){
+    await updateOrders(null);
+}
 
+async function updateOrdersOnConfiguredOrderStatuses(){
+    let lookupObject = await getLookupValue(constants.UPDATE_ORDER_STATUS_KEY)
+    if(lookupObject?.orderStatuses)
+    for(orderStatus of lookupObject.orderStatuses){
+        await updateOrders(orderStatus);
+    }
+}
+
+async function updateOrders(orderStatus){
+    let queryTypeVal = "ordersData";
+    if(orderStatus) queryTypeVal+=orderStatus;
     try{
-    var shops = await Shop.find({appStatus:true})
-    //iterating through all fetched ips
-        for(const shop of shops){
-            // console.log(id);
-            let url = generateOrdersUrl(shop.accessToken,0);
-            // console.log(url)
-            var data = await GetData(url);
-            if(data!=null){
-                var previousUpdateData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryData:{$all:data.orders},queryType:"ordersData"})
-                if(previousUpdateData.length<=0){
-                    await updateNewOrders(shop,data.orders)
-                    await updateNewOrderItems(shop,data.orders)
-                    previousUpdateData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryType:"ordersData"})
-    
-                    if(previousUpdateData.length>0){
-                        await previousDataQuery.updateMany({shopShortCode:shop.shortCode,queryType:"ordersData"},{queryData:data.orders})
-                    }else await new previousDataQuery({shopShortCode:shop.shortCode,queryData:data.orders,queryType:"ordersData"}).save()
-                    console.log("New Data Found");
-                }
-                else{
-                    // console.log("data is same as previousOrder");
-                }
-            }else{
-                console.log("Invalid user or secretkey of shop " + shop.name)
-            }
+        var shops = await Shop.find({appStatus:true})
+        //iterating through all fetched ips
+            for(const shop of shops){
+                // console.log(id);
+                let url = generateOrdersUrl(shop.accessToken,0,orderStatus);
+                // console.log(url)
+                var data = await GetData(url);
+                if(data!=null){
+                    if(data?.orders?.length > 0){
+                        var previousUpdateData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryData:{$all:data.orders},queryType:queryTypeVal})
+                        if(previousUpdateData.length<=0){
+                            await updateNewOrders(shop,data.orders)
+                            await updateNewOrderItems(shop,data.orders)
+                            previousUpdateData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryType:queryTypeVal})
             
+                            if(previousUpdateData.length>0){
+                                await previousDataQuery.updateMany({shopShortCode:shop.shortCode,queryType:queryTypeVal},{queryData:data.orders})
+                            }else await new previousDataQuery({shopShortCode:shop.shortCode,queryData:data.orders,queryType:queryTypeVal}).save()
+                            console.log("New Data Found");
+                        }
+                        else{
+                            // console.log("data is same as previousOrder");
+                        }
+                    }else{
+                        console.log("Order Array is Empty")
+                    }
+
+                }else{
+                    console.log("Invalid user or secretkey of shop " + shop.name)
+                }
+                
+            }
         }
-    }
-    catch(ex){
-        console.log("Exception occured, error: "+ex.message);
-    }
-    
-    console.log("Data Loop done");
+        catch(ex){
+            console.log("Exception occured, error: "+ex.message);
+        }
+        
+        console.log("Data Loop done");
 }
 
 
+
 module.exports.updateOrdersData = updateOrdersData
+module.exports.updateOrdersOnConfiguredOrderStatuses = updateOrdersOnConfiguredOrderStatuses;

@@ -129,6 +129,8 @@ customDispatchedReceivedStatus=[{
 
 customOrderFilterTypes=["AND","OR"]
 
+updateOrdersStatuses={orderStatuses:["pending","ready_to_ship","shipped"]}
+
 
 customOrderFilters=[FILTERCONST.ORDER_STATUS,FILTERCONST.CUSTOM_ORDER_STATUS,FILTERCONST.DATE_RANGE_FILTER,FILTERCONST.ORDER_PAYOUT_FILTER]
 
@@ -141,3 +143,4 @@ module.exports.darazOpenAppDetails = darazOpenAppDetails;
 module.exports.customOrderFilterTypes = customOrderFilterTypes;
 module.exports.customOrderFilters = customOrderFilters;
 module.exports.customDispatchedReceivedStatus=customDispatchedReceivedStatus;
+module.exports.updateOrdersStatuses=updateOrdersStatuses;

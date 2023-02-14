@@ -8,5 +8,6 @@ module.exports = {
         CUSTOM_ORDER_STATUS:{name:"Custom Order Status Filter",value:"CustomOrderStatus"},
         DATE_RANGE_FILTER:{name:"Date Range Filter",value:"DateRangeFilter"},
         ORDER_PAYOUT_FILTER:{name:"Order Payout Filter",value:"OrderPayoutFilter"}
-    }
+    },
+    UPDATE_ORDER_STATUS_KEY:"UpdateDataOrderStatuses"
 }
