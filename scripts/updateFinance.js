@@ -43,7 +43,6 @@ async function updateTransactions(){
                         lastIteration=true
                     }
                     if(previousTransactionsData.length<=0){
-                        console.log(transactions)
                     for(let t of transactions){
                         //check if transactions is in db
                         let transaction = await Transaction.find({TransactionNumber:t.transaction_number,ShopShortCode:shop.shortCode,userEmail:shop.userEmail})
