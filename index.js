@@ -31,6 +31,7 @@ const { schedulerRouter } = require('./routes/scheduler');
 const { scheduler } = require('./scripts/scheduler');
 const { refreshAccessToken } = require('./service/shopService');
 const { customOrderStatusRouter } = require('./routes/customOrderStatus');
+const morgan = require('morgan');
  
 mongoose.connect(config.connectionstring,{useFindAndModify:false,useNewUrlParser:true,useUnifiedTopology:true,useCreateIndex:true})
     .then(()=>{
@@ -50,6 +51,17 @@ app.use(function(req, res, next) {
     next();
 })
 
+if(config.util.getEnv('NODE_ENV')=="debugging"){
+    app.use(morgan('combined'));
+    app.use((req, res, next) => {
+        const oldSend = res.send;
+        res.send = function(data) {
+        console.log(data); // Log the response body
+        oldSend.apply(res, arguments);
+        };
+        next();
+    });
+    }
 app.use(express.json({limit: '50mb'}));
 app.use('/api/darazapi',darazapi);
 app.use('/api/users',users);
