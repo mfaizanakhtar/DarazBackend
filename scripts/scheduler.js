@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const { upgradeFuturePackage } = require('./futureRequest');
 const { updateTransactions } = require('./updateFinance');
-const { updateOrdersData } = require('./updateOrders');
+const { updateOrdersData, updateOrdersOnConfiguredOrderStatuses } = require('./updateOrders');
 const { getAllSkus, updateAllSkus } = require('./updateSku');
 const { updateOrderItemStatus } = require('./updateStatus');
 const { refreshAccessToken } = require('../service/shopService');
@@ -26,6 +26,14 @@ function scheduler(){
     //new orders request cron at every 5minutes
     cron.schedule('0 */5 * * * *',async ()=>{
         await updateOrdersData();
+    }, {
+        scheduled: true,
+        timezone: "Asia/Karachi"
+    })
+
+    //new orders request for specific statuses cron at every 5minutes
+    cron.schedule('0 */5 * * * *',async ()=>{
+        await updateOrdersOnConfiguredOrderStatuses();
     }, {
         scheduled: true,
         timezone: "Asia/Karachi"

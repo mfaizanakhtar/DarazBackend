@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const moment = require('moment');
+const { Lookup } = require('../models/lookup');
 
 
 function SignParameters(secretkey,param){
@@ -45,6 +46,13 @@ function replaceUnderScoreKeysToDollar(object){
     return object
 }
 
+async function getLookupValue(lookupKey){
+    let lookupObj = await Lookup.findOne({lookup_key:lookupKey});
+    if(lookupObj?.lookup_detail) return lookupObj.lookup_detail
+    else return {};
+}
+
 module.exports.SignParameters = SignParameters;
 module.exports.replaceUnderScoreKeysToDollar = replaceUnderScoreKeysToDollar;
 module.exports.getDateFilter = getDateFilter;
+module.exports.getLookupValue = getLookupValue;
