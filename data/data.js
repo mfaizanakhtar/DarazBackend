@@ -101,7 +101,7 @@ plansPermissions={
 }
 
 mailerCredential={
-    host:"alogy.pk",
+    host:"mail.alogy.pk",
     port:465,
     mailUserName:"no-reply@alogy.pk",
     mailPassword:"noreply123"
