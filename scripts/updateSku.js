@@ -171,36 +171,43 @@ async function getAllSkus(){
             let ProductSku = await GetData(Url)
             if(ProductSku!=null){
             let Products = ProductSku.products
-            for(product of Products){
-                let upsertedSkuIds=[]
-                for(const [i,sku] of product.skus.entries()){
-                    
-                    sku.ShopShortCode=shop.shortCode
-                    sku.ShopName=shop.name
-                    sku.userEmail=shop.userEmail
-                    
-                    let result = null
-                    result = await CompileFbdFbmStock(sku)
-                    sku.FBMstock = result.FBMstock
-                    sku.FBDstock = result.FBDstock
-                    sku.updatedAt = moment().toDate();
-                    sku.itemId=product.item_id;
-
-                skuResult = await darazSku.updateOne(
-                    {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopShortCode:shop.shortCode,userEmail:shop.userEmail},
-                    {$set:sku},
-                    {upsert:true}
-                )
-                if(skuResult.upserted && skuResult.upserted.length>0){
-                    upsertedSkuIds = skuResult.upserted.map(result=>result._id)
+            try{
+                for(product of Products){
+                    let upsertedSkuIds=[]
+                    for(const [i,sku] of product.skus.entries()){
+                        
+                        sku.ShopShortCode=shop.shortCode
+                        sku.ShopName=shop.name
+                        sku.userEmail=shop.userEmail
+                        
+                        let result = null
+                        result = await CompileFbdFbmStock(sku)
+                        sku.FBMstock = result.FBMstock
+                        sku.FBDstock = result.FBDstock
+                        sku.updatedAt = moment().toDate();
+                        sku.itemId=product.item_id;
+    
+                    skuResult = await darazSku.updateOne(
+                        {ShopSku:sku.ShopSku,SkuId:sku.SkuId,ShopShortCode:shop.shortCode,userEmail:shop.userEmail},
+                        {$set:sku},
+                        {upsert:true}
+                    )
+                    if(skuResult.upserted && skuResult.upserted.length>0){
+                        upsertedSkuIds = skuResult.upserted.map(result=>result._id)
+                    }
+                    }
+                    await darazProduct.updateOne(
+                        {ItemId:product.item_id,ShopShortCode:shop.shortCode,userEmail:shop.userEmail},
+                        {$set:createProductObj(product,upsertedSkuIds)},
+                        {upsert:true}
+                    )
                 }
-                }
-                await darazProduct.updateOne(
-                    {ItemId:product.item_id,ShopShortCode:shop.shortCode,userEmail:shop.userEmail},
-                    {$set:createProductObj(product,upsertedSkuIds)},
-                    {upsert:true}
-                )
             }
+            catch(ex){
+                console.log("ProductError")
+                console.log(ex + Products)
+            }
+
         }
 }
 console.log("New Skus Fetched")
