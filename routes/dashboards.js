@@ -385,7 +385,7 @@ async function getStatus(filter,userEmail,query){
 
     let sales = await OrderItems.aggregate([
         {
-            $match:{...filter,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{...filter,userEmail:userEmail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:null,sales:{$sum:"$ItemPrice"}}
