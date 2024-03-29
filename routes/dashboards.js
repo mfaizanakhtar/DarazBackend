@@ -53,12 +53,12 @@ router.get('/OrderAnalytics',auth,async(req,res)=>{
         {$group:{_id:null,sum:{$sum:"$ItemPrice"}}}
     ])
 
-    let packagingCostResult = await OrderItems.aggregate([
+    let productCostResult = await OrderItems.aggregate([
         {$match:{userEmail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {$group:{_id:null,sum:{$sum:"$cost"}}}
     ])
 
-    let productCostResult = await OrderItems.aggregate([
+    let packagingCostResult = await OrderItems.aggregate([
         {$match:{userEmail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {$group:{_id:null,sum:{$sum:"$packagingCost"}}}
     ])
@@ -409,7 +409,7 @@ async function getStatus(filter,userEmail,query){
             $match:{...filter,userEmail:userEmail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
-            $group:{_id:null,sales:{$sum:"$cost"}}
+            $group:{_id:null,costs:{$sum:"$cost"}}
         }
     ])
     let packagingCosts = await OrderItems.aggregate([
@@ -417,7 +417,7 @@ async function getStatus(filter,userEmail,query){
             $match:{...filter,userEmail:userEmail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
-            $group:{_id:null,sales:{$sum:"$packagingCost"}}
+            $group:{_id:null,packagingCosts:{$sum:"$packagingCost"}}
         }
     ])
     if(sales[0]) delete sales[0]['_id']
