@@ -239,20 +239,20 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
         }
     ])
 
-    // let OrdersProfit = await OrderItems.aggregate([
-    //     {
-    //         $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
-    //     },
-    //     {
-    //         $group:{_id:"$OrderId"}
-    //     },
-    //     {
-    //         $count:"orders"
-    //     }
-    // ])
+    let OrdersProfit = await OrderItems.aggregate([
+        {
+            $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+        },
+        {
+            $group:{_id:"$OrderId"}
+        },
+        {
+            $count:"orders"
+        }
+    ])
 
     // console.log(itemsProfit)
-    res.send({ProfitStats:{...itemsProfit[0]}})
+    res.send({ProfitStats:{...itemsProfit[0],...OrdersProfit[0]}})
 })
 
 router.get("/getProfitAnalyticsGraph",auth,async(req,res)=>{
