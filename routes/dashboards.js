@@ -235,7 +235,7 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
             $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
-            $group:{_id:null,items:{$sum:1},sales:{$sum:"$ItemPrice"},packagingCosts:{$sum:"$packagingCost"},costs:{$sum:"$cost"},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:["$TransactionsPayout",{$subtract:["$cost","$packagingCost"]}]}}}
+            $group:{_id:null,items:{$sum:1},sales:{$sum:"$ItemPrice"},packagingCosts:{$sum:"$packagingCost"},costs:{$sum:"$cost"},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
         }
     ])
 
