@@ -316,7 +316,7 @@ router.get("/getStoresProfitStats",auth,async(req,res)=>{
             $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
-            $group:{_id:"$ShopShortCode",ShopName:{$first:"$ShopName"},items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:{$add:["$cost","$packagingCost"]}},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
+            $group:{_id:"$ShopShortCode",ShopName:{$first:"$ShopName"},items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:"$cost"},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
         },
         {
             $sort:{"profit":-1}
