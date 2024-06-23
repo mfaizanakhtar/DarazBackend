@@ -46,7 +46,7 @@ const OrderItemsSchema = new mongoose.Schema({
     packagingCost:Number,
     PortCode:{type:String,defaults:''},
     trackingBarcode:String,
-    portcodeBarcode:String,
+    PortCodeImage:{type:String,defaults:''},
     orderIdBarcode:String,
     qrCode:String,
     labelPrice:String,
