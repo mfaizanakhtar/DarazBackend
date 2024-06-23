@@ -52,13 +52,26 @@ router.get('/OrderAnalytics',auth,async(req,res)=>{
         {$match:{userEmail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
         {$group:{_id:null,sum:{$sum:"$ItemPrice"}}}
     ])
+
+    let productCostResult = await OrderItems.aggregate([
+        {$match:{userEmail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$group:{_id:null,sum:{$sum:"$cost"}}}
+    ])
+
+    let packagingCostResult = await OrderItems.aggregate([
+        {$match:{userEmail:req.user.userEmail,Status:{$ne:'canceled'},$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}},
+        {$group:{_id:null,sum:{$sum:"$packagingCost"}}}
+    ])
     if(itemsResult.length==0){
         itemsResult.push({sum:0})
         ordersResult.push({sum:0})
         revenueResult.push({sum:0})
+        packagingCostResult.push({sum:0})
+        productCostResult.push({sum:0})
+
     }
 
-    response={orders:ordersResult[0].sum,items:itemsResult[0].sum,revenue:revenueResult[0].sum}
+    response={orders:ordersResult[0].sum,items:itemsResult[0].sum,revenue:revenueResult[0].sum,costs:productCostResult[0].sum,packagingCosts:packagingCostResult[0].sum}
     // console.log(response)
     res.send(response)
 
@@ -222,7 +235,7 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
             $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
-            $group:{_id:null,items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:"$cost"},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:["$TransactionsPayout","$cost"]}}}
+            $group:{_id:null,items:{$sum:1},sales:{$sum:"$ItemPrice"},packagingCosts:{$sum:"$packagingCost"},costs:{$sum:"$cost"},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
         }
     ])
 
@@ -303,7 +316,7 @@ router.get("/getStoresProfitStats",auth,async(req,res)=>{
             $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
-            $group:{_id:"$ShopShortCode",ShopName:{$first:"$ShopName"},items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:{$add:["$cost","$packagingCost"]}},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
+            $group:{_id:"$ShopShortCode",ShopName:{$first:"$ShopName"},items:{$sum:1},sales:{$sum:"$ItemPrice"},costs:{$sum:"$cost"},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
         },
         {
             $sort:{"profit":-1}
@@ -391,12 +404,30 @@ async function getStatus(filter,userEmail,query){
             $group:{_id:null,sales:{$sum:"$ItemPrice"}}
         }
     ])
+    let costs = await OrderItems.aggregate([
+        {
+            $match:{...filter,userEmail:userEmail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+        },
+        {
+            $group:{_id:null,costs:{$sum:"$cost"}}
+        }
+    ])
+    let packagingCosts = await OrderItems.aggregate([
+        {
+            $match:{...filter,userEmail:userEmail,$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+        },
+        {
+            $group:{_id:null,packagingCosts:{$sum:"$packagingCost"}}
+        }
+    ])
     if(sales[0]) delete sales[0]['_id']
     // console.log(sales[0])
     if(items.length==0) items.push({ItemCount:0})
     if(orders.length==0) orders.push({OrderCount:0})
     if(sales.length==0) sales.push({sales:0})
-    let response={...items[0],...orders[0],...sales[0]}
+    if(costs.length==0) costs.push({sales:0})
+    if(packagingCosts.length==0) packagingCosts.push({sales:0})
+    let response={...items[0],...orders[0],...sales[0],...costs[0],...packagingCosts[0]}
     return response
 }
 
