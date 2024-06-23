@@ -94,6 +94,7 @@ async function updateOrderItemPortCodes(accessToken,orderItemIds){
     
     for(let j=0;j<Math.ceil(orderItemIds.length/splitCount);j++){
         var portCodes=[]
+        var PortCodeImages=[]
         var trackings=[]
         var trackingbarcodes=[]
         var qrcodes=[]
@@ -110,54 +111,46 @@ async function updateOrderItemPortCodes(accessToken,orderItemIds){
     var result = atob(data.document.file)
     const $=cheerio.load(result)
         //scrape portcodes
-    $("div").find('div:nth-child(5)').each(function(index,element){
-        PortCode=$(element).text().substr(14)
+    $("div").find('div:nth-child(1)').find('div:nth-child(5)').each(function(index,element){
+        PortCode=$(element).text()
         PortCode=PortCode.trim()
         portCodes.push(PortCode)
     });
+            //scrape portcodes Images
+    $("div").find('div:nth-child(1)').find('div:nth-child(3)').find('img').each(function(index,element){
+        let portCodeImage=$(element).attr('src')
+        PortCodeImages.push(portCodeImage)
+    });
     //scrape Tracking to search
-    $("div").find('div:nth-child(4)').each(function(index,element){
-        trackingbarcodes.push($(element).find('div').find('img').attr('src'))
-        // console.log($(element).find('div').find('img').attr('src'))
-        Tracking=$(element).text().substr(20)
+    $("div[class='cn-print-imgbarcode'][data-typecode='code128']").each(function(index,element){
+        let trackingBarcode = $(element).find('img').attr('src')
+        trackingbarcodes.push(trackingBarcode)
+
+        Tracking=$(element).attr('data-value')
         Tracking = Tracking.trim()
         trackings.push(Tracking)
     });
     //scrape Label Price
-    $("div").find('div:nth-child(11)').each(function(index,element){
+    $("div").find('div:nth-child(1)').find('div:nth-child(16)').each(function(index,element){
         labelPrices.push($(element).text())
     });
     //scrape deliveryPoint
-    $("div").find('div:nth-child(8)').each(function(index,element){
-
-        deliveryPoints.push($(element).text())
-
+    $("div").find('div:nth-child(1)').find('div:nth-child(15)').find('table').find('tbody').find('tr:nth-child(3)')
+    .each(function(index,element){
+        deliveryPoints.push($(element).text().trim())
     });
     //scrape ordernumber from label
-    $("div:nth-child(2)").find('div:nth-child(1)').each(function(index,element){
-        // PortCode=$(element).text().substr(14)
-        // PortCode=PortCode.substr(0,PortCode.length-1)
-        // portCodes.push(PortCode)
-        labelOrderNumbers.push($(element).text().substr(13))
-        // console.log($(element).text().substr(13))
+    $("div").find('div:nth-child(1)').find('div:nth-child(22)').each(function(index,element){
+        labelOrderNumbers.push($(element).text().substr(13).trim())
     });
-    //scrape trackingbarcodes images
-    // $('div[class=barcode]').find('img').each(function(index,element){
 
-    //     if((index % 3==0)){
-    //         trackingbarcodes.push($(element).attr('src'))
-    //     }
-
-    // });
-    //scrape qr codes
-    $('div[class="box left qrcode"]').find('img').each(function(index,element){
-
-        qrcodes.push($(element).attr('src'))
-
+    $("div[class='cn-print-imgbarcode'][data-typecode='qrcode']").find('img').each(function(index,element){
+        let qrCode = $(element).attr('src')
+        qrcodes.push(qrCode)
     });
     //scrape seller address
-    $("div").find('div:nth-child(15)').each(function(index,element){
-        sellerAddress.push($(element).text().substr(8))
+    $("div").find('div:nth-child(1)').find('div:nth-child(12)').each(function(index,element){
+        sellerAddress.push($(element).text())
     });
     console.log("2nd Checkpoint")
     console.log(trackings.length)
@@ -169,6 +162,7 @@ async function updateOrderItemPortCodes(accessToken,orderItemIds){
         updateResult = await OrderItems.updateMany({TrackingCode:trackings[i].toString(),OrderId:labelOrderNumbers[i].toString()},{
             $set:{
                 PortCode:portCodes[i],trackingBarcode:trackingbarcodes[i],
+                PortCodeImage:PortCodeImages[i],
                 qrCode:qrcodes[i],labelPrice:labelPrices[i],
                 deliveryPoint:deliveryPoints[i],labelTracking:trackings[i],
                 sellerAddress:sellerAddress[i]
