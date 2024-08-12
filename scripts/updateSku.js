@@ -100,7 +100,7 @@ function createProductObj(product,skus){
 
 async function updateAllSkus(){
     try{
-    shops = await Shop.find()
+    shops = await Shop.find({appStatus:true})
     for(let shop of shops){
         
         splitCount=30
@@ -161,7 +161,7 @@ async function updateAllSkus(){
 }
 
 async function getAllSkus(){
-    shops = await Shop.find()
+    shops = await Shop.find({appStatus:true})
     let Url;
     for(let shop of shops){
 

@@ -14,7 +14,7 @@ async function updatePriceQuantity(skuId,userEmail,request){
                 reject({message:"No such Sku Found"})
             }
             let stockPriceResult = createStockPriceBody(dSku,request)
-            let shopResult = await Shop.findOne({shortCode:dSku.ShopShortCode,userEmail:userEmail})
+            let shopResult = await Shop.findOne({shortCode:dSku.ShopShortCode,userEmail:userEmail,appStatus:true})
             let postUrl = postUpdatePriceQuantity(shopResult.accessToken,stockPriceResult.xmlRequest)
             let postResponse = await PostData(postUrl)
             if(postResponse.code=='0'){

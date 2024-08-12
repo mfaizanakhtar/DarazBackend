@@ -73,7 +73,7 @@ async function updateOrderItemStatus(user,status){
 
 async function fetchLabelsAndUpdate(userEmail){
     console.log("labels ",userEmail)
-    shops = await Shop.find({userEmail:userEmail})
+    shops = await Shop.find({userEmail:userEmail,appStatus:true})
     for(shop of shops){
         var orderitemsIds=[]
         items= await OrderItems.find({ShopShortCode:shop.shortCode,Status:'ready_to_ship',labelTracking:'',ShippingType:'Dropshipping'})

@@ -8,7 +8,7 @@ const moment = require('moment');
 
 async function updateTransactions(){
     try{
-    let shops = await Shop.find()
+    let shops = await Shop.find({appStatus:true})
     transactionTypes=[-1]
     // transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
     //13 - Item Price Credit
@@ -32,7 +32,7 @@ async function updateTransactions(){
                 while(!lastIteration){
                     // let alreadyInDbcount=0;
                     //get Url for transaction
-                    url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract('2','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
+                    url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract('1','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
                     // console.log(url)
                     //get transactions data
                     let transactions = await GetData(url);

@@ -17,7 +17,7 @@ async function authoriseAndAddShop(query,user){
         if(sellerResp){
             var shop = await Shop.findOne({userEmail:{$ne:user.userEmail},shortCode:sellerResp.short_code})
             if(shop){
-                throw {message:"This shop is already associated with different account",status:400}
+                throw {message:"This shop is already associated with different account. Please contact Administrator",status:400}
             }
             shop = await Shop.findOne({userEmail:user.userEmail,shortCode:sellerResp.short_code})
             if(shop){
@@ -75,13 +75,13 @@ function updateExistingShop(shop,tokenResp,sellerResp){
 }
 
 async function getShopsWithUserEmail(userEmail){
-    var shops = await Shop.find({userEmail:userEmail},{shortCode:1,name:1}).sort({name:1})
+    var shops = await Shop.find({userEmail:userEmail,appStatus:true},{shortCode:1,name:1}).sort({name:1})
     return shops
 }
 
 async function refreshAccessToken(){
     try{
-        var shops = await Shop.find({});
+        var shops = await Shop.find({appStatus:true});
         for(var shop of shops){
             var generateRefreshAccessUrl=getRefreshAccessTokenUrl(shop.refreshToken);
             var refreshTokenResp = await PostData(generateRefreshAccessUrl);

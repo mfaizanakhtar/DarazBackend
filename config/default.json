@@ -1,5 +1,5 @@
 {
-    "connectionstring" : "mongodb://127.0.0.1:27017/Daraz_open",
+    "connectionstring" : "mongodb://dashlytic:edashFaizan1234@15.207.167.127:27017/Daraz?authSource=admin",
     "jwtprivatekey":"1234",
     "baseUrl":"http://localhost:4200"
 }
