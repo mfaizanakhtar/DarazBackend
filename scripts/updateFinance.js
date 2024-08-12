@@ -30,7 +30,7 @@ async function updateTransactions(){
                 lastIteration=false
                 let offSet=0;
                 while(!lastIteration){
-                    // let alreadyInDbcount=0;
+                    let alreadyInDbcount=0;
                     //get Url for transaction
                     url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract('1','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
                     // console.log(url)
@@ -79,7 +79,7 @@ async function updateTransactions(){
                         let transactResult
                         try{
                             transactResult = await transaction.save()
-                            // alreadyInDbcount++
+                            alreadyInDbcount++
                         }catch(ex){
                             console.log("Transaction already exists")
                         }
@@ -117,7 +117,7 @@ async function updateTransactions(){
                     console.log("Invalid username or secretkey of shop "+ shop.name)
                 }
             offSet++
-            // if((alreadyInDbcount/transactionsLength)>=0.8) break;
+            if((alreadyInDbcount/transactionsLength)>=0.8) break;
         }
             }
         }catch(ex){
