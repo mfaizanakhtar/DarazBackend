@@ -117,7 +117,7 @@ async function updateTransactions(days=null){
                     console.log("Invalid username or secretkey of shop "+ shop.name)
                 }
             offSet++
-            if((alreadyInDbcount/transactionsLength)>=0.8 && !days) break;
+            if((alreadyInDbcount/transactions.length)>=0.8 && !days) break;
         }
             }
         }catch(ex){
