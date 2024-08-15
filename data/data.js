@@ -109,9 +109,9 @@ mailerCredential={
 
 darazOpenAppDetails={
     callBackUrl:config.get('baseUrl')+"/users/shops",
-    appKey:"500606",
+    appKey:"502538",
     pkUrl:"https://api.daraz.pk/oauth/authorize",
-    appSecret:"6Ob7pZ9yTjXTNrKSXMXXxFoatFsKP73D"
+    appSecret:"oeXzbRisHKkx9OuVLqibtyicy4ev0BEp"
 }
 
 customDispatchedReceivedStatus=[{
