@@ -32,7 +32,6 @@ const { scheduler } = require('./scripts/scheduler');
 const { refreshAccessToken } = require('./service/shopService');
 const { customOrderStatusRouter } = require('./routes/customOrderStatus');
 const morgan = require('morgan');
-const { fetchDarazOpenAppDetails } = require("./service/GenerateUrl");
  
 mongoose.connect(config.connectionstring,{useFindAndModify:false,useNewUrlParser:true,useUnifiedTopology:true,useCreateIndex:true})
     .then(()=>{
@@ -86,7 +85,6 @@ if(config.util.getEnv('NODE_ENV')=="development"){
 }
 
 dataQueries()
-fetchDarazOpenAppDetails()
 
 // updateTransactions();
 

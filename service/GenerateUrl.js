@@ -1,13 +1,9 @@
 const LazadaAPI = require('lazada-open-platform-sdk');
 const moment = require('moment');
+const { darazOpenAppDetails } = require('../data/data');
 const {SignParameters} = require('./utils');
 
 var baseUrl="https://api.daraz.pk/rest";
-var darazOpenAppDetails={}
-
-async function fetchDarazOpenAppDetails(){
-    darazOpenAppDetails = await Lookup.findOne({lookup_key:"darazOpenAppDetails"})
-}
 
 function generateAccessTokenUrl(callBackCode){
     var accessTokenUrl="/auth/token/create"
@@ -140,4 +136,3 @@ module.exports.generateAccessTokenUrl = generateAccessTokenUrl;
 module.exports.getSellerUrl = getSellerUrl;
 module.exports.getRefreshAccessTokenUrl = getRefreshAccessTokenUrl;
 module.exports.postUpdatePriceQuantity = postUpdatePriceQuantity;
-module.exports.fetchDarazOpenAppDetails = fetchDarazOpenAppDetails;
