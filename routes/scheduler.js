@@ -27,7 +27,8 @@ router.get('/refreshAccessToken',async(req,res)=>{
 
 router.get('/updateTransactions',async(req,res)=>{
     console.log("updateTransactions api called")
-    await updateTransactions();
+    if(req.query?.days) await updateTransactions(req.query?.days);
+    else await updateTransactions();
     res.status(200).send();
 })
 

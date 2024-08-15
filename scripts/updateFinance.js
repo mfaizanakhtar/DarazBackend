@@ -6,7 +6,7 @@ const {OrderItems} = require('../models/orderItem');
 const { previousDataQuery } = require('../models/previousDataQuery');
 const moment = require('moment');
 
-async function updateTransactions(){
+async function updateTransactions(days=null){
     try{
     let shops = await Shop.find({appStatus:true})
     transactionTypes=[-1]
@@ -32,7 +32,7 @@ async function updateTransactions(){
                 while(!lastIteration){
                     let alreadyInDbcount=0;
                     //get Url for transaction
-                    url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract('1','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
+                    url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract(days ? days : '2','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
                     // console.log(url)
                     //get transactions data
                     let transactions = await GetData(url);
@@ -117,7 +117,7 @@ async function updateTransactions(){
                     console.log("Invalid username or secretkey of shop "+ shop.name)
                 }
             offSet++
-            if((alreadyInDbcount/transactionsLength)>=0.8) break;
+            if((alreadyInDbcount/transactionsLength)>=0.8 && !days) break;
         }
             }
         }catch(ex){
