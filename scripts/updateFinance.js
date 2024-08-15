@@ -121,6 +121,7 @@ async function updateTransactions(days=null){
         }
             }
         }catch(ex){
+            console.log(ex)
             console.log("Problem fetching transactions for shop: "+shop.name)
         }
 }
