@@ -232,7 +232,7 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
 
     let itemsProfit = await OrderItems.aggregate([
         {
-            $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{userEmail:req.user.userEmail,$or:[{Status:"delivered"},{Status:"confirmed"}],$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:null,items:{$sum:1},sales:{$sum:"$ItemPrice"},packagingCosts:{$sum:"$packagingCost"},costs:{$sum:"$cost"},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
@@ -241,7 +241,7 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
 
     let OrdersProfit = await OrderItems.aggregate([
         {
-            $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{userEmail:req.user.userEmail,$or:[{Status:"delivered"},{Status:"confirmed"}],$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:"$OrderId"}
