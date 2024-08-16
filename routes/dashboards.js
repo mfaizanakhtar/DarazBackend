@@ -7,14 +7,14 @@ const moment = require('moment')
 
 router.get('/OrderStatuses',auth,async (req,res)=>{
     let response=[]
-    let statuses=['pending','ready_to_ship','shipped','delivered','returned','failed']
+    let statuses=['pending','ready_to_ship','shipped','delivered','returned','failed','failed_delivery']
     for (var status of statuses) {
         jsonStatus={status:status}
         jsonStatus.count= await getStatus({Status:status},req.user.userEmail,req.query)
         response.push(jsonStatus)
         
     }
-    let extraStatuses=[{label:'failed-Not Received',Status:'failed',ReturnDate:null,ShippingType:'Dropshipping'}]
+    let extraStatuses=[{label:'failed-Not Received',Status:'failed',ReturnDate:null,ShippingType:'Dropshipping'},{label:'failed_D-Not Received',Status:'failed_delivery',ReturnDate:null,ShippingType:'Dropshipping'}]
     for (var s of extraStatuses){
         jsonStatus={status:s.label}
         var query={}
