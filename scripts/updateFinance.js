@@ -9,18 +9,18 @@ const moment = require('moment');
 async function updateTransactions(days=null){
     try{
     let shops = await Shop.find({appStatus:true})
-    transactionTypes=[-1]
-    // transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
-    //13 - Item Price Credit
-    //8 - Shipping Fee (Paid By Customer)
-    //16 - Commission
-    //3 - Payment Fee
-    //28 - Automatic Shipping Fee
-    //14 - Reversal Item Price
-    //85 - Lost And Damaged Claim
-    //15 - Reversal Commission
-    //145 - Other Debits (Returns)
-    //104 - Adjustments Others
+    // transactionTypes=[-1]
+    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
+    // 13 - Item Price Credit
+    // 8 - Shipping Fee (Paid By Customer)
+    // 16 - Commission
+    // 3 - Payment Fee
+    // 28 - Automatic Shipping Fee
+    // 14 - Reversal Item Price
+    // 85 - Lost And Damaged Claim
+    // 15 - Reversal Commission
+    // 145 - Other Debits (Returns)
+    // 104 - Adjustments Others
     //get start and enddate for query
     let limit = 500
     // console.log(dates)
