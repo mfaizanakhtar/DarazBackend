@@ -9,8 +9,8 @@ const moment = require('moment');
 async function updateTransactions(days=null){
     try{
     let shops = await Shop.find({appStatus:true})
-    // transactionTypes=[-1]
-    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
+    transactionTypes=[-1]
+    // transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
     // 13 - Item Price Credit
     // 8 - Shipping Fee (Paid By Customer)
     // 16 - Commission
