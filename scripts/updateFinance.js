@@ -36,6 +36,7 @@ async function updateTransactions(days=null){
                     // console.log(url)
                     //get transactions data
                     let transactions = await GetData(url);
+                    console.log(transactions)
                     if(transactions!=null){
                     let previousTransactionsData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryData:JSON.stringify(transactions),queryType:"transType="+transType+"offSet="+offSet})
                     if(transactions.length<500){
@@ -45,10 +46,10 @@ async function updateTransactions(days=null){
                     if(previousTransactionsData.length<=0){
                     for(let t of transactions){
                         //check if transactions is in db
-                        let transaction = await Transaction.find({TransactionNumber:t.transaction_number,ShopShortCode:shop.shortCode,userEmail:shop.userEmail})
+                        let transaction = await Transaction.find({TransactionNumber:t.transaction_number,FeeName:t.fee_name,ShopShortCode:shop.shortCode,userEmail:shop.userEmail})
                         let increment
                         // console.log(t)
-                        increment={$inc:{TransactionsPayout:parseInt(t.amount)}}
+                        increment={$inc:{TransactionsPayout:parseAmountString(t.amount)}}
                         if(transaction.length>0){
                             if(transaction.OrderItemUpdated==false){
     
@@ -69,6 +70,7 @@ async function updateTransactions(days=null){
                             
                             if(updateResult.n>0){
                                 await Transaction.updateMany({_id:transactResult._id},{OrderItemUpdated:true})
+                                alreadyInDbcount++
                             }
     
                             }
@@ -79,7 +81,6 @@ async function updateTransactions(days=null){
                         let transactResult
                         try{
                             transactResult = await transaction.save()
-                            alreadyInDbcount++
                         }catch(ex){
                             console.log("Transaction already exists")
                         }
@@ -117,7 +118,7 @@ async function updateTransactions(days=null){
                     console.log("Invalid username or secretkey of shop "+ shop.name)
                 }
             offSet++
-            if((alreadyInDbcount/transactions.length)>=0.8 && !days) break;
+            // if((alreadyInDbcount/transactions.length)>=0.8 && !days) break;
         }
             }
         }catch(ex){
@@ -132,6 +133,7 @@ catch(ex){
 }
 }
 
+
 function getTransactionObj(t,shop,transType){
     let transaction = new Transaction({
         TransactionDate:t.transaction_date,
@@ -141,8 +143,8 @@ function getTransactionObj(t,shop,transType){
         Details:t.details,
         SellerSku:t.seller_sku,
         LazadaSku:t.lazada_sku,
-        Amount:t.amount,
-        VATinAmount:t.VAT_in_amount,
+        Amount:parseAmountString(t.amount),
+        VATinAmount:parseAmountString(t.VAT_in_amount),
         Statement:t.statement,
         PaidStatus:t.paid_status,
         OrderNo:t.orderItem_no,
@@ -160,5 +162,10 @@ function getTransactionObj(t,shop,transType){
 
     return transaction
 }
+
+function parseAmountString(amountString){
+    return Number(amountString.replace(/,/g, ''))
+}
+
 
 module.exports.updateTransactions = updateTransactions
