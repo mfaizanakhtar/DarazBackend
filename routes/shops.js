@@ -19,7 +19,7 @@ router.get('/authorise',auth,async(req,res)=>{
 })
 
 router.get('/getAll',auth,async(req,res)=>{
-    const shop =await Shop.find({userEmail:req.user.userEmail,appStatus:true},{accessToken:0,refreshExpiresIn:0,refreshToken:0,tokenExpiresIn:0,__v:0,_id:0});
+    const shop =await Shop.find({userEmail:req.user.userEmail,appStatus:true},{accessToken:0,refreshToken:0,tokenExpiresIn:0,__v:0,_id:0});
     res.send(shop);
 })
 

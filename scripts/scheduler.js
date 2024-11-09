@@ -39,8 +39,8 @@ function scheduler(){
         timezone: "Asia/Karachi"
     })
 
-    //new transaction request cron at every 1 hour
-    cron.schedule('0 0 */1 * * *',async ()=>{
+    //new transaction request cron at every 8 hour
+    cron.schedule('0 0 */6 * * *',async ()=>{
         await updateTransactions();
     }, {
         scheduled: true,

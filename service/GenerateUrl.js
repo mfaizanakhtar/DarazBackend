@@ -49,7 +49,7 @@ function generateMultipleOrderItemsUrl(accessToken,orderIds){
 }
 
 function generateTransactionsUrl(accessToken,transType,startTime,endTime,limit,offSet){
-    var getTransactionDetailsUrl="/finance/transaction/detail/get"
+    var getTransactionDetailsUrl="/finance/transaction/details/get"
     var params = {access_token:accessToken,trans_type:transType,start_time:startTime,end_time:endTime,limit:limit,offset:offSet};
 
     return createGetUrl(getTransactionDetailsUrl,params)

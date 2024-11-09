@@ -6,21 +6,21 @@ const {OrderItems} = require('../models/orderItem');
 const { previousDataQuery } = require('../models/previousDataQuery');
 const moment = require('moment');
 
-async function updateTransactions(){
+async function updateTransactions(days=null){
     try{
-    let shops = await Shop.find()
-    transactionTypes=[-1]
-    // transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
-    //13 - Item Price Credit
-    //8 - Shipping Fee (Paid By Customer)
-    //16 - Commission
-    //3 - Payment Fee
-    //28 - Automatic Shipping Fee
-    //14 - Reversal Item Price
-    //85 - Lost And Damaged Claim
-    //15 - Reversal Commission
-    //145 - Other Debits (Returns)
-    //104 - Adjustments Others
+    let shops = await Shop.find({appStatus:true})
+    // transactionTypes=[-1]
+    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
+    // 13 - Item Price Credit
+    // 8 - Shipping Fee (Paid By Customer)
+    // 16 - Commission
+    // 3 - Payment Fee
+    // 28 - Automatic Shipping Fee
+    // 14 - Reversal Item Price
+    // 85 - Lost And Damaged Claim
+    // 15 - Reversal Commission
+    // 145 - Other Debits (Returns)
+    // 104 - Adjustments Others
     //get start and enddate for query
     let limit = 500
     // console.log(dates)
@@ -30,9 +30,9 @@ async function updateTransactions(){
                 lastIteration=false
                 let offSet=0;
                 while(!lastIteration){
-                    // let alreadyInDbcount=0;
+                    let alreadyInDbcount=0;
                     //get Url for transaction
-                    url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract('2','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
+                    url= generateTransactionsUrl(shop.accessToken,transType,moment().subtract(days ? days : '2','days').format("yyyy-MM-DD"),moment().format("yyyy-MM-DD"),limit,offSet*limit)
                     // console.log(url)
                     //get transactions data
                     let transactions = await GetData(url);
@@ -79,7 +79,7 @@ async function updateTransactions(){
                         let transactResult
                         try{
                             transactResult = await transaction.save()
-                            // alreadyInDbcount++
+                            alreadyInDbcount++
                         }catch(ex){
                             console.log("Transaction already exists")
                         }
@@ -117,10 +117,11 @@ async function updateTransactions(){
                     console.log("Invalid username or secretkey of shop "+ shop.name)
                 }
             offSet++
-            // if((alreadyInDbcount/transactionsLength)>=0.8) break;
+            if((alreadyInDbcount/transactions.length)>=0.8 && !days) break;
         }
             }
         }catch(ex){
+            console.log(ex)
             console.log("Problem fetching transactions for shop: "+shop.name)
         }
 }

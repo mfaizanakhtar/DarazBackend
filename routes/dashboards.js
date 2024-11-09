@@ -7,14 +7,14 @@ const moment = require('moment')
 
 router.get('/OrderStatuses',auth,async (req,res)=>{
     let response=[]
-    let statuses=['pending','ready_to_ship','shipped','delivered','returned','failed']
+    let statuses=['pending','confirmed','packed','ready_to_ship','shipped','delivered','returned','failed','failed_delivery']
     for (var status of statuses) {
         jsonStatus={status:status}
         jsonStatus.count= await getStatus({Status:status},req.user.userEmail,req.query)
         response.push(jsonStatus)
         
     }
-    let extraStatuses=[{label:'failed-Not Received',Status:'failed',ReturnDate:null,ShippingType:'Dropshipping'}]
+    let extraStatuses=[{label:'failed-Not Received',Status:'failed',ReturnDate:null,ShippingType:'Dropshipping'},{label:'failed_D-Not Received',Status:'failed_delivery',ReturnDate:null,ShippingType:'Dropshipping'}]
     for (var s of extraStatuses){
         jsonStatus={status:s.label}
         var query={}
@@ -232,7 +232,7 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
 
     let itemsProfit = await OrderItems.aggregate([
         {
-            $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{userEmail:req.user.userEmail,$or:[{Status:"delivered"},{Status:"confirmed"}],$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:null,items:{$sum:1},sales:{$sum:"$ItemPrice"},packagingCosts:{$sum:"$packagingCost"},costs:{$sum:"$cost"},payout:{$sum:"$TransactionsPayout"},profit:{$sum:{$subtract:[{$subtract:["$TransactionsPayout","$cost"]},"$packagingCost"]}}}
@@ -241,7 +241,7 @@ router.get("/getProfitAnalytics",auth,async(req,res)=>{
 
     let OrdersProfit = await OrderItems.aggregate([
         {
-            $match:{userEmail:req.user.userEmail,Status:"delivered",$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
+            $match:{userEmail:req.user.userEmail,$or:[{Status:"delivered"},{Status:"confirmed"}],$and:[{CreatedAt:{$gte:startdate}},{CreatedAt:{$lte:enddate}}]}
         },
         {
             $group:{_id:"$OrderId"}
