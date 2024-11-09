@@ -36,7 +36,6 @@ async function updateTransactions(days=null){
                     // console.log(url)
                     //get transactions data
                     let transactions = await GetData(url);
-                    console.log(transactions)
                     if(transactions!=null){
                     let previousTransactionsData = await previousDataQuery.find({shopShortCode:shop.shortCode,queryData:JSON.stringify(transactions),queryType:"transType="+transType+"offSet="+offSet})
                     if(transactions.length<500){
