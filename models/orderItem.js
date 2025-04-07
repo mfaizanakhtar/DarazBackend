@@ -53,6 +53,7 @@ const OrderItemsSchema = new mongoose.Schema({
     deliveryPoint:String,
     sellerAddress:String,
     Reason:String,
+    packageId:String,
     trackingChangeCount:{
         type:Number,
         default:0

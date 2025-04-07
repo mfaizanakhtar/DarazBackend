@@ -4,9 +4,9 @@ const {OrderItems} = require('../models/orderItem')
 const auth = require('../middleware/auth')
 const router = express.Router();
 const {Shop} = require('../models/shop')
-const {RtsURL} = require('../service/GenerateUrl')
+const {RtsURL,PackURL} = require('../service/GenerateUrl')
 const {GetData,PostData} = require('../scripts/HttpReq')
-const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus} = require('../scripts/updateStatus')
+const {updateOrderItemsForRts,fetchLabelsAndUpdate,updateOrderItemStatus,setPackageIdAfterPack, updateOrderItemAfterPacking} = require('../scripts/updateStatus')
 const {updateQuery, updateQueryForStockChecklist} = require('../service/ordersService')
 const {getDateFilter, replaceUnderScoreKeysToDollar} = require('../service/utils');
 
@@ -92,6 +92,46 @@ async function FindQuery(query,user){
     return {orders:orders,count:0}
 }
 
+router.post('/setStatusToPack',auth,async(req,res)=>{
+    let orders = req.body.Orders
+    PackRequests = []
+    try{
+        shops = {}
+        for(let order of orders){
+            let shop = shops[order.ShopShortCode]
+            if(!shop){
+                shop = await Shop.findOne({shortCode:order.ShopShortCode})
+                shops[order.ShopShortCode] = shop
+            }
+            let OrderItems=order.OrderItems.map(item=>{if(item.ShippingType=='Dropshipping' && item.Status!='canceled'){return item.OrderItemId}})
+            OrderItems="["+OrderItems.toString()+"]"
+            let packReqObj = {pack_order_list:[{
+                    order_item_list:OrderItems,
+                    order_id:order.OrderId,
+                }],
+                delivery_type:"dropship",
+                shipping_allocate_type:"TFS"
+            }
+            let packReqUrl = await PackURL(shop.accessToken,packReqObj)
+            console.log(packReqUrl)
+            let packrequestResponse = await PostData(packReqUrl)
+            let pack_order_list = packrequestResponse?.result?.data?.pack_order_list
+            if(pack_order_list?.length > 0){
+                await setPackageIdAfterPack(req.user.userEmail,order.ShopShortCode,pack_order_list)
+            }
+            console.log(packrequestResponse)
+            PackRequests.push(pack_order_list)
+        }
+
+        const updateResult = await updateOrderItemAfterPacking(req.user.userEmail,PackRequests)
+        res.send({count:PackRequests.length,updateResult:updateResult})
+    }
+    catch(error){
+        console.log(error)
+        res.send({count:0})
+    }
+})
+
 router.post('/setStatusToRTS',auth,async(req,res)=>{
     // console.log(req.body.Orders)
     RtsOrdersResponse=[]
@@ -102,10 +142,14 @@ router.post('/setStatusToRTS',auth,async(req,res)=>{
         // console.log(order)
         var shop = await Shop.findOne({shortCode:order.ShopShortCode})
         // console.log(shop)
-        var OrderItems=order.OrderItems.map(item=>{if(item.ShippingType=='Dropshipping' && item.Status!='canceled'){return item.OrderItemId}})
-        var OrderItems="["+OrderItems.toString()+"]"
-        Url = RtsURL(shop.accessToken,OrderItems)
+        packages = {
+            packages:order.OrderItems.map((orderItem)=>({"package_id":orderItem?.packageId}))
+            
+        }
+        Url = RtsURL(shop.accessToken,packages)
+        console.log(Url)
         var result = await PostData(Url)
+        console.log("response from orders rts request by daraz",result)
         RtsOrdersResponse.push(result)
     }
     console.log(RtsOrdersResponse.length)

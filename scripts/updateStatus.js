@@ -8,16 +8,46 @@ const atob = require("atob");
 
 async function updateOrderItemsForRts(user,RtsOrdersResponse){
 
-        console.log("status ",user)
-        if(RtsOrdersResponse>0){
+    if(RtsOrdersResponse>0){
 
-        // //get All Shops in db
-        // console.log("updating status")
-        var updateResult = await updateOrderItemStatus({userEmail:user},{Status:'pending',ShippingType:'Dropshipping'})
-        console.log("user status done")
+        var updateResult = await updateOrderItemStatus({userEmail:user},{Status:'packed',ShippingType:'Dropshipping'})
         return updateResult
     }
  
+}
+
+async function updateOrderItemAfterPacking(user,PackOrderList){
+
+    if(PackOrderList?.length>0){
+
+        var updateResult = await updateOrderItemStatus({userEmail:user},{Status:'pending',ShippingType:'Dropshipping'})
+        return updateResult
+    }
+
+}
+
+async function setPackageIdAfterPack(user,ShopShortCode,PackOrderList){
+
+    console.log("status ",user)
+    let updateResult = {}
+    if(PackOrderList?.length>0){
+        for(packOrder of PackOrderList){
+            for(orderItem of packOrder?.order_item_list){
+                updateResult = await OrderItems.findOneAndUpdate(
+                    {
+                        userEmail:user,
+                        ShopShortCode:ShopShortCode,
+                        OrderItemId:orderItem.order_item_id
+                    },
+                    {
+                        packageId:orderItem.package_id
+                    })
+            }
+        }
+        console.log(updateResult)
+        return updateResult
+    }
+
 }
 
 async function updateOrderItemStatus(user,status){
@@ -52,7 +82,7 @@ async function updateOrderItemStatus(user,status){
                             ShippingType:item.shipping_type,OrderItemId:item.order_item_id,ItemPrice:item.item_price,
                             ShippingAmount:item.shipping_amount
                             ,Variation:item.variation},
-                            {Status:item.status,TrackingCode:item.tracking_code,
+                            {Status:item.status,TrackingCode:item.tracking_code,packageId:item.package_id,
                                 ShipmentProvider:item.shipment_provider.substr(item.shipment_provider.indexOf(',')+2),UpdatedAt:item.updated_at,Reason:item.reason})
                         
                         }
@@ -182,3 +212,5 @@ async function updateOrderItemPortCodes(accessToken,orderItemIds){
 module.exports.updateOrderItemStatus = updateOrderItemStatus
 module.exports.updateOrderItemsForRts = updateOrderItemsForRts
 module.exports.fetchLabelsAndUpdate = fetchLabelsAndUpdate
+module.exports.updateOrderItemAfterPacking = updateOrderItemAfterPacking
+module.exports.setPackageIdAfterPack = setPackageIdAfterPack
