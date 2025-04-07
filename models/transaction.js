@@ -4,7 +4,7 @@ const transactionSchema = new mongoose.Schema({
     TransactionDate:{type:Date,index:true},
     TransactionType:String,
     FeeName:String,
-    TransactionNumber:{type:String,unique:true},
+    TransactionNumber:String,
     Details:String,
     SellerSku:String,
     LazadaSku:String,
@@ -25,6 +25,9 @@ const transactionSchema = new mongoose.Schema({
     OrderItemUpdated:{type:Boolean,default:false},
     transType:String
 })
+
+transactionSchema.index({ TransactionNumber: 1, FeeName: 1 }, { unique: true });
+
 
 const Transaction = new mongoose.model('Transaction',transactionSchema)
 

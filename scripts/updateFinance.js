@@ -9,8 +9,8 @@ const moment = require('moment');
 async function updateTransactions(days=null){
     try{
     let shops = await Shop.find({appStatus:true})
-    // transactionTypes=[-1]
-    transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
+    transactionTypes=[-1]
+    // transactionTypes=[13,8,16,3,28,14,85,15,145,104,4,-1]
     // 13 - Item Price Credit
     // 8 - Shipping Fee (Paid By Customer)
     // 16 - Commission
@@ -45,10 +45,10 @@ async function updateTransactions(days=null){
                     if(previousTransactionsData.length<=0){
                     for(let t of transactions){
                         //check if transactions is in db
-                        let transaction = await Transaction.find({TransactionNumber:t.transaction_number,ShopShortCode:shop.shortCode,userEmail:shop.userEmail})
+                        let transaction = await Transaction.find({TransactionNumber:t.transaction_number,FeeName:t.fee_name,ShopShortCode:shop.shortCode,userEmail:shop.userEmail})
                         let increment
                         // console.log(t)
-                        increment={$inc:{TransactionsPayout:parseInt(t.amount)}}
+                        increment={$inc:{TransactionsPayout:parseAmountString(t.amount)}}
                         if(transaction.length>0){
                             if(transaction.OrderItemUpdated==false){
     
@@ -69,6 +69,7 @@ async function updateTransactions(days=null){
                             
                             if(updateResult.n>0){
                                 await Transaction.updateMany({_id:transactResult._id},{OrderItemUpdated:true})
+                                alreadyInDbcount++
                             }
     
                             }
@@ -79,7 +80,6 @@ async function updateTransactions(days=null){
                         let transactResult
                         try{
                             transactResult = await transaction.save()
-                            alreadyInDbcount++
                         }catch(ex){
                             console.log("Transaction already exists")
                         }
@@ -117,7 +117,7 @@ async function updateTransactions(days=null){
                     console.log("Invalid username or secretkey of shop "+ shop.name)
                 }
             offSet++
-            if((alreadyInDbcount/transactions.length)>=0.8 && !days) break;
+            // if((alreadyInDbcount/transactions.length)>=0.8 && !days) break;
         }
             }
         }catch(ex){
@@ -132,6 +132,7 @@ catch(ex){
 }
 }
 
+
 function getTransactionObj(t,shop,transType){
     let transaction = new Transaction({
         TransactionDate:t.transaction_date,
@@ -141,8 +142,8 @@ function getTransactionObj(t,shop,transType){
         Details:t.details,
         SellerSku:t.seller_sku,
         LazadaSku:t.lazada_sku,
-        Amount:t.amount,
-        VATinAmount:t.VAT_in_amount,
+        Amount:parseAmountString(t.amount),
+        VATinAmount:parseAmountString(t.VAT_in_amount),
         Statement:t.statement,
         PaidStatus:t.paid_status,
         OrderNo:t.orderItem_no,
@@ -160,5 +161,10 @@ function getTransactionObj(t,shop,transType){
 
     return transaction
 }
+
+function parseAmountString(amountString){
+    return Number(amountString.replace(/,/g, ''))
+}
+
 
 module.exports.updateTransactions = updateTransactions
