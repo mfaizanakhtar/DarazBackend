@@ -131,6 +131,7 @@ function setOrderItemObj(item,shortCode,userEmail,sku,shopName){
         userEmail:userEmail,
         cost:sku.cost,
         Reason:item.reason,
+        packageId:item.package_id,
         ...packagingCost
     })
     // console.log(orderItem.ShipmentProvider)

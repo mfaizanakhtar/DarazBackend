@@ -55,9 +55,17 @@ function generateTransactionsUrl(accessToken,transType,startTime,endTime,limit,o
     return createGetUrl(getTransactionDetailsUrl,params)
 }
 
-function RtsURL(accessToken,OrderItemIds){
-    var setRtsUrl="/order/rts"
-    var params = {access_token:accessToken,order_item_ids:OrderItemIds,delivery_type:"dropship",shipment_provider:"daraz",tracking_number:"daraz"};
+function RtsURL(accessToken,packagesObj){
+    var setRtsUrl="/order/package/rts"
+    var params = {access_token:accessToken,readyToShipReq:JSON.stringify(packagesObj)};
+
+    return createGetUrl(setRtsUrl,params)
+}
+
+function PackURL(accessToken,packReqObj){
+    var setRtsUrl="/order/fulfill/pack"
+    console.log(packReqObj)
+    var params = {access_token:accessToken,packReq:JSON.stringify(packReqObj)};
 
     return createGetUrl(setRtsUrl,params)
 }
@@ -91,7 +99,6 @@ function createGetUrl(apiUrl,extraParams){
     var formattedParams=sortAndFormatParams(params);
 
     var url = baseUrl+apiUrl+formattedParams.queryParams+"&sign="+SignParameters(darazOpenAppDetails.appSecret,apiUrl+formattedParams.concatenatedParams);
-   
     return url;
 }
 
@@ -111,7 +118,7 @@ function sortAndFormatParams(params){
         if(i==0){
             queryParams=queryParams+"?"
         }
-        queryParams=queryParams+currVal+"="+((currVal=="sku_seller_list" || currVal=="order_item_ids" || currVal=="payload") ? encodeURIComponent(params[currVal]) : params[currVal])
+        queryParams=queryParams+currVal+"="+((currVal=="sku_seller_list" || currVal=="order_item_ids" || currVal=="payload" || currVal=="readyToShipReq") ? encodeURIComponent(params[currVal]) : params[currVal])
         
         i++
         return accumulator;
@@ -131,6 +138,7 @@ module.exports.generateOrdersUrl = generateOrdersUrl;
 module.exports.generateMultipleOrderItemsUrl = generateMultipleOrderItemsUrl;
 module.exports.generateLabelUrl = generateLabelUrl;
 module.exports.RtsURL = RtsURL;
+module.exports.PackURL = PackURL;
 module.exports.generateSkuUrl = generateSkuUrl
 module.exports.generateAccessTokenUrl = generateAccessTokenUrl;
 module.exports.getSellerUrl = getSellerUrl;
